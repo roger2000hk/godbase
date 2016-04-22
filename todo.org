@@ -1,4 +1,4 @@
-* debug hashmap
+* investigate why 1 level skipmap doesn't work
 * add Map.Find(interface{}) interface{}
 ** add to test loop
 *** find all before/after first delete
