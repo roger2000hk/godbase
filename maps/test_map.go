@@ -139,7 +139,7 @@ func RunBasicTests() {
 	hm := NewHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000, a, 1)
 	testMapBasics("Hash", hm, its)
 
-	ehm := NewEHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000)
+	ehm := NewEHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 30000)
 	testMapBasics("EHash", ehm, its)
 
 	pprof.StopCPUProfile()
