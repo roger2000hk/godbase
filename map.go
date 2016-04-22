@@ -1,4 +1,4 @@
-package gofbls
+package godbase
 
 type Map interface {
 	Delete(key Cmp, val interface{}) int

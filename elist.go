@@ -1,4 +1,4 @@
-package gofbls
+package godbase
 
 import (
 	//"fmt"

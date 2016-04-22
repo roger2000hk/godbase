@@ -45,7 +45,7 @@ func testMapBasics(label string, m Map, its testItems, t *testing.T) {
 	for i, it := range its {
 		m.Insert(it.key, &its[i], false)
 	}
-	PrintTime(start, "%v * %v.Insert", len(its), label)
+	PrintTime(start, "%v * %v.Insert1", len(its), label)
 	
 	if l := m.Len(); l != int64(len(its)) {
 		t.Errorf("invalid Len() after Insert(): %v / %v", l, len(its))
@@ -57,7 +57,7 @@ func testMapBasics(label string, m Map, its testItems, t *testing.T) {
 			t.Errorf("invalid Delete(%v) res: %v", its[i].key, res)
 		}
 	}
-	PrintTime(start, "%v * %v.Delete", len(its), label)
+	PrintTime(start, "%v * %v.Delete1", len(its), label)
 
 	start = time.Now()
 	for i, it := range its {
@@ -79,7 +79,7 @@ func TestMapBasics(t *testing.T) {
 	mm := NewMapMap()
 	testMapBasics("MapMap", mm, its, t) 
 
-	a := NewSkipNodeAlloc(50)
-	sm := NewSkipMap(a, 16)
+	a := NewSkipNodeAlloc(55)
+	sm := NewSkipMap(a, 14)
 	testMapBasics("SkipMap", sm, its, t) 
 }
