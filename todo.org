@@ -1,16 +1,32 @@
+* fix eskipmap findnode linking
+
+* adapt hashmap to take any Set
+
 * remove SkipNode.up & make down circular
 ** just continue down until same node repeats
+
+* make SkipMap.alloc optional
+** extract init code from Alloc.New to Node.Init
+** check nil before using
+
+* add EHashMap
+** same as HashMap but with ESkipMap slots
 
 * try to disable slab alloc and cmp perf
 
 * profile and tune perf
 
+* add ESkipMap
+
 * add Map.Find(interface{}) interface{}
 ** add to test loop
 *** find all before/after first delete
-* add Map.Clone()
+* add Map.CloneWhile(start, end, test)
 * add map package
 ** rename Map to map.Any
 ** rename SkipMap to map.Skip
 ** rename HashMap to map.Hash
 ** rename MapMap to map.Map
+
+* add list package
+** rename EList to list.EDouble
