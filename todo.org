@@ -1,4 +1,13 @@
-* add maps.Sorted with RangeWhile
+* add locks package
+** copy RW/Ctx from old
+*** rename RW to Lock
+
+* add locks.Locker
+** keep HashMaps of RecId => Lock
+*** one for readers, one for writers
+** protect maps with Lock 
+
+* add maps.Sorted with RangeWhile(start, end, test)
 ** implement for sorted maps
 
 * add Find to Any
@@ -7,7 +16,8 @@
 ** return Iter
 *** add interface with Key(), Val() & Next()
 
-* add Map.RangeWhile(start, end, test)
+* add Rec type
+** wrap maps.Any
 
 * maps/README.md
 
