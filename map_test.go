@@ -63,6 +63,11 @@ func (m *HashMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interfa
 	return res, ok
 }
 
+func (m *EHashMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
+	return toTestItem(res.(*ESkipNode)), ok
+}
+
 func (m MapMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, val, allowMulti)
 	return res, ok
@@ -125,4 +130,7 @@ func TestMapBasics(t *testing.T) {
 
 	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 4000, a, 1)
 	testMapBasics("HashMap", hm, its, t)
+
+	ehm := NewEHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 5000)
+	testMapBasics("EHashMap", ehm, its, t)
 }
