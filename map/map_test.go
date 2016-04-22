@@ -1,4 +1,4 @@
-package godbase
+package maps
 
 import (
 	"fmt"
@@ -53,27 +53,27 @@ func PrintTime(start time.Time, msg string, args...interface{}) {
 	log.Printf("%s:\t%s", fmt.Sprintf(msg, args...), elapsed)
 }
 
-func (m *ESkipMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
 	return toTestItem(res.(*ESkipNode)), ok
 }
 
-func (m *HashMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *Hash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, val, allowMulti)
 	return res, ok
 }
 
-func (m *EHashMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *EHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
 	return toTestItem(res.(*ESkipNode)), ok
 }
 
-func (m MapMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m Map) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, val, allowMulti)
 	return res, ok
 }
 
-func (m *SkipMap) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *Skip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, val, allowMulti)
 	return res, ok
 }
@@ -115,22 +115,22 @@ func testMapBasics(label string, m testMap, its testItems, t *testing.T) {
 func TestMapBasics(t *testing.T) {
 	its := randItems(100000)
 
-	mm := NewMapMap()
-	testMapBasics("MapMap", mm, its, t) 
+	mm := NewMap()
+	testMapBasics("Map", mm, its, t) 
 
 	a := NewSkipNodeAlloc(55)
-	//ssm := NewSkipMap(a, 1)
-	//testMapBasics("ListMap", ssm, its, t) 
+	//ssm := NewSkip(a, 1)
+	//testMapBasics("List", ssm, its, t) 
 
-	sm := NewSkipMap(a, 14)
-	testMapBasics("SkipMap", sm, its, t) 
+	sm := NewSkip(a, 14)
+	testMapBasics("Skip", sm, its, t) 
 
-	esm := NewESkipMap()
-	testMapBasics("ESkipMap", esm, its, t) 
+	esm := NewESkip()
+	testMapBasics("ESkip", esm, its, t) 
 
-	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000, a, 1)
-	testMapBasics("HashMap", hm, its, t)
+	hm := NewHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000, a, 1)
+	testMapBasics("Hash", hm, its, t)
 
-	ehm := NewEHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000)
-	testMapBasics("EHashMap", ehm, its, t)
+	ehm := NewEHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000)
+	testMapBasics("EHash", ehm, its, t)
 }

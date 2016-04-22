@@ -1,23 +1,24 @@
-package godbase
+package maps
 
 import (
 	"fmt"
 	"bytes"
+	"github.com/fncodr/godbase/list"
 	"unsafe"
 )
 
-type SkipMap struct {
+type Skip struct {
 	alloc *SkipNodeAlloc
 	bottom *SkipNode
 	len int64
 	top SkipNode
 }
 
-func NewSkipMap(alloc *SkipNodeAlloc, levels int) *SkipMap {
-	return new(SkipMap).Init(alloc, levels)
+func NewSkip(alloc *SkipNodeAlloc, levels int) *Skip {
+	return new(Skip).Init(alloc, levels)
 }
 
-func (m *SkipMap) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
+func (m *Skip) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
 	if m.alloc == nil {
 		 return new(SkipNode).Init(key, val, prev)
 	} 
@@ -25,7 +26,7 @@ func (m *SkipMap) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
 	return m.alloc.New(key, val, prev)
 }
 
-func (m *SkipMap) Delete(key Cmp, val interface{}) int {
+func (m *Skip) Delete(key Cmp, val interface{}) int {
 	cnt := 0
 
 	if n, ok := m.FindNode(key); ok {
@@ -46,7 +47,7 @@ func (m *SkipMap) Delete(key Cmp, val interface{}) int {
 	return cnt
 }
 
-func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
+func (m *Skip) FindNode(key Cmp) (*SkipNode, bool) {
 	if m.bottom.next != m.bottom {
 		if key.Less(m.bottom.next.key) {
 			return m.bottom, false
@@ -96,7 +97,7 @@ func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
 	return n, false
 }
 
-func (m *SkipMap) Init(alloc *SkipNodeAlloc, levels int) *SkipMap {
+func (m *Skip) Init(alloc *SkipNodeAlloc, levels int) *Skip {
 	m.alloc = alloc
 	m.top.Init(nil, nil, nil)
 	n := &m.top
@@ -112,7 +113,7 @@ func (m *SkipMap) Init(alloc *SkipNodeAlloc, levels int) *SkipMap {
 	return m
 }
 
-func (m *SkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *Skip) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	n, ok := m.FindNode(key)
 	
 	if ok && !allowMulti {
@@ -125,11 +126,11 @@ func (m *SkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}
 	return val, true
 }
 
-func (m *SkipMap) Len() int64 {
+func (m *Skip) Len() int64 {
 	return m.len
 }
 
-func (m *SkipMap) String() string {
+func (m *Skip) String() string {
 	var buf bytes.Buffer
 	start := &m.top
 
@@ -158,7 +159,7 @@ func (m *SkipMap) String() string {
 }
 
 type SkipNode struct {
-	freeNode EList
+	freeNode list.EDouble
 	down, next, prev, up *SkipNode
 	key Cmp
 	val interface{}
@@ -193,7 +194,7 @@ func (n *SkipNode) Init(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
 type SkipSlab []SkipNode
 
 type SkipNodeAlloc struct {
-	freeList EList
+	freeList list.EDouble
 	idx int
 	slab SkipSlab
 	slabSize int
@@ -213,7 +214,7 @@ func (a *SkipNodeAlloc) Init(slabSize int) *SkipNodeAlloc {
 func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
 	var res *SkipNode
 
-	if n := a.freeList.next; n != n {
+	if n := a.freeList.Next(); n != n {
 		n.Del()
 		res = (*SkipNode)(n.Ptr(freeNodeOffs))
 	}

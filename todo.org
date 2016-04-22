@@ -1,22 +1,7 @@
-* make SkipMap.alloc optional
-** extract init code from Alloc.New to Node.Init
-** check nil before using
-
-* try to disable slab alloc and cmp perf
-
 * profile and tune perf
-
-* add ESkipMap
 
 * add Map.Find(interface{}) interface{}
 ** add to test loop
 *** find all before/after first delete
 * add Map.CloneWhile(start, end, test)
-* add map package
-** rename Map to map.Any
-** rename SkipMap to map.Skip
-** rename HashMap to map.Hash
-** rename MapMap to map.Map
-
-* add list package
-** rename EList to list.EDouble
+* add Map.RangeWhile(start, end, test)

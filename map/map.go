@@ -1,6 +1,6 @@
-package godbase
+package maps
 
-type Map interface {
+type Any interface {
 	Delete(key Cmp, val interface{}) int
 	Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool)
 	Len() int64
@@ -10,18 +10,18 @@ type Cmp interface {
 	Less(Cmp) bool
 }
 
-type MapMap map[Cmp]interface{}
+type Map map[Cmp]interface{}
 
-func NewMapMap() MapMap {
-	return make(MapMap)
+func NewMap() Map {
+	return make(Map)
 }
 
-func (m MapMap) Delete(key Cmp, val interface{}) int {
+func (m Map) Delete(key Cmp, val interface{}) int {
 	delete(m, key)
 	return 1
 }
 
-func (m MapMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m Map) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	if prev, ok := m[key]; ok {
 		return prev, false
 	}
@@ -30,7 +30,7 @@ func (m MapMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, 
 	return val, true
 }
 
-func (m MapMap) Len() int64 {
+func (m Map) Len() int64 {
 	return int64(len(m))
 }
 

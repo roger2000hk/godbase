@@ -1,9 +1,9 @@
-package godbase
+package maps
 
-type HashSlots []SkipMap
+type HashSlots []Skip
 type HashFn func (Cmp) uint64
 
-type HashMap struct {
+type Hash struct {
 	alloc *SkipNodeAlloc
 	fn HashFn
 	len int64
@@ -11,18 +11,18 @@ type HashMap struct {
 	slots HashSlots
 }
 
-func NewHashMap(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *HashMap {
-	return new(HashMap).Init(fn, slotCount, alloc, levels)
+func NewHash(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Hash {
+	return new(Hash).Init(fn, slotCount, alloc, levels)
 }
 
-func (m *HashMap) Delete(key Cmp, val interface{}) int {
+func (m *Hash) Delete(key Cmp, val interface{}) int {
 	i := m.fn(key) % uint64(len(m.slots))
 	res := m.slots[i].Delete(key, val)
 	m.len -= int64(res)
 	return res
 }
 
-func (m *HashMap) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *HashMap {
+func (m *Hash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Hash {
 	m.alloc = alloc
 	m.fn = fn
 	m.levels = levels
@@ -33,7 +33,7 @@ func (m *HashMap) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels in
 	return m
 }
 
-func (m *HashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *Hash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	i := m.fn(key) % uint64(len(m.slots))
 	res, ok := m.slots[i].Insert(key, val, allowMulti)
 
@@ -44,6 +44,6 @@ func (m *HashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}
 	return res, ok
 }
 
-func (m *HashMap) Len() int64 {
+func (m *Hash) Len() int64 {
 	return m.len
 }

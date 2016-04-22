@@ -1,4 +1,4 @@
-package godbase
+package maps
 
 import (
 	"bytes"
@@ -7,16 +7,16 @@ import (
 
 const ESkipLevels = 14
 
-type ESkipMap struct {
+type ESkip struct {
 	len int64
 	root ESkipNode
 }
 
-func NewESkipMap() *ESkipMap {
-	return new(ESkipMap).Init()
+func NewESkip() *ESkip {
+	return new(ESkip).Init()
 }
 
-func (m *ESkipMap) Delete(key Cmp, val interface{}) int {
+func (m *ESkip) Delete(key Cmp, val interface{}) int {
 	cnt := 0
 
 	if n, ok := m.FindNode(key); ok {		
@@ -36,7 +36,7 @@ func (m *ESkipMap) Delete(key Cmp, val interface{}) int {
 	return cnt
 }
 
-func (m *ESkipMap) FindNode(key Cmp) (*ESkipNode, bool) {
+func (m *ESkip) FindNode(key Cmp) (*ESkipNode, bool) {
 	rootNext := m.root.next[ESkipLevels-1]
 
 	if rootNext != &m.root {
@@ -83,12 +83,12 @@ func (m *ESkipMap) FindNode(key Cmp) (*ESkipNode, bool) {
 	return n, false
 }
 
-func (m *ESkipMap) Init() *ESkipMap {
+func (m *ESkip) Init() *ESkip {
 	m.root.Init(nil)
 	return m
 }
 
-func (m *ESkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkip) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	n, ok := m.FindNode(key)
 	
 	if ok && !allowMulti {
@@ -100,11 +100,11 @@ func (m *ESkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{
 	return val, true
 }
 
-func (m *ESkipMap) Len() int64 {
+func (m *ESkip) Len() int64 {
 	return m.len
 }
 
-func (m *ESkipMap) String() string {
+func (m *ESkip) String() string {
 	var buf bytes.Buffer
 
 	for i := 0; i < ESkipLevels; i++ {
