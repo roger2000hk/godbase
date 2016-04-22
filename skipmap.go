@@ -17,6 +17,14 @@ func NewSkipMap(alloc *SkipNodeAlloc, levels int) *SkipMap {
 	return new(SkipMap).Init(alloc, levels)
 }
 
+func (m *SkipMap) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
+	if m.alloc == nil {
+		 return new(SkipNode).Init(key, val, prev)
+	} 
+	
+	return m.alloc.New(key, val, prev)
+}
+
 func (m *SkipMap) Delete(key Cmp, val interface{}) int {
 	cnt := 0
 
@@ -25,7 +33,9 @@ func (m *SkipMap) Delete(key Cmp, val interface{}) int {
 			if val == nil || n.val == val {
 				n.Delete()
 				cnt++
-				m.alloc.Free(n)
+				if m.alloc != nil {
+					m.alloc.Free(n)
+				}
 			}
 			
 			n = n.next
@@ -56,7 +66,8 @@ func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
 
 		for n.key != nil && n.key.Less(key) {
 			if steps == maxSteps && pn != nil {
-				nn := m.alloc.New(n.key, n.val, pn)
+				var nn *SkipNode
+				nn = m.AllocNode(n.key, n.val, pn)
 				nn.down, n.up, pn = n, nn, nn
 				steps = 0
 			}
@@ -87,11 +98,11 @@ func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
 
 func (m *SkipMap) Init(alloc *SkipNodeAlloc, levels int) *SkipMap {
 	m.alloc = alloc
-	m.top.Init()
+	m.top.Init(nil, nil, nil)
 	n := &m.top
 
 	for i := 0; i < levels-1; i++ {
-		n.down = alloc.New(nil, nil, nil)
+		n.down = m.AllocNode(nil, nil, nil)
 		n.down.up = n
 		n = n.down
 	}
@@ -108,7 +119,7 @@ func (m *SkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}
 		return n.val, false
 	}
 	
-	nn := m.alloc.New(key, val, n) 
+	nn := m.AllocNode(key, val, n) 
 	nn.down = nn
 	m.len++
 	return val, true
@@ -165,8 +176,18 @@ func (n *SkipNode) Delete() {
 	}
 }
 
-func (n *SkipNode) Init() {
-	n.down, n.next, n.prev, n.up = n, n, n, n
+func (n *SkipNode) Init(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
+	n.key, n.val = key, val
+	n.up = n
+
+	if prev != nil {
+		n.prev, n.next = prev, prev.next
+		prev.next.prev, prev.next = n, n
+	} else {
+		n.prev, n.next = n, n
+	}
+
+	return n
 }
 
 type SkipSlab []SkipNode
@@ -207,17 +228,8 @@ func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode 
 		a.idx++
 	}
 
-	res.key, res.val = key, val
-	res.up = res
 
-	if prev != nil {
-		res.prev, res.next = prev, prev.next
-		prev.next.prev, prev.next = res, res
-	} else {
-		res.prev, res.next = res, res
-	}
-
-	return res
+	return res.Init(key, val, prev)
 }
 
 func (a *SkipNodeAlloc) Free(n *SkipNode) {

@@ -1,16 +1,6 @@
-* fix eskipmap findnode linking
-
-* adapt hashmap to take any Set
-
-* remove SkipNode.up & make down circular
-** just continue down until same node repeats
-
 * make SkipMap.alloc optional
 ** extract init code from Alloc.New to Node.Init
 ** check nil before using
-
-* add EHashMap
-** same as HashMap but with ESkipMap slots
 
 * try to disable slab alloc and cmp perf
 
