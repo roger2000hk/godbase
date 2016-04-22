@@ -1,7 +1,3 @@
-* rename Hash to SkipHash
-
-* rename EHash to ESkipHash
-
 * add maps.Sorted with RangeWhile
 ** implement for sorted maps
 
