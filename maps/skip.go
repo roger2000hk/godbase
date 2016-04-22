@@ -3,7 +3,7 @@ package maps
 import (
 	"fmt"
 	"bytes"
-	"github.com/fncodr/godbase/list"
+	"github.com/fncodr/godbase/lists"
 	"unsafe"
 )
 
@@ -159,7 +159,7 @@ func (m *Skip) String() string {
 }
 
 type SkipNode struct {
-	freeNode list.EDouble
+	freeNode lists.EDouble
 	down, next, prev, up *SkipNode
 	key Cmp
 	val interface{}
@@ -194,7 +194,7 @@ func (n *SkipNode) Init(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
 type SkipSlab []SkipNode
 
 type SkipNodeAlloc struct {
-	freeList list.EDouble
+	freeList lists.EDouble
 	idx int
 	slab SkipSlab
 	slabSize int
