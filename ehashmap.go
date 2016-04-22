@@ -1,6 +1,6 @@
 package godbase
 
-type EHashSlots []*ESkipMap
+type EHashSlots []ESkipMap
 
 type EHashMap struct {
 	fn HashFn
@@ -14,24 +14,25 @@ func NewEHashMap(fn HashFn, slotCount int) *EHashMap {
 
 func (m *EHashMap) Delete(key Cmp, val interface{}) int {
 	i := m.fn(key) % uint64(len(m.slots))
-
-	if s := m.slots[i]; s != nil {
-		res := s.Delete(key, val)
-		m.len -= int64(res)
-		return res
-	}
-
-	return 0
+	res := m.slots[i].Delete(key, val)
+	m.len -= int64(res)
+	return res
 }
 
 func (m *EHashMap) Init(fn HashFn, slotCount int) *EHashMap {
 	m.fn = fn
 	m.slots = make(EHashSlots, slotCount)
+
+	for i, _ := range m.slots {
+		m.slots[i].Init()
+	}
+
 	return m
 }
 
 func (m *EHashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.getSlot(key).Insert(key, val, allowMulti)
+	i := m.fn(key) % uint64(len(m.slots))
+	res, ok := m.slots[i].Insert(key, val, allowMulti)
 
 	if ok {
 		m.len++
@@ -42,16 +43,4 @@ func (m *EHashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{
 
 func (m *EHashMap) Len() int64 {
 	return m.len
-}
-
-func (m *EHashMap) getSlot(key Cmp) *ESkipMap {
-	i := m.fn(key) % uint64(len(m.slots))
-	s := m.slots[i]
-
-	if s == nil {
-		s = NewESkipMap()
-		m.slots[i] = s
-	}
-
-	return s
 }

@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const ESkipLevels = 8
+const ESkipLevels = 14
 
 type ESkipMap struct {
 	len int64

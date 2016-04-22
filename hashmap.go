@@ -1,6 +1,6 @@
 package godbase
 
-type HashSlots []*SkipMap
+type HashSlots []SkipMap
 type HashFn func (Cmp) uint64
 
 type HashMap struct {
@@ -17,14 +17,9 @@ func NewHashMap(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Has
 
 func (m *HashMap) Delete(key Cmp, val interface{}) int {
 	i := m.fn(key) % uint64(len(m.slots))
-
-	if s := m.slots[i]; s != nil {
-		res := s.Delete(key, val)
-		m.len -= int64(res)
-		return res
-	}
-
-	return 0
+	res := m.slots[i].Delete(key, val)
+	m.len -= int64(res)
+	return res
 }
 
 func (m *HashMap) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *HashMap {
@@ -32,11 +27,15 @@ func (m *HashMap) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels in
 	m.fn = fn
 	m.levels = levels
 	m.slots = make(HashSlots, slotCount)
+	for i, _ := range m.slots {
+		m.slots[i].Init(alloc, levels)
+	}
 	return m
 }
 
 func (m *HashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.getSlot(key).Insert(key, val, allowMulti)
+	i := m.fn(key) % uint64(len(m.slots))
+	res, ok := m.slots[i].Insert(key, val, allowMulti)
 
 	if ok {
 		m.len++
@@ -47,16 +46,4 @@ func (m *HashMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}
 
 func (m *HashMap) Len() int64 {
 	return m.len
-}
-
-func (m *HashMap) getSlot(key Cmp) *SkipMap {
-	i := m.fn(key) % uint64(len(m.slots))
-	s := m.slots[i]
-
-	if s == nil {
-		s = NewSkipMap(m.alloc, m.levels)
-		m.slots[i] = s
-	}
-
-	return s
 }

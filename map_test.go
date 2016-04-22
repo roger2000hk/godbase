@@ -113,14 +113,14 @@ func testMapBasics(label string, m testMap, its testItems, t *testing.T) {
 }
 
 func TestMapBasics(t *testing.T) {
-	its := randItems(10000)
+	its := randItems(100000)
 
 	mm := NewMapMap()
 	testMapBasics("MapMap", mm, its, t) 
 
 	a := NewSkipNodeAlloc(55)
-	ssm := NewSkipMap(a, 1)
-	testMapBasics("ListMap", ssm, its, t) 
+	//ssm := NewSkipMap(a, 1)
+	//testMapBasics("ListMap", ssm, its, t) 
 
 	sm := NewSkipMap(a, 14)
 	testMapBasics("SkipMap", sm, its, t) 
@@ -128,9 +128,9 @@ func TestMapBasics(t *testing.T) {
 	esm := NewESkipMap()
 	testMapBasics("ESkipMap", esm, its, t) 
 
-	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 4000, a, 1)
+	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000, a, 1)
 	testMapBasics("HashMap", hm, its, t)
 
-	ehm := NewEHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 5000)
+	ehm := NewEHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 10000)
 	testMapBasics("EHashMap", ehm, its, t)
 }
