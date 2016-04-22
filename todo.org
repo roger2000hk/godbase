@@ -7,6 +7,8 @@
 ** return Iter
 *** add interface with Key(), Val() & Next()
 
-*** find all before/after first delete
-* add Map.CloneWhile(start, end, test)
 * add Map.RangeWhile(start, end, test)
+
+* maps/README.md
+
+* add Map.CloneWhile(start, end, test)

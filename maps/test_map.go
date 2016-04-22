@@ -136,7 +136,7 @@ func RunBasicTests() {
 	esm := NewESkip()
 	testMapBasics("ESkip", esm, its) 
 
-	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000, a, 2)
+	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 80000, a, 1)
 	testMapBasics("SkipHash", hm, its)
 
 	ehm := NewESkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
