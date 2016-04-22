@@ -83,6 +83,6 @@ func TestMapBasics(t *testing.T) {
 	sm := NewSkipMap(a, 14)
 	testMapBasics("SkipMap", sm, its, t) 
 
-	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 100, a, 1)
+	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 100, a, 10)
 	testMapBasics("HashMap", hm, its, t) 
 }
