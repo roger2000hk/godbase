@@ -1,27 +1,27 @@
 package maps
 
-type EHashSlots []ESkip
+type ESkipHashSlots []ESkip
 
-type EHash struct {
+type ESkipHash struct {
 	fn HashFn
 	len int64
-	slots EHashSlots
+	slots ESkipHashSlots
 }
 
-func NewEHash(fn HashFn, slotCount int) *EHash {
-	return new(EHash).Init(fn, slotCount)
+func NewESkipHash(fn HashFn, slotCount int) *ESkipHash {
+	return new(ESkipHash).Init(fn, slotCount)
 }
 
-func (m *EHash) Delete(key Cmp, val interface{}) int {
+func (m *ESkipHash) Delete(key Cmp, val interface{}) int {
 	i := m.fn(key) % uint64(len(m.slots))
 	res := m.slots[i].Delete(key, val)
 	m.len -= int64(res)
 	return res
 }
 
-func (m *EHash) Init(fn HashFn, slotCount int) *EHash {
+func (m *ESkipHash) Init(fn HashFn, slotCount int) *ESkipHash {
 	m.fn = fn
-	m.slots = make(EHashSlots, slotCount)
+	m.slots = make(ESkipHashSlots, slotCount)
 
 	for i, _ := range m.slots {
 		m.slots[i].Init()
@@ -30,7 +30,7 @@ func (m *EHash) Init(fn HashFn, slotCount int) *EHash {
 	return m
 }
 
-func (m *EHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkipHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	i := m.fn(key) % uint64(len(m.slots))
 	res, ok := m.slots[i].Insert(key, val, allowMulti)
 
@@ -41,6 +41,6 @@ func (m *EHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, 
 	return res, ok
 }
 
-func (m *EHash) Len() int64 {
+func (m *ESkipHash) Len() int64 {
 	return m.len
 }

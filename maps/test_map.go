@@ -60,12 +60,12 @@ func (m *ESkip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface
 	return toTestItem(res.(*ESkipNode)), ok
 }
 
-func (m *Hash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *SkipHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, val, allowMulti)
 	return res, ok
 }
 
-func (m *EHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkipHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
 	return toTestItem(res.(*ESkipNode)), ok
 }
@@ -136,11 +136,11 @@ func RunBasicTests() {
 	esm := NewESkip()
 	testMapBasics("ESkip", esm, its) 
 
-	hm := NewHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000, a, 1)
-	testMapBasics("Hash", hm, its)
+	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000, a, 1)
+	testMapBasics("SkipHash", hm, its)
 
-	ehm := NewEHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
-	testMapBasics("EHash", ehm, its)
+	ehm := NewESkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
+	testMapBasics("ESkipHash", ehm, its)
 
 	pprof.StopCPUProfile()
 	file.Close()

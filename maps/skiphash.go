@@ -1,39 +1,39 @@
 package maps
 
-type HashSlots []Skip
+type SkipHashSlots []Skip
 type HashFn func (Cmp) uint64
 
-type Hash struct {
+type SkipHash struct {
 	alloc *SkipNodeAlloc
 	fn HashFn
 	len int64
 	levels int
-	slots HashSlots
+	slots SkipHashSlots
 }
 
-func NewHash(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Hash {
-	return new(Hash).Init(fn, slotCount, alloc, levels)
+func NewSkipHash(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *SkipHash {
+	return new(SkipHash).Init(fn, slotCount, alloc, levels)
 }
 
-func (m *Hash) Delete(key Cmp, val interface{}) int {
+func (m *SkipHash) Delete(key Cmp, val interface{}) int {
 	i := m.fn(key) % uint64(len(m.slots))
 	res := m.slots[i].Delete(key, val)
 	m.len -= int64(res)
 	return res
 }
 
-func (m *Hash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Hash {
+func (m *SkipHash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *SkipHash {
 	m.alloc = alloc
 	m.fn = fn
 	m.levels = levels
-	m.slots = make(HashSlots, slotCount)
+	m.slots = make(SkipHashSlots, slotCount)
 	for i, _ := range m.slots {
 		m.slots[i].Init(alloc, levels)
 	}
 	return m
 }
 
-func (m *Hash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *SkipHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	i := m.fn(key) % uint64(len(m.slots))
 	res, ok := m.slots[i].Insert(key, val, allowMulti)
 
@@ -44,6 +44,6 @@ func (m *Hash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, b
 	return res, ok
 }
 
-func (m *Hash) Len() int64 {
+func (m *SkipHash) Len() int64 {
 	return m.len
 }
