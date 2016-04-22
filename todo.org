@@ -1,4 +1,10 @@
+* remove SkipNode.up & make down circular
+** just continue down until same node repeats
+
+* try to disable slab alloc and cmp perf
+
 * profile and tune perf
+
 * add Map.Find(interface{}) interface{}
 ** add to test loop
 *** find all before/after first delete
