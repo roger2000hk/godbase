@@ -1,8 +1,10 @@
-* investigate why 1 level skipmap doesn't work
+* profile and tune perf
 * add Map.Find(interface{}) interface{}
 ** add to test loop
 *** find all before/after first delete
-
-* implement hashmap with slots map[uint64, Map]
-** copy from fbls.jl
-** add to test loop
+* add Map.Clone()
+* add map package
+** rename Map to map.Any
+** rename SkipMap to map.Skip
+** rename HashMap to map.Hash
+** rename MapMap to map.Map
