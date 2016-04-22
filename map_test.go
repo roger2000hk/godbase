@@ -82,4 +82,7 @@ func TestMapBasics(t *testing.T) {
 	a := NewSkipNodeAlloc(55)
 	sm := NewSkipMap(a, 14)
 	testMapBasics("SkipMap", sm, its, t) 
+
+	hm := NewHashMap(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 100, a, 1)
+	testMapBasics("HashMap", hm, its, t) 
 }

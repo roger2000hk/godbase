@@ -2,7 +2,7 @@ package godbase
 
 type Map interface {
 	Delete(key Cmp, val interface{}) int
-	Insert(key Cmp, val interface{}, allowMulti bool) interface{}
+	Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool)
 	Len() int64
 }
 
@@ -21,13 +21,13 @@ func (m MapMap) Delete(key Cmp, val interface{}) int {
 	return 1
 }
 
-func (m MapMap) Insert(key Cmp, val interface{}, allowMulti bool) interface{} {
+func (m MapMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	if prev, ok := m[key]; ok {
-		return prev
+		return prev, false
 	}
 	
 	m[key] = val
-	return val
+	return val, true
 }
 
 func (m MapMap) Len() int64 {

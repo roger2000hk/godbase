@@ -7,14 +7,14 @@ import (
 )
 
 type SkipMap struct {
+	alloc *SkipNodeAlloc
 	bottom *SkipNode
 	len int64
-	nodeAlloc *SkipNodeAlloc
 	top SkipNode
 }
 
-func NewSkipMap(nodeAlloc *SkipNodeAlloc, levels int) *SkipMap {
-	return new(SkipMap).Init(nodeAlloc, levels)
+func NewSkipMap(alloc *SkipNodeAlloc, levels int) *SkipMap {
+	return new(SkipMap).Init(alloc, levels)
 }
 
 func (m *SkipMap) Delete(key Cmp, val interface{}) int {
@@ -25,7 +25,7 @@ func (m *SkipMap) Delete(key Cmp, val interface{}) int {
 			if val == nil || n.val == val {
 				n.Delete()
 				cnt++
-				m.nodeAlloc.Free(n)
+				m.alloc.Free(n)
 			}
 			
 			n = n.next
@@ -56,7 +56,7 @@ func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
 
 		for n.key != nil && n.key.Less(key) {
 			if steps == maxSteps && pn != nil {
-				nn := m.nodeAlloc.New(n.key, n.val, pn)
+				nn := m.alloc.New(n.key, n.val, pn)
 				nn.down, n.up, pn = n, nn, nn
 				steps = 0
 			}
@@ -85,13 +85,13 @@ func (m *SkipMap) FindNode(key Cmp) (*SkipNode, bool) {
 	return n, false
 }
 
-func (m *SkipMap) Init(nodeAlloc *SkipNodeAlloc, levels int) *SkipMap {
-	m.nodeAlloc = nodeAlloc
+func (m *SkipMap) Init(alloc *SkipNodeAlloc, levels int) *SkipMap {
+	m.alloc = alloc
 	m.top.Init()
 	n := &m.top
 
 	for i := 0; i < levels-1; i++ {
-		n.down = nodeAlloc.New(nil, nil, nil)
+		n.down = alloc.New(nil, nil, nil)
 		n.down.up = n
 		n = n.down
 	}
@@ -101,17 +101,17 @@ func (m *SkipMap) Init(nodeAlloc *SkipNodeAlloc, levels int) *SkipMap {
 	return m
 }
 
-func (m *SkipMap) Insert(key Cmp, val interface{}, allowMulti bool) interface{} {
+func (m *SkipMap) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
 	n, ok := m.FindNode(key)
 	
 	if ok && !allowMulti {
-		return n.val
+		return n.val, false
 	}
 	
-	nn := m.nodeAlloc.New(key, val, n) 
+	nn := m.alloc.New(key, val, n) 
 	nn.down = nn
 	m.len++
-	return val
+	return val, true
 }
 
 func (m *SkipMap) Len() int64 {
