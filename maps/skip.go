@@ -65,7 +65,7 @@ func (m *Skip) FindNode(key Cmp) (*SkipNode, bool) {
 	for true {
 		n = n.next
 
-		for n.key != nil && n.key.Less(key) {
+		for n.key != nil && n.key.Less(key){
 			if steps == maxSteps && pn != nil {
 				var nn *SkipNode
 				nn = m.AllocNode(n.key, n.val, pn)
@@ -89,7 +89,6 @@ func (m *Skip) FindNode(key Cmp) (*SkipNode, bool) {
 		}
 
 		n = pn.down
-		
 		steps = 1
 		maxSteps++
 	}
@@ -217,9 +216,7 @@ func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode 
 	if n := a.freeList.Next(); n != n {
 		n.Del()
 		res = (*SkipNode)(n.Ptr(freeNodeOffs))
-	}
-
-	if res == nil {
+	} else {
 		if a.idx == a.slabSize {
 			a.slab = make([]SkipNode, a.slabSize)
 			a.idx = 0
@@ -228,7 +225,6 @@ func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode 
 		res = &a.slab[a.idx]
 		a.idx++
 	}
-
 
 	return res.Init(key, val, prev)
 }

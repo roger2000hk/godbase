@@ -1,7 +1,16 @@
-* profile and tune perf
+* rename Hash to SkipHash
 
-* add Map.Find(interface{}) interface{}
-** add to test loop
+* rename EHash to ESkipHash
+
+* add maps.Sorted with RangeWhile
+** implement for sorted maps
+
+* add Find to Any
+** implement for all maps
+*** call FindNode
+** return Iter
+*** add interface with Key(), Val() & Next()
+
 *** find all before/after first delete
 * add Map.CloneWhile(start, end, test)
 * add Map.RangeWhile(start, end, test)

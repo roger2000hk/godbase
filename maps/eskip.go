@@ -50,12 +50,14 @@ func (m *ESkip) FindNode(key Cmp) (*ESkipNode, bool) {
 		}
 	}
 
-	n := m.root.next[0]
-	pn := n
+	var pn *ESkipNode
+	n := &m.root
 	maxSteps, steps := 1, 1
 
 	for i := 0; i < ESkipLevels; i++ {
-		for n != &m.root && n.key.Less(key) {
+		n = n.next[i]
+
+		for n != &m.root && n.key.Less(key){
 			if steps == maxSteps && i > 0 {
 				pn = pn.InsertAfter(n, i-1)
 				steps = 0
@@ -70,12 +72,7 @@ func (m *ESkip) FindNode(key Cmp) (*ESkipNode, bool) {
 		}
 
 		n = n.prev[i]
-		pn = n
-	
-		if i < ESkipLevels-1 {
-			n = n.next[i+1]
-		}
-
+		pn = n	
 		steps = 1
 		maxSteps++
 	}
