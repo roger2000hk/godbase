@@ -1,5 +1,5 @@
 # beating The Map
-### a story about my glorious quest to write a faster map
+### a glorious quest to write a faster map
 
 ## why?
 Good question. This rabbit hole was a bit deeper than anticipated, but I still feel it was worth the effort, given the results. To cut a long story short, I was itching for multi-capable sorted maps to implement in-memory indexing in godbase. I quickly found out that my lofty goal of adding multi-capability and sorting, while matching the performance of native maps; was far from a walk in the park. Which is probably part of the reason I couldn't find anyone else trying.
