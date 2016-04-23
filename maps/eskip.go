@@ -135,7 +135,7 @@ func (m *ESkip) Init() *ESkip {
 	return m
 }
 
-func (m *ESkip) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkip) Insert(key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
 	n, ok := m.FindNode(&m.root, key)
 	
 	if ok && !allowMulti {
@@ -144,7 +144,7 @@ func (m *ESkip) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, 
 	
 	n.InsertAfter(val.(*ESkipNode), ESkipLevels-1)
  	m.len++
-	return val, true
+	return val.(*ESkipNode), true
 }
 
 func (m *ESkip) Len() int64 {
@@ -182,6 +182,14 @@ func (n *ESkipNode) Delete() {
 	}
 }
 
+func (n *ESkipNode) HasNext() bool {
+	return n.next[ESkipLevels-1].key != nil
+}
+
+func (n *ESkipNode) HasPrev() bool {
+	return n.prev[ESkipLevels-1].key != nil
+}
+
 func (n *ESkipNode) Init(key Cmp) {
 	n.key = key
 
@@ -194,14 +202,6 @@ func (n *ESkipNode) InsertAfter(node *ESkipNode, i int) *ESkipNode {
 	node.prev[i], node.next[i] = n, n.next[i]
 	n.next[i].prev[i], n.next[i] = node, node
 	return node
-}
-
-func (n *ESkipNode) HasNext() bool {
-	return n.next[ESkipLevels-1].key != nil
-}
-
-func (n *ESkipNode) HasPrev() bool {
-	return n.prev[ESkipLevels-1].key != nil
 }
 
 func (n *ESkipNode) Key() Cmp {
