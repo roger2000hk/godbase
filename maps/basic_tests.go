@@ -30,7 +30,7 @@ func (m *Skip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{
 	return res, ok
 }
 
-func runAnyTests(label string, m testMap, its testItems) {
+func runBasicTests(label string, m testMap, its testItems) {
 	start := time.Now()
 	for i, it := range its {
 		m.testInsert(it.skipNode.key, &its[i], false)
@@ -64,25 +64,25 @@ func runAnyTests(label string, m testMap, its testItems) {
 	PrintTime(start, "%v * %v.Delete2", len(its), label)
 }
 
-func RunAnyTests() {
+func RunBasicTests() {
 	its := randItems(100000)
 
 	mm := NewMap()
-	runAnyTests("Map", mm, its) 
+	runBasicTests("Map", mm, its) 
 
 	a := NewSkipNodeAlloc(55)
 	//ssm := NewSkip(a, 1)
-	//runAnyTests("List", ssm, its) 
+	//runBasicTests("List", ssm, its) 
 
 	sm := NewSkip(a, 14)
-	runAnyTests("Skip", sm, its) 
+	runBasicTests("Skip", sm, its) 
 
 	esm := NewESkip()
-	runAnyTests("ESkip", esm, its) 
+	runBasicTests("ESkip", esm, its) 
 
 	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 80000, a, 1)
-	runAnyTests("SkipHash", hm, its)
+	runBasicTests("SkipHash", hm, its)
 
 	ehm := NewESkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
-	runAnyTests("ESkipHash", ehm, its)
+	runBasicTests("ESkipHash", ehm, its)
 }

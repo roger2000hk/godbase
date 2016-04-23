@@ -5,12 +5,16 @@ import (
 	"time"
 )
 
-func runSortedTests(label string, m testMap, its testItems) {
+type sortedTestMap interface {
+	testMap
+}
+
+func runSortedTests(label string, m sortedTestMap, its testItems) {
 	start := time.Now()
 	for i, it := range its {
 		m.testInsert(it.skipNode.key, &its[i], false)
 	}
-	PrintTime(start, "%v * %v.Insert1", len(its), label)
+	PrintTime(start, "%v * %v.Insert", len(its), label)
 
 	if l := m.Len(); l != int64(len(its)) {
 		log.Printf("invalid Len() after Insert(): %v / %v", l, len(its))
@@ -18,7 +22,7 @@ func runSortedTests(label string, m testMap, its testItems) {
 }
 
 func RunSortedTests() {
-	its := randItems(100000)
+	its := reverseItems(100000)
 
 	mm := NewMap()
 	runSortedTests("Map", mm, its) 

@@ -35,12 +35,28 @@ func toTestItem(node *ESkipNode) *testItem {
 
 type testItems []testItem
 
-func randItems(n int) testItems {
+func sortedItems(n int) testItems {
 	res := make(testItems, n)
 
 	for i := 0; i < n; i++ {
 		res[i].skipNode.Init(testKey(i))
 	}
+
+	return res
+}
+
+func reverseItems(n int) testItems {
+	res := make(testItems, n)
+
+	for i := n-1; i >= 0; i-- {
+		res[i].skipNode.Init(testKey(i))
+	}
+
+	return res
+}
+
+func randItems(n int) testItems {
+	res := sortedItems(n)
 
 	for i := 0; i < n; i++ {
 		j := rand.Intn(n)
@@ -62,7 +78,8 @@ func RunTests() {
 	}
 
 	pprof.StartCPUProfile(bufio.NewWriter(file))
-	RunAnyTests()
+	RunBasicTests()
+	RunMultiTests()
 	RunSortedTests()
 	pprof.StopCPUProfile()
 }
