@@ -4,13 +4,11 @@
 ** add Cmp, Iter, Any & Sorted to README.md
 ** commit
 
-* add Iter.Insert(key, val)
-** inserts in the right pos, starting from iter
-** change Any.Insert to use Iter.Insert
-*** return Iter instead of val
+* add opt start iter param to Insert
 
-* add Iter.Delete() Iter
-** return next
+* add opt start iter param to Delete, return next Iter
+** add runMultiTests to any_tests.go
+** add for loop example deleting all elems for key
 
 * add Hash / HashSlots
 ** one Hash imp
@@ -18,11 +16,11 @@
 *** add GetSlot(i, create) Any method
 ** init slots lazily in GetSlot()
 
-* change hash types to init slots lazily when needed
-** add nil checks on access
-
 * implement Sorted for Skip
 ** add to tests
+
+* add Any.Find(start Iter, key) Iter
+** same as First() for sorted maps
 
 * add Rec type
 ** wrap maps.Any
