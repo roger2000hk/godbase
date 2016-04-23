@@ -116,7 +116,8 @@ func (m *Skip) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, b
 	n, ok := m.FindNode(key)
 	
 	if ok && !allowMulti {
-		return n.val, false
+		n.val = val
+		return val, false
 	}
 	
 	nn := m.AllocNode(key, val, n) 

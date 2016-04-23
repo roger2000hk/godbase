@@ -1,15 +1,40 @@
-* add maps.Sorted with RangeWhile(start, end, test)
-** implement for sorted maps
-** check gosset
+* add maps.Sorted
+** implement Iter for eskip
+** add sorted_tests.go
+*** run for eskip
+** add Cmp, Any & Sorted to README.md
+** commit
 
-* add Find to Any
-** implement for all maps
-*** call FindNode
-** return Iter
-*** add interface with Key(), Val() & Next()
+* add Iter.Insert(key, val)
+** inserts in the right pos, starting from iter
+** change Any.Insert to use Iter.Insert
+*** return Iter instead of val
+
+* add Iter.Delete() Iter
+** return next
+
+* add Hash / HashSlots
+** one Hash imp
+** add HashSlots type for each chain type
+*** add GetSlot(i, create) Any method
+** init slots lazily in GetSlot()
+
+* change hash types to init slots lazily when needed
+** add nil checks on access
+
+* implement Sorted for Skip
+** add to tests
 
 * add Rec type
 ** wrap maps.Any
+
+* add Sets.Slice from old
+** keep one slice for keys & one for values
+** implement Any & Sorted on top
+
+* copy maps to sets package
+** no multi capability
+** compare perf
 
 * add locks package
 ** copy RW/Ctx from old
@@ -19,6 +44,3 @@
 ** keep HashMaps of RecId => Lock
 *** one for readers, one for writers
 ** protect maps with Lock 
-
-
-* add Map.CloneWhile(start, end, test)

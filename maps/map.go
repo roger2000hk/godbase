@@ -1,15 +1,5 @@
 package maps
 
-type Any interface {
-	Delete(key Cmp, val interface{}) int
-	Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool)
-	Len() int64
-}
-
-type Cmp interface {
-	Less(Cmp) bool
-}
-
 type Map map[Cmp]interface{}
 
 func NewMap() Map {
@@ -33,4 +23,3 @@ func (m Map) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, boo
 func (m Map) Len() int64 {
 	return int64(len(m))
 }
-
