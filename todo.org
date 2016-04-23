@@ -1,8 +1,7 @@
 * add maps.Sorted
-** implement Iter for eskip
 ** add sorted_tests.go
 *** run for eskip
-** add Cmp, Any & Sorted to README.md
+** add Cmp, Iter, Any & Sorted to README.md
 ** commit
 
 * add Iter.Insert(key, val)
