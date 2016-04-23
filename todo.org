@@ -18,7 +18,6 @@
 ** implement Sorted ops
 
 * implement Sorted for Skip
-** add to tests
 
 * add Any.Find(start Iter, key) Iter
 ** same as First() for sorted maps
