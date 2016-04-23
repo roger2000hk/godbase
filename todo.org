@@ -15,6 +15,7 @@
 ** add HashSlots type for each chain type
 *** add GetSlot(i, create) Any method
 ** init slots lazily in GetSlot()
+** implement Sorted ops
 
 * implement Sorted for Skip
 ** add to tests

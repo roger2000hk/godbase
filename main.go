@@ -5,5 +5,5 @@ import (
 )
 
 func main() {
-	maps.RunBasicTests()
+	maps.RunTests()
 }

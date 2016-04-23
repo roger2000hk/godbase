@@ -1,10 +1,13 @@
 package maps
 
 import (
+	"bufio"
 	"fmt"
 	"log"
 	"time"
 	"math/rand"
+	"os"
+	"runtime/pprof"
 	"unsafe"
 )
 
@@ -50,4 +53,16 @@ func randItems(n int) testItems {
 func PrintTime(start time.Time, msg string, args...interface{}) {
 	elapsed := time.Since(start)
 	log.Printf("%s:\t%s", fmt.Sprintf(msg, args...), elapsed)
+}
+
+func RunTests() {
+	file, err := os.Create("test.prof")
+	if err != nil {
+		panic(err)
+	}
+
+	pprof.StartCPUProfile(bufio.NewWriter(file))
+	RunAnyTests()
+	RunSortedTests()
+	pprof.StopCPUProfile()
 }

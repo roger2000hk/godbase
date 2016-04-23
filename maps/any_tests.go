@@ -1,10 +1,7 @@
 package maps
 
 import (
-	"bufio"
 	"log"
-	"os"
-	"runtime/pprof"
 	"time"
 )
 
@@ -33,7 +30,7 @@ func (m *Skip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{
 	return res, ok
 }
 
-func testMapBasics(label string, m testMap, its testItems) {
+func runAnyTests(label string, m testMap, its testItems) {
 	start := time.Now()
 	for i, it := range its {
 		m.testInsert(it.skipNode.key, &its[i], false)
@@ -67,34 +64,25 @@ func testMapBasics(label string, m testMap, its testItems) {
 	PrintTime(start, "%v * %v.Delete2", len(its), label)
 }
 
-func RunBasicTests() {
+func RunAnyTests() {
 	its := randItems(100000)
 
 	mm := NewMap()
-	testMapBasics("Map", mm, its) 
+	runAnyTests("Map", mm, its) 
 
 	a := NewSkipNodeAlloc(55)
 	//ssm := NewSkip(a, 1)
-	//testMapBasics("List", ssm, its) 
+	//runAnyTests("List", ssm, its) 
 
-	file, err := os.Create("test.prof")
-	if err != nil {
-		panic(err)
-	}
-	pprof.StartCPUProfile(bufio.NewWriter(file))
-	
 	sm := NewSkip(a, 14)
-	testMapBasics("Skip", sm, its) 
+	runAnyTests("Skip", sm, its) 
 
 	esm := NewESkip()
-	testMapBasics("ESkip", esm, its) 
+	runAnyTests("ESkip", esm, its) 
 
 	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 80000, a, 1)
-	testMapBasics("SkipHash", hm, its)
+	runAnyTests("SkipHash", hm, its)
 
 	ehm := NewESkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
-	testMapBasics("ESkipHash", ehm, its)
-
-	pprof.StopCPUProfile()
-	file.Close()
+	runAnyTests("ESkipHash", ehm, its)
 }
