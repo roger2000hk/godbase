@@ -10,10 +10,10 @@ I ended up with two designs based on deterministic skip lists. One with a config
 Once sorted maps were working properly, I had the crazy idea to put a hash on top just to see what happens. It turns out that dividing the dataset into a tuned number of ordered sets helps puts us consistently ahead of native maps in the synthetic performance game for millions of items. That's far from the end of the story though. I still haven't had enough time to ponder the consequences of having access to both hashed and ordered aspects of the data simultaneously, but I have a hunch it will bend the rules to my advantage in a number of tricky scenarios. Additionally; the hash adapter supports any kind of Map for slot chains, which opens the door for multi level hashing where each chain is another hash that further divides the dataset.
 
 ## status
-Only insert/delete/iterators implemented so far, set operations and polish are still in the oven.
+Basic functionality and testing in place; bells, whistles & polish are still on the stove.
 
 ## api
-More RISCy & Lispy than your everyday set/map api; but then, part of this excercise is proving that providing an optimal api is half of implementing an optimal algorithm. And there's more low hanging fruit around in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
+More RISC/Lispy than your everyday set/map api. Turns out that providing an optimal api is half of implementing an optimal algorithm. And there's more low hanging fruit around in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
 
 ### interfaces
 

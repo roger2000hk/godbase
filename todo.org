@@ -6,6 +6,8 @@
 
 * commit & post update
 
+* add Cut tests
+
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
@@ -15,6 +17,8 @@
 * add map slot types
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
+
+* ---
 
 * add Any.Clone(TestFn)
 ** panic for embedded imps
