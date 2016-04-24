@@ -1,37 +1,49 @@
 * add maps.Sorted
-** add sorted_tests.go
-*** run for eskip
-** add Cmp, Iter, Any & Sorted to README.md
+** figure out why eskip findnode gets stuck on level
+*** not circular?
+** run all tests
 ** commit
 
-* add opt start iter param to Insert
+* update readme
+** add Cmp, Iter & Any apis
+** remove examples clause
+** add constructors header after api
+*** list all constructors
 
-* add opt start iter param to Delete, return next Iter
-** add runMultiTests to any_tests.go
-** add for loop example deleting all elems for key
+* update CHANGES
+
+* commit
 
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
 *** add GetSlot(i, create) Any method
 ** init slots lazily in GetSlot()
-** implement Sorted ops
 
-* implement Sorted for Skip
+* add map slot types
+** add constructors NewSkipMap & NewESkipMap with maps
+*** compare perf
 
-* add Any.Find(start Iter, key) Iter
-** same as First() for sorted maps
+* add Any.Clone(TestFn)
+** panic for embedded imps
+** only include elems for which test returns true
+
+* add Any.CutAll(other Any, TestFn)
+** return difference as new set
+** only move elems for which test returns true
+** operate within slot for hash maps
+
+* add Any.Update(start, end, update UpdateFn) int
+** type UpdateFn func(k, v) (v, bool)
+** delete if bool == false, otherwise update values
+** return nr of deleted
+
+* add Any.InsertAll(other Any, TestFn)
+** opimized iter insert where possible
+*** keep iter around and set to nil if check if next < prev
 
 * add Rec type
 ** wrap maps.Any
-
-* add Sets.Slice from old
-** keep one slice for keys & one for values
-** implement Any & Sorted on top
-
-* copy maps to sets package
-** no multi capability
-** compare perf
 
 * add locks package
 ** copy RW/Ctx from old
@@ -41,3 +53,7 @@
 ** keep HashMaps of RecId => Lock
 *** one for readers, one for writers
 ** protect maps with Lock 
+
+* copy maps to sets package
+** no multi capability
+** compare perf

@@ -15,11 +15,22 @@ func NewSkipHash(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *Sk
 	return new(SkipHash).Init(fn, slotCount, alloc, levels)
 }
 
-func (m *SkipHash) Delete(key Cmp, val interface{}) int {
+func (m *SkipHash) Cut(start, end Iter, fn TestFn) Any {
+	i := m.fn(start.Key()) % uint64(len(m.slots))
+	return m.slots[i].Cut(start, end, fn)
+}
+
+func (m *SkipHash) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	i := m.fn(key) % uint64(len(m.slots))
-	res := m.slots[i].Delete(key, val)
-	m.len -= int64(res)
-	return res
+	res, cnt := m.slots[i].Delete(start, end, key, val)
+	m.len -= int64(cnt)
+	return res, cnt
+}
+
+func (m *SkipHash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+	i := m.fn(key) % uint64(len(m.slots))
+	res, ok := m.slots[i].Find(start, key, val)
+	return res, ok
 }
 
 func (m *SkipHash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *SkipHash {
@@ -33,9 +44,9 @@ func (m *SkipHash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels i
 	return m
 }
 
-func (m *SkipHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *SkipHash) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {	
 	i := m.fn(key) % uint64(len(m.slots))
-	res, ok := m.slots[i].Insert(key, val, allowMulti)
+	res, ok := m.slots[i].Insert(start, key, val, allowMulti)
 
 	if ok {
 		m.len++

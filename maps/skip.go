@@ -1,8 +1,8 @@
 package maps
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"github.com/fncodr/godbase/lists"
 	"unsafe"
 )
@@ -26,50 +26,143 @@ func (m *Skip) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
 	return m.alloc.New(key, val, prev)
 }
 
-func (m *Skip) Delete(key Cmp, val interface{}) int {
-	cnt := 0
+func (m *Skip) Cut(start, end Iter, fn TestFn) Any {
+	if start == nil {
+		start = m.bottom.next
+	} else {
+		start = start.(*SkipNode).Bottom()
+	}
 
-	if n, ok := m.FindNode(key); ok {
-		for n.key == key {
-			if val == nil || n.val == val {
-				n.Delete()
-				cnt++
-				if m.alloc != nil {
-					m.alloc.Free(n)
-				}
+	if end == nil {
+		end = m.bottom.prev
+	} else {
+		end = end.(*SkipNode).Bottom()
+	}
+
+	res := NewSkip(m.alloc, m.Levels())
+	nn := res.bottom
+
+	for n := start.(*SkipNode); 
+	Iter(n) != end; 
+	n = n.next {
+		if Iter(n) == start {
+			panic(fmt.Sprintf("invalid end: %v", end))
+		}
+
+		if n == m.bottom {
+			nn = res.bottom
+		} else if fn == nil || fn(n.key, n) {
+			for ln, lnn := n, nn; n.up != n; n = n.up {
+				ln.prev.next = ln.next
+				ln.next.prev = ln.prev
+				
+				lnn.next = ln
+				ln.prev = lnn
+
+				ln.next = lnn.next
+				lnn.next.prev = ln
 			}
 			
-			n = n.next
+			nn = n
+			m.len--
+			res.len++
+		}		
+	}
+
+	return res
+}
+
+func (m *Skip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
+	n := m.bottom.next
+
+	if start == nil {
+		start = m.top.next
+	} else {
+		n = start.(*SkipNode).Top()
+	}
+
+	if end == nil {
+		end = m.bottom
+	} else {
+		end = end.(*SkipNode).Bottom()
+	}
+
+	if key != nil {
+		var ok bool
+		if n, ok = m.FindNode(start, key); !ok {
+			return n, 0
+		}
+	} else {
+		n = n.Bottom()
+	}
+
+	cnt := 0
+
+	for n != end && (key == nil || n == m.bottom || n.key == key) {
+		next := n.next
+
+		if n != m.bottom && (val == nil || n.val == val) {
+			n.Delete()
+			cnt++
+
+			if m.alloc != nil {
+				m.alloc.Free(n)
+			}
+		}
+		
+		n = next
+
+		if n == start {
+			panic(fmt.Sprintf("invalid end: %v", end))
 		}
 	}
 
 	m.len -= int64(cnt)
-	return cnt
+	return n.prev, cnt
 }
 
-func (m *Skip) FindNode(key Cmp) (*SkipNode, bool) {
-	if m.bottom.next != m.bottom {
-		if key.Less(m.bottom.next.key) {
-			return m.bottom, false
-		}
+func (m *Skip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+	n, ok := m.FindNode(start, key)
+	
+	if !ok {
+		return n, false
+	}
+
+	for val != nil && n.next.key == key && n.val != val {
+		n = n.next
+	}
+
+	return n, n.key == key && (val == nil || n.val == val)
+}
+
+func (m *Skip) FindNode(start Iter, key Cmp) (*SkipNode, bool) {
+	if start == nil {
+		start = m.top.next
+	}
+	
+	if next := m.bottom.next; next != m.bottom && key.Less(next.key) {
+		return m.bottom, false
+	}
 		
-		if m.bottom.prev.key.Less(key) {
-			return m.bottom.prev, false
-		}
+	if prev := m.bottom.prev; prev != m.bottom && prev.key.Less(key) {
+		return prev, false
 	}
 
 	var pn *SkipNode
-	n := &m.top
+	n := start.(*SkipNode)
 	maxSteps, steps := 1, 1
 	
 	for true {
-		n = n.next
+		if n.key == nil {
+			n = n.next
+		}
 
-		for n.key != nil && n.key.Less(key){
+		for n.key != nil && n.key.Less(key) {
 			if steps == maxSteps && pn != nil {
 				var nn *SkipNode
 				nn = m.AllocNode(n.key, n.val, pn)
-				nn.down, n.up, pn = n, nn, nn
+				nn.down = n
+				n.up, pn = nn, nn
 				steps = 0
 			}
 
@@ -78,26 +171,28 @@ func (m *Skip) FindNode(key Cmp) (*SkipNode, bool) {
 		}
 
 		if n.key == key {
-			for n.down != n {
-				n = n.down
-			}
+			n = n.Bottom()
 
+			for n.prev.key == key {
+				n = n.prev
+			}
+			
 			return n, true
 		}
 
 		pn = n.prev
-
+		
 		if pn.down == pn {
-			n = n.prev
 			break
 		}
 
 		n = pn.down
+
 		steps = 1
 		maxSteps++
 	}
-
-	return n, false
+	
+	return n.prev, false
 }
 
 func (m *Skip) Init(alloc *SkipNodeAlloc, levels int) *Skip {
@@ -116,8 +211,8 @@ func (m *Skip) Init(alloc *SkipNodeAlloc, levels int) *Skip {
 	return m
 }
 
-func (m *Skip) Insert(key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
-	n, ok := m.FindNode(key)
+func (m *Skip) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
+	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
 		n.val = val
@@ -132,6 +227,16 @@ func (m *Skip) Insert(key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
 
 func (m *Skip) Len() int64 {
 	return m.len
+}
+
+func (m *Skip) Levels() int {
+	res := 1
+
+	for n := &m.top; n.down != n; n = n.down { 
+		res++
+	}
+
+	return res
 }
 
 func (m *Skip) String() string {
@@ -170,6 +275,12 @@ type SkipNode struct {
 }
 
 var freeNodeOffs = unsafe.Offsetof(new(SkipNode).freeNode)
+
+func (n *SkipNode) Bottom() *SkipNode {
+	var res *SkipNode
+	for res = n; res.down != res; res = res.down { }
+	return res
+}
 
 func (n *SkipNode) Delete() {
 	var pn *SkipNode
@@ -213,6 +324,12 @@ func (n *SkipNode) Next() Iter {
 
 func (n *SkipNode) Prev() Iter {
 	return n.prev
+}
+
+func (n *SkipNode) Top() *SkipNode {
+	var res *SkipNode
+	for res = n; res.up != res; res = res.up { }
+	return res
 }
 
 func (n *SkipNode) Val() interface{} {

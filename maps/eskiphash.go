@@ -12,11 +12,22 @@ func NewESkipHash(fn HashFn, slotCount int) *ESkipHash {
 	return new(ESkipHash).Init(fn, slotCount)
 }
 
-func (m *ESkipHash) Delete(key Cmp, val interface{}) int {
+func (m *ESkipHash) Cut(start, end Iter, fn TestFn) Any {
+	i := m.fn(start.Key()) % uint64(len(m.slots))
+	return m.slots[i].Cut(start, end, fn)
+}
+
+func (m *ESkipHash) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	i := m.fn(key) % uint64(len(m.slots))
-	res := m.slots[i].Delete(key, val)
-	m.len -= int64(res)
-	return res
+	res, cnt := m.slots[i].Delete(start, end, key, val)
+	m.len -= int64(cnt)
+	return res, cnt
+}
+
+func (m *ESkipHash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+	i := m.fn(key) % uint64(len(m.slots))
+	res, ok := m.slots[i].Find(start, key, val)
+	return res, ok
 }
 
 func (m *ESkipHash) Init(fn HashFn, slotCount int) *ESkipHash {
@@ -30,9 +41,9 @@ func (m *ESkipHash) Init(fn HashFn, slotCount int) *ESkipHash {
 	return m
 }
 
-func (m *ESkipHash) Insert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
+func (m *ESkipHash) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
 	i := m.fn(key) % uint64(len(m.slots))
-	res, ok := m.slots[i].Insert(key, val, allowMulti)
+	res, ok := m.slots[i].Insert(start, key, val, allowMulti)
 
 	if ok {
 		m.len++

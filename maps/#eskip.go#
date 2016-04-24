@@ -57,8 +57,6 @@ func (m *ESkip) Cut(start, end Iter, fn TestFn) Any {
 }
 
 func (m *ESkip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
-	//fmt.Printf("delete1: %v\n", key)
-
 	n := m.root.next[ESkipLevels-1]
 
 	if start == nil {
@@ -169,8 +167,6 @@ func (m *ESkip) Init() *ESkip {
 }
 
 func (m *ESkip) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
-//	fmt.Printf("insert %v\n", key)
-
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
@@ -211,8 +207,6 @@ type ESkipNode struct {
 
 func (n *ESkipNode) Delete() {
 	for i := 0; i < ESkipLevels; i++ {
-		//fmt.Printf("delete2: %v / %v / %v\n", n.key, n.prev[i], n.next[i])
-
 		n.prev[i].next[i] = n.next[i]
 		n.next[i].prev[i] = n.prev[i] 
 		n.prev[i], n.next[i] = nil, nil

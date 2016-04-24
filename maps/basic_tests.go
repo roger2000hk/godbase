@@ -1,71 +1,48 @@
 package maps
 
 import (
+	//"fmt"
 	"log"
 	"time"
 )
 
-func (m *ESkip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
-	return toTestItem(res.(*ESkipNode)), ok
-}
-
-func (m *SkipHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.Insert(key, val, allowMulti)
-	return res, ok
-}
-
-func (m *ESkipHash) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.Insert(key, &val.(*testItem).skipNode, allowMulti)
-	return toTestItem(res.(*ESkipNode)), ok
-}
-
-func (m Map) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.Insert(key, val, allowMulti)
-	return res, ok
-}
-
-func (m *Skip) testInsert(key Cmp, val interface{}, allowMulti bool) (interface{}, bool) {
-	res, ok := m.Insert(key, val, allowMulti)
-	return res, ok
-}
-
-func runBasicTests(label string, m testMap, its testItems) {
+func runBasicTests(label string, m testAny, its testItems) {
 	start := time.Now()
 	for i, it := range its {
-		m.testInsert(it.skipNode.key, &its[i], false)
+		m.testInsert(nil, it.skipNode.key, &its[i], false)
 	}
 	PrintTime(start, "%v * %v.Insert1", len(its), label)
 
 	if l := m.Len(); l != int64(len(its)) {
-		log.Printf("invalid Len() after Insert(): %v / %v", l, len(its))
+		log.Panicf("invalid Len() after Insert(): %v / %v", l, len(its))
 	}
 
 	start = time.Now()
 	for i := 0; i < len(its) / 2; i++ {
-		if res := m.Delete(its[i].skipNode.key, nil); res != 1 {
-			log.Printf("invalid Delete(%v) res: %v", its[i].skipNode.key, res)
+		//fmt.Printf("%v\n", m)
+		k := its[i].skipNode.key
+		if res, cnt := m.testDelete(nil, nil, k, nil); cnt != 1 {
+			log.Panicf("%v invalid Delete (%v) res: %v", label, its[i].skipNode.key, res)
 		}
 	}
 	PrintTime(start, "%v * %v.Delete1", len(its), label)
 
 	start = time.Now()
 	for i, it := range its {
-		//fmt.Printf("%v\n", m)
-		m.testInsert(it.skipNode.key, &its[i], false)
+		m.testInsert(nil, it.skipNode.key, &its[i], false)
 	}
 	PrintTime(start, "%v * %v.Insert2", len(its), label)
 
 
 	start = time.Now()
 	for _, it := range its {
-		m.Delete(it.skipNode.key, nil)
+		m.testDelete(nil, nil, it.skipNode.key, nil)
 	}
 	PrintTime(start, "%v * %v.Delete2", len(its), label)
 }
 
 func RunBasicTests() {
-	its := randItems(100000)
+	its := randItems(10000)
 
 	mm := NewMap()
 	runBasicTests("Map", mm, its) 

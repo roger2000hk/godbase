@@ -12,5 +12,10 @@ Once sorted maps were working properly, I had the crazy idea to put a hash on to
 ## status
 Only insert/delete/iterators implemented so far, set operations and polish are still in the oven.
 
+## api
+More RISCy & Lispy than your everyday set/map api; but then, part of this excercise is proving that providing an optimal api is half of implementing an optimal algorithm. And there's more low hanging fruit around in the garden of set/map apis than most places. It's obvious to me that academic 
+dogmatics and software (or life in general, for that matter) isn't really the match made in 
+heaven it's being sold as.
+
 ## examples
 test_map.go runs a basic test loop for each available map type, that should be enough to get started.

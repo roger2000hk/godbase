@@ -1,13 +1,13 @@
 package maps
 
-// All map keys are requred to support Cmp.
+// All map keys are requred to support Cmp
 
 type Cmp interface {
 	Less(Cmp) bool
 }
 
-// Iters are circular and cheap, since they are nothing but an interface on 
-// top of actual nodes.
+// Iters are circular and cheap, since they are nothing but a common 
+// interface on top of actual nodes
 
 type Iter interface {
 	// Returns true if next elem is not root
@@ -29,41 +29,45 @@ type Iter interface {
 	Val() interface{}
 }
 
-// Basic map operations
+// Basic map ops supported by all implementations
+// More RISCy & Lispy than your everyday set/map api; but then, part of this 
+// excercise is proving that providing an optimal api is half of implementing 
+// an optimal algorithm. And there's more low hanging fruit around in the 
+// garden of set/map api's than most places. It seems to me that academic 
+// dogmatics and software (or life in general, for that matter) isn't really 
+// the match made in heaven scientists like to pretend it is. 
 
 type Any interface {
-	// Deletes all elems matching key/val;
-	// val is optional and can be set to nil to delete all elems with key.
-	// Returns the number of deleted elems.
+	// Cuts elems from start to end for which fn returns true into new set;
+	// start, end & fn are all optional. Circular cutting, with start/end on
+	// opposite sides of root; is supported. Returns a cut from the start slot
+	// for hash maps.
 
-	Delete(key Cmp, val interface{}) int
+	Cut(start, end Iter, fn TestFn) Any
 
-	// Inserts key/val into map;
-	// val is optional and can be set to nil, and dup checks can be disabled 
-	// by setting allowMulti to false. Returns the inserted val & true on 
-	// success, or existing val & false on dup.
+	// Deletes all elems after start matching key/val;
+	// start, end, key & val are all optional, nil deletes all elems. Specifying 
+	// iters for hash maps only works within the same slot. Returns an iter to next 
+	// elem and the number of deleted elems.
 
-	Insert(key Cmp, val interface{}, allowMulti bool) (Iter, bool)
+	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
+
+	// Returns iter for first elem after start matching key and ok;
+	// start & val are optional, specifying a start iter for hash maps only works within the 
+	// same slot.
+
+	Find(start Iter, key Cmp, val interface{}) (Iter, bool)
+	
+	// Inserts key/val into map after start;
+	// start & val are both optional, and dup checks can be disabled 
+	// by setting allowMulti to false. Returns iter to inserted val & true
+	// on success, or iter to existing val & false on dup. Specifying a
+	// start iter for hash maps only works within the same slot.
+
+	Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
 
 	// Returns the number of elems in map
 	Len() int64
 }
 
 type TestFn func (Cmp, interface{}) bool
-
-// Operations specific to sorted implementations
-
-type Sorted interface {
-	Any
-
-	// Cuts elems from start to end for which fn returns true into new set;
-	// start, end & fn are optional. Circular cutting, with start/end on
-	// opposite sides of root; is supported.
-
-	Cut(start Iter, end Iter, fn TestFn) Sorted
-
-	// Returns iter for first elem after start >= key;
-	// start & key are optional
-
-	First(start Iter, key Cmp) Iter
-}
