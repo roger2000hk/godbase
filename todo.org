@@ -1,18 +1,10 @@
-* add maps.Sorted
-** figure out why eskip findnode gets stuck on level
-*** not circular?
-** run all tests
-** commit
-
 * update readme
 ** add Cmp, Iter & Any apis
-** remove examples clause
-** add constructors header after api
-*** list all constructors
+** list all constructors
 
 * update CHANGES
 
-* commit
+* commit & post update
 
 * add Hash / HashSlots
 ** one Hash imp
