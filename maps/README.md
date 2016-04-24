@@ -13,7 +13,7 @@ Once sorted maps were working properly, I had the crazy idea to put a hash on to
 Basic functionality and testing in place; bells, whistles & polish are still on the stove.
 
 ## api
-More RISC/Lispy than your everyday set/map api. Turns out that providing an optimal api is half of implementing an optimal algorithm. And there's more low hanging fruit around in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
+More RISC/Lispy than your everyday set/map api. Turns out that providing an optimal api is half of implementing an optimal algorithm. And there's more low hanging fruit in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
 
 ### interfaces
 
