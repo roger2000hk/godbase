@@ -1,6 +1,3 @@
-* correct find result from skip
-** commit basic find tests
-
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
@@ -10,6 +7,9 @@
 * add map slot types
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
+
+* add maps.Sorted with First/Last() Iter
+** extend Any
 
 * rename Cut to CutRange
 ** change to take MapFn instead of TestFn
@@ -69,3 +69,5 @@
 ** keep HashMaps of RecId => Lock
 *** one for readers, one for writers
 ** protect maps with Lock 
+* add hash resizing
+* add skip resizing
