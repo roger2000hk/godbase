@@ -1,11 +1,3 @@
-* add MapSlots
-** NewMapSlots()
-** store as map[interface{}]Any
-** add MapHashFn func(Cmp) interface{}
-** compare perf
-
-* update readme constructors & commit
-
 * add maps.Sorted with First/Last() Iter
 ** extend Any
 
