@@ -8,13 +8,13 @@ import (
 )
 
 type Skip struct {
-	alloc *SkipNodeAlloc
+	alloc *SkipAlloc
 	bottom *SkipNode
 	len int64
 	top SkipNode
 }
 
-func NewSkip(alloc *SkipNodeAlloc, levels int) *Skip {
+func NewSkip(alloc *SkipAlloc, levels int) *Skip {
 	return new(Skip).Init(alloc, levels)
 }
 
@@ -195,7 +195,7 @@ func (m *Skip) FindNode(start Iter, key Cmp) (*SkipNode, bool) {
 	return n.prev, false
 }
 
-func (m *Skip) Init(alloc *SkipNodeAlloc, levels int) *Skip {
+func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
 	m.alloc = alloc
 	m.top.Init(nil, nil, nil)
 	n := &m.top
@@ -338,25 +338,25 @@ func (n *SkipNode) Val() interface{} {
 
 type SkipSlab []SkipNode
 
-type SkipNodeAlloc struct {
+type SkipAlloc struct {
 	freeList lists.EDouble
 	idx int
 	slab SkipSlab
 	slabSize int
 }
 
-func NewSkipNodeAlloc(slabSize int) *SkipNodeAlloc {
-	return new(SkipNodeAlloc).Init(slabSize)
+func NewSkipAlloc(slabSize int) *SkipAlloc {
+	return new(SkipAlloc).Init(slabSize)
 }
 
-func (a *SkipNodeAlloc) Init(slabSize int) *SkipNodeAlloc {
+func (a *SkipAlloc) Init(slabSize int) *SkipAlloc {
 	a.freeList.Init()
 	a.slab = make(SkipSlab, slabSize)
 	a.slabSize = slabSize
 	return a
 }
 
-func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
+func (a *SkipAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
 	var res *SkipNode
 
 	if n := a.freeList.Next(); n != n {
@@ -375,6 +375,6 @@ func (a *SkipNodeAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode 
 	return res.Init(key, val, prev)
 }
 
-func (a *SkipNodeAlloc) Free(n *SkipNode) {
+func (a *SkipAlloc) Free(n *SkipNode) {
 	a.freeList.InsAfter(&n.freeNode)
 }

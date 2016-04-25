@@ -18,7 +18,7 @@ func runConstructorTests() {
 	NewSkip(nil, 10)
 
 	// 20 level skip map with slab allocated nodes
-	a := NewSkipNodeAlloc(50)
+	a := NewSkipAlloc(50)
 	NewSkip(a, 20)
 
 	// skip map with embedded nodes
@@ -74,7 +74,7 @@ func RunBasicTests() {
 	mm := NewMap()
 	runBasicTests("Map", mm, its) 
 
-	a := NewSkipNodeAlloc(55)
+	a := NewSkipAlloc(55)
 	//ssm := NewSkip(a, 1)
 	//runBasicTests("List", ssm, its) 
 

@@ -54,7 +54,7 @@ func RunMultiTests() {
 	its2 := sortedItems(nreps)
 	its3 := sortedItems(nreps)
 
-	a := NewSkipNodeAlloc(55)
+	a := NewSkipAlloc(55)
 	//ssm := NewSkip(a, 1)
 	//runMultiTests("List", ssm, its1, its2, its3) 
 

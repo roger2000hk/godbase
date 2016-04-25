@@ -19,7 +19,7 @@ func runSortedTests(label string, m testAny, its testItems) {
 
 func RunSortedTests() {
 	its := reverseItems(100000)
-	a := NewSkipNodeAlloc(55)
+	a := NewSkipAlloc(55)
 
 	ssm := NewSkip(a, 1)
 	runSortedTests("List", ssm, its) 

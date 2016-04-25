@@ -4,14 +4,14 @@ type SkipHashSlots []Skip
 type HashFn func (Cmp) uint64
 
 type SkipHash struct {
-	alloc *SkipNodeAlloc
+	alloc *SkipAlloc
 	fn HashFn
 	len int64
 	levels int
 	slots SkipHashSlots
 }
 
-func NewSkipHash(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *SkipHash {
+func NewSkipHash(fn HashFn, slotCount int, alloc *SkipAlloc, levels int) *SkipHash {
 	return new(SkipHash).Init(fn, slotCount, alloc, levels)
 }
 
@@ -33,7 +33,7 @@ func (m *SkipHash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 	return res, ok
 }
 
-func (m *SkipHash) Init(fn HashFn, slotCount int, alloc *SkipNodeAlloc, levels int) *SkipHash {
+func (m *SkipHash) Init(fn HashFn, slotCount int, alloc *SkipAlloc, levels int) *SkipHash {
 	m.alloc = alloc
 	m.fn = fn
 	m.levels = levels
