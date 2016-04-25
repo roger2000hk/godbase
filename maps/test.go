@@ -6,11 +6,22 @@ import (
 )
 
 const (
+	// Nr of slots for embedded hash maps
 	testESlots = 5000
+
+	// Nr of levels for hashed skip maps
 	testHashLevels = 3
+
+	// Nr of levels for non-hashed skip maps
 	testLevels = 14
+
+	// Nr of elems / reps
 	testReps = 50000
+
+	// Size of skip node slabs
 	testSlabSize = 100
+
+	// Nr of slots for non-embedded hash maps
 	testSlots = 10000
 )
 
