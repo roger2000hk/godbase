@@ -1,9 +1,3 @@
-* add Hash / HashSlots
-** one Hash imp
-** add HashSlots type for each chain type
-*** add GetSlot(i, create) Any method
-** init slots lazily in GetSlot()
-
 * add map slot types
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
