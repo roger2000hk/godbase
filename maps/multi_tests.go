@@ -23,7 +23,7 @@ func runMultiTests(label string, m testAny, its1, its2, its3 testItems) {
 	start = time.Now()
 	for i, it := range its1 {
 		if res, cnt := m.testDelete(nil, nil, it.skipNode.key, &its1[i]); cnt != 1 {
-			log.Panicf("%v invalid multi delete (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
+			log.Panicf("%v invalid multi delete1 (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
 		}
 	}
 	PrintTime(start, "%v * %v multi delete1", len(its1), label)
@@ -35,6 +35,9 @@ func runMultiTests(label string, m testAny, its1, its2, its3 testItems) {
 
 	start = time.Now()
 	for i, it := range its1 {
+		if res, ok := m.testFind(nil, it.skipNode.key, nil); !ok {
+			log.Panicf("%v invalid find res0: %v", label, res)
+		}
 		if res, ok := m.testFind(nil, it.skipNode.key, &its1[i]); ok {
 			log.Panicf("%v invalid find res1: %v", label, res)
 		} 
@@ -46,6 +49,16 @@ func runMultiTests(label string, m testAny, its1, its2, its3 testItems) {
 		} 
 	}
 	PrintTime(start, "%v * %v multi find", len(its1), label)
+
+	for _, it := range its1 {
+		if res, cnt := m.testDelete(nil, nil, it.skipNode.key, nil); cnt != 2 {
+			log.Panicf("%v invalid multi delete2 (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
+		}
+	}
+
+	if l := m.Len(); l != 0 {
+		log.Panicf("%v invalid len after delete1: %v / %v", label, l, 0)
+	}
 }
 
 func RunMultiTests() {
