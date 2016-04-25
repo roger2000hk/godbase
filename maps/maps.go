@@ -30,12 +30,6 @@ type Iter interface {
 }
 
 // Basic map ops supported by all implementations
-// More RISCy & Lispy than your everyday set/map api; but then, part of this 
-// excercise is proving that providing an optimal api is half of implementing 
-// an optimal algorithm. And there's more low hanging fruit around in the 
-// garden of set/map api's than most places. It seems to me that academic 
-// dogmatics and software (or life in general, for that matter) isn't really 
-// the match made in heaven scientists like to pretend it is. 
 
 type Any interface {
 	// Cuts elems from start to end for which fn returns true into new set;

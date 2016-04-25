@@ -6,8 +6,6 @@
 
 * commit & post update
 
-* add Cut tests
-
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
@@ -18,16 +16,43 @@
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
 
+* convert tests to benchmark format
+
+* add multi delete tests
+
+* add Cut tests
+
 * ---
+
+* add rec support
+** Rec interface
+** BasicRec wraps maps.Any
+
+* add idx support
+** Idx interface
+** BasicIdx wraps maps.Any
+** provide range ops
+*** runs within slot for hash types
 
 * add Any.Clone(TestFn)
 ** panic for embedded imps
 ** only include elems for which test returns true
 
+* add locks package
+** copy RW/Ctx from old
+*** rename RW to Lock
+
+
 * add Any.CutAll(other Any, TestFn)
 ** return difference as new set
 ** only move elems for which test returns true
 ** operate within slot for hash maps
+
+* add locks.Locker
+** keep HashMaps of RecId => Lock
+*** one for readers, one for writers
+** protect maps with Lock 
+
 
 * add Any.Update(start, end, update UpdateFn) int
 ** type UpdateFn func(k, v) (v, bool)
@@ -37,18 +62,6 @@
 * add Any.InsertAll(other Any, TestFn)
 ** opimized iter insert where possible
 *** keep iter around and set to nil if check if next < prev
-
-* add Rec type
-** wrap maps.Any
-
-* add locks package
-** copy RW/Ctx from old
-*** rename RW to Lock
-
-* add locks.Locker
-** keep HashMaps of RecId => Lock
-*** one for readers, one for writers
-** protect maps with Lock 
 
 * copy maps to sets package
 ** no multi capability
