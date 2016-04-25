@@ -1,8 +1,5 @@
 package maps
 
-// Map is mostly meant as a reference for performance comparisons,
-// it only supports enough of the api to run the basic tests
-
 type Map map[Cmp]interface{}
 
 func NewMap() Map {

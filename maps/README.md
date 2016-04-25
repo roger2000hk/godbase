@@ -18,6 +18,7 @@ More RISC/Lispy than your everyday set/map api. Providing an optimal api is part
 ### interfaces
 
 ```go
+
 // All map keys are requred to support Cmp
 
 type Cmp interface {
@@ -51,15 +52,16 @@ type Iter interface {
 
 type Any interface {
 	// Cuts elems from start to end for which fn returns true into new set;
-	// start, end & fn are all optional. Circular cutting, with start/end on
-	// opposite sides of root; is supported. Returns a cut from the start slot
+	// start, end & fn are all optional. Circular cuts, with start/end on
+	// opposite sides of root; are supported. Returns a cut from the start slot
 	// for hash maps.
 
 	Cut(start, end Iter, fn TestFn) Any
 
 	// Deletes all elems after start matching key/val;
 	// start, end, key & val are all optional, nil deletes all elems. Specifying 
-	// iters for hash maps only works within the same slot. Returns an iter to next 
+	// iters for hash maps only works within the same slot. Circular deletes,
+	// with start/end on opposite sides of root; are supported. Returns an iter to next 
 	// elem and the number of deleted elems.
 
 	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
@@ -71,10 +73,9 @@ type Any interface {
 	Find(start Iter, key Cmp, val interface{}) (Iter, bool)
 	
 	// Inserts key/val into map after start;
-	// start & val are both optional, and dup checks can be disabled 
-	// by setting allowMulti to false. Returns iter to inserted val & true
-	// on success, or iter to existing val & false on dup. Specifying a
-	// start iter for hash maps only works within the same slot.
+	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 
+	// Returns iter to inserted val & true on success, or iter to existing val & false on dup. 
+	// Specifying a start iter for hash maps only works within the same slot.
 
 	Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
 
@@ -84,6 +85,42 @@ type Any interface {
 
 type TestFn func (Cmp, interface{}) bool
 
+
 ```
 
 ### constructors
+
+```go
+
+type testKey int
+
+func (k testKey) Less(other Cmp) bool {
+	return k < other.(testKey)
+}
+
+func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+
+func runConstructorTests() {
+	// Map is mostly meant as a reference for performance comparisons,
+	// it only supports enough of the api to run basic tests on top of 
+	// a native map.
+	NewMap()
+	
+	// 10 level skip map with separately allocated nodes
+	NewSkip(nil, 10)
+
+	// 20 level skip map with slab allocated nodes
+	a := NewSkipNodeAlloc(50)
+	NewSkip(a, 20)
+
+	// skip map with embedded nodes
+	NewESkip()
+
+	// 2 level hashed skip map with 1000 slots and slab allocated nodes
+	NewSkipHash(genHash, 1000, a, 2)
+
+	// hashed skip map with 10000 slots and embedded nodes
+	NewESkipHash(genHash, 10000)
+}
+
+```

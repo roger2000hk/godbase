@@ -33,15 +33,16 @@ type Iter interface {
 
 type Any interface {
 	// Cuts elems from start to end for which fn returns true into new set;
-	// start, end & fn are all optional. Circular cutting, with start/end on
-	// opposite sides of root; is supported. Returns a cut from the start slot
+	// start, end & fn are all optional. Circular cuts, with start/end on
+	// opposite sides of root; are supported. Returns a cut from the start slot
 	// for hash maps.
 
 	Cut(start, end Iter, fn TestFn) Any
 
 	// Deletes all elems after start matching key/val;
 	// start, end, key & val are all optional, nil deletes all elems. Specifying 
-	// iters for hash maps only works within the same slot. Returns an iter to next 
+	// iters for hash maps only works within the same slot. Circular deletes,
+	// with start/end on opposite sides of root; are supported. Returns an iter to next 
 	// elem and the number of deleted elems.
 
 	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
@@ -53,10 +54,9 @@ type Any interface {
 	Find(start Iter, key Cmp, val interface{}) (Iter, bool)
 	
 	// Inserts key/val into map after start;
-	// start & val are both optional, and dup checks can be disabled 
-	// by setting allowMulti to false. Returns iter to inserted val & true
-	// on success, or iter to existing val & false on dup. Specifying a
-	// start iter for hash maps only works within the same slot.
+	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 
+	// Returns iter to inserted val & true on success, or iter to existing val & false on dup. 
+	// Specifying a start iter for hash maps only works within the same slot.
 
 	Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
 

@@ -6,6 +6,31 @@ import (
 	"time"
 )
 
+func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+
+func runConstructorTests() {
+	// Map is mostly meant as a reference for performance comparisons,
+	// it only supports enough of the api to run basic tests on top of 
+	// a native map.
+	NewMap()
+	
+	// 10 level skip map with separately allocated nodes
+	NewSkip(nil, 10)
+
+	// 20 level skip map with slab allocated nodes
+	a := NewSkipNodeAlloc(50)
+	NewSkip(a, 20)
+
+	// skip map with embedded nodes
+	NewESkip()
+
+	// 2 level hashed skip map with 1000 slots and slab allocated nodes
+	NewSkipHash(genHash, 1000, a, 2)
+
+	// hashed skip map with 10000 slots and embedded nodes
+	NewESkipHash(genHash, 10000)
+}
+
 func runBasicTests(label string, m testAny, its testItems) {
 	start := time.Now()
 	for i, it := range its {
@@ -42,6 +67,8 @@ func runBasicTests(label string, m testAny, its testItems) {
 }
 
 func RunBasicTests() {
+	runConstructorTests()
+
 	its := randItems(10000)
 
 	mm := NewMap()
