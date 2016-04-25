@@ -1,5 +1,4 @@
-* rename Cut to CutRange
-** change to take MapFn instead of TestFn
+** change Cut to take MapFn instead of TestFn
 ** add tests
 
 * add locks package
