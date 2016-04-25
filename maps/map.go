@@ -1,6 +1,10 @@
 package maps
 
-type Map map[Cmp]interface{}
+import (
+	"fmt"
+)
+
+type Map map[Key]interface{}
 
 func NewMap() Map {
 	return make(Map)
@@ -10,7 +14,7 @@ func (m Map) Cut(start, end Iter, fn TestFn) Any {
 	panic("Map doesn't support iters")
 }
 
-func (m Map) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
+func (m Map) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	if start != nil || end != nil {
 		panic("Map doesn't support iters")
 	}
@@ -23,12 +27,12 @@ func (m Map) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	return nil, 1
 }
 
-func (m Map) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+func (m Map) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	v, ok := m[key]
 	return nil, ok && (val == nil || v == val)
 }
 
-func (m Map) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
+func (m Map) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	if start != nil {
 		panic("Map doesn't support iters")
 	}
@@ -47,4 +51,8 @@ func (m Map) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter
 
 func (m Map) Len() int64 {
 	return int64(len(m))
+}
+
+func (m Map) String() string {
+	return fmt.Sprintf("%v", m)
 }

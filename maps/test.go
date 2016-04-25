@@ -30,9 +30,9 @@ var testSkipAlloc = NewSkipAlloc(testSlabSize)
 
 type testAny interface {
 	Any
-	testDelete(start, end Iter, key Cmp, val interface{}) (Iter, int)
-	testFind(start Iter, key Cmp, val interface{}) (Iter, bool)
-	testInsert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
+	testDelete(start, end Iter, key Key, val interface{}) (Iter, int)
+	testFind(start Iter, key Key, val interface{}) (Iter, bool)
+	testInsert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
 }
 
 type testItem struct {
@@ -42,13 +42,13 @@ type testItem struct {
 type testItems []testItem
 type testKey int
 
-func (k testKey) Less(other Cmp) bool {
+func (k testKey) Less(other Key) bool {
 	return k < other.(testKey)
 }
 
-func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+func genHash(k Key) uint64 { return uint64(k.(testKey)) }
 
-func genMapHash(k Cmp) interface{} { return k }
+func genMapHash(k Key) interface{} { return k }
 
 func toTestItem(node *ESkipNode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
@@ -85,10 +85,10 @@ func randItems(n int) testItems {
 	return res
 }
 
-func allocESkip(_ Cmp) Any {
+func allocESkip(_ Key) Any {
 	return NewESkip()
 }
 
-func allocSkip(_ Cmp) Any {
+func allocSkip(_ Key) Any {
 	return NewSkip(testSkipAlloc, testHashLevels)
 }

@@ -19,7 +19,7 @@ func NewSkip(alloc *SkipAlloc, levels int) *Skip {
 	return new(Skip).Init(alloc, levels)
 }
 
-func (m *Skip) AllocNode(key Cmp, val interface{}, prev *SkipNode) *SkipNode{
+func (m *Skip) AllocNode(key Key, val interface{}, prev *SkipNode) *SkipNode{
 	if m.alloc == nil {
 		 return new(SkipNode).Init(key, val, prev)
 	} 
@@ -73,7 +73,7 @@ func (m *Skip) Cut(start, end Iter, fn TestFn) Any {
 	return res
 }
 
-func (m *Skip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
+func (m *Skip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	n := m.bottom.next
 
 	if start == nil {
@@ -119,10 +119,10 @@ func (m *Skip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	}
 
 	m.len -= int64(cnt)
-	return n, cnt
+	return n.prev, cnt
 }
 
-func (m *Skip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+func (m *Skip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if !ok {
@@ -136,7 +136,7 @@ func (m *Skip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 	return n.prev, n.key == key && (val == nil || n.val == val)
 }
 
-func (m *Skip) FindNode(start Iter, key Cmp) (*SkipNode, bool) {
+func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 	if start == nil {
 		start = m.top.next
 	}
@@ -213,7 +213,7 @@ func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
 	return m
 }
 
-func (m *Skip) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
@@ -272,7 +272,7 @@ func (m *Skip) String() string {
 type SkipNode struct {
 	freeNode lists.EDouble
 	down, next, prev, up *SkipNode
-	key Cmp
+	key Key
 	val interface{}
 }
 
@@ -302,7 +302,7 @@ func (n *SkipNode) HasPrev() bool {
 	return n.prev.key != nil
 }
 
-func (n *SkipNode) Init(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
+func (n *SkipNode) Init(key Key, val interface{}, prev *SkipNode) *SkipNode {
 	n.key, n.val = key, val
 	n.up = n
 
@@ -316,7 +316,7 @@ func (n *SkipNode) Init(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
 	return n
 }
 
-func (n *SkipNode) Key() Cmp {
+func (n *SkipNode) Key() Key {
 	return n.key
 }
 
@@ -358,7 +358,7 @@ func (a *SkipAlloc) Init(slabSize int) *SkipAlloc {
 	return a
 }
 
-func (a *SkipAlloc) New(key Cmp, val interface{}, prev *SkipNode) *SkipNode {
+func (a *SkipAlloc) New(key Key, val interface{}, prev *SkipNode) *SkipNode {
 	var res *SkipNode
 
 	if n := a.freeList.Next(); n != n {

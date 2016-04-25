@@ -52,7 +52,7 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	skipAlloc := func (_ Cmp) Any { return NewSkip(nil, 2) }
+	skipAlloc := func (_ Key) Any { return NewSkip(nil, 2) }
 	as := NewSlots(1000, genHash, skipAlloc)
 	NewHash(as)
 
@@ -75,7 +75,7 @@ func TestConstructors(t *testing.T) {
 	NewHash(ess)
 
 	// 1000 hash slots backed by hash maps with 100 embedded skip slots
-	hs := NewHashSlots(1000, genHash, func (_ Cmp) Slots { return NewESkipSlots(100, genHash) })
+	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESkipSlots(100, genHash) })
 	NewHash(hs)
 }
 
@@ -116,8 +116,12 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	for i := 0; i < len(its) / 2; i++ {
 		k := its[i].skipNode.key
 
-		if res, cnt := m.Delete(nil, nil, k, nil); 
-		cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
+		res, cnt := m.Delete(nil, nil, k, nil);
+		if res != nil {
+			res = res.Next()
+		}
+
+		if cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
 			t.Errorf("%v invalid delete(%v) res: %v", label, k, res)
 		}
 	}

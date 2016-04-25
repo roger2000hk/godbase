@@ -1,9 +1,17 @@
 package maps
 
-// All map keys are requred to support Cmp
-type Cmp interface {
-	Less(Cmp) bool
+import (
+	"strings"
+)
+
+// All map keys are requred to support Key
+type Key interface {
+	Less(Key) bool
 }
+
+type IntKey int
+type StringKey string
+
 
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. They are positioned before start
@@ -17,7 +25,7 @@ type Iter interface {
 	HasPrev() bool
 
 	// Returns key for elem or nil if root
-	Key() Cmp
+	Key() Key
 
 	// Returns iter to next elem
 	Next() Iter
@@ -44,26 +52,37 @@ type Any interface {
 	// with start/end on opposite sides of root; are supported. Returns an iter to next 
 	// elem and number of deleted elems.
 
-	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
+	Delete(start, end Iter, key Key, val interface{}) (Iter, int)
 
 	// Returns iter for first elem after start matching key and ok;
 	// start & val are optional, specifying a start iter for hash maps only works within the 
 	// same slot.
 
-	Find(start Iter, key Cmp, val interface{}) (Iter, bool)
+	Find(start Iter, key Key, val interface{}) (Iter, bool)
 	
 	// Inserts key/val into map after start;
 	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 
 	// Returns iter to inserted val & true on success, or iter to existing val & false on dup. 
 	// Specifying a start iter for hash maps only works within the same slot.
 
-	Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
+	Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
 
 	// Returns the number of elems in map
 	Len() int64
+
+	// Returns string repr for printing
+	String() string
 }
 
 // map allocator interface
 type Alloc func () Any
 
-type TestFn func (Cmp, interface{}) bool
+type TestFn func (Key, interface{}) bool
+
+func (k IntKey) Less(other Key) bool {
+	return k < other.(IntKey)
+}
+
+func (k StringKey) Less(other Key) bool {
+	return strings.Compare(string(k), string(other.(StringKey))) < 0
+}

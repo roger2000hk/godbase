@@ -1,7 +1,11 @@
 package maps
 
+import (
+	"fmt"
+)
+
 type Slots interface {	
-	Get(key Cmp, create bool) Any
+	Get(key Key, create bool) Any
 }
 
 type AnySlots struct {
@@ -40,10 +44,10 @@ type SkipSlots struct {
 	slots []Skip
 }
 
-type HashFn func (Cmp) uint64
-type MapHashFn func (Cmp) interface{}
-type SlotAlloc func (key Cmp) Any
-type SlotsAlloc func (key Cmp) Slots
+type HashFn func (Key) uint64
+type MapHashFn func (Key) interface{}
+type SlotAlloc func (key Key) Any
+type SlotsAlloc func (key Key) Slots
 
 func NewESkipSlots(count int, fn HashFn) *ESkipSlots {
 	ss := new(ESkipSlots)
@@ -93,18 +97,18 @@ func (m *Hash) Cut(start, end Iter, fn TestFn) Any {
 	return m.slots.Get(start.Key(), true).Cut(start, end, fn)
 }
 
-func (m *Hash) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
+func (m *Hash) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	res, cnt := m.slots.Get(key, true).Delete(start, end, key, val)
 	m.len -= int64(cnt)
 	return res, cnt
 }
 
-func (m *Hash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
+func (m *Hash) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	res, ok := m.slots.Get(key, true).Find(start, key, val)
 	return res, ok
 }
 
-func (ss *AnySlots) Get(key Cmp, create bool) Any {
+func (ss *AnySlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := ss.slots[i]
 
@@ -121,7 +125,7 @@ func (ss *AnySlots) Get(key Cmp, create bool) Any {
 	return nil
 }
 
-func (ss *ESkipSlots) Get(key Cmp, create bool) Any {
+func (ss *ESkipSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -136,7 +140,7 @@ func (ss *ESkipSlots) Get(key Cmp, create bool) Any {
 	return nil
 }
 
-func (ss *HashSlots) Get(key Cmp, create bool) Any {
+func (ss *HashSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -151,7 +155,7 @@ func (ss *HashSlots) Get(key Cmp, create bool) Any {
 	return nil
 }
 
-func (ss *MapSlots) Get(key Cmp, create bool) Any {
+func (ss *MapSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key)
 	s, ok := ss.slots[i]
 
@@ -168,7 +172,7 @@ func (ss *MapSlots) Get(key Cmp, create bool) Any {
 	return nil
 }
 
-func (ss *SkipSlots) Get(key Cmp, create bool) Any {
+func (ss *SkipSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -189,7 +193,7 @@ func (m *Hash) Init(slots Slots) *Hash {
 	return m
 }
 
-func (m *Hash) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {	
+func (m *Hash) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {	
 	res, ok := m.slots.Get(key, true).Insert(start, key, val, allowMulti)
 
 	if ok {
@@ -201,4 +205,8 @@ func (m *Hash) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (It
 
 func (m *Hash) Len() int64 {
 	return m.len
+}
+
+func (m *Hash) String() string {
+	return fmt.Sprintf("%v", m.slots)
 }

@@ -1,3 +1,19 @@
+* add maps.Suffix wrap
+** adapt insert
+** adapt find
+** add tests
+*** compare to suffix array
+** commit
+
+* add 'wrapping it up' to README
+
+* add locks package
+** copy RW/Ctx from old
+*** rename RW to Lock
+
+* add locks.RWHashMap
+** keep one locks.RW per slot
+
 * add maps.Sorted with First/Last() Iter
 ** extend Any
 
@@ -18,11 +34,6 @@
 *** runs within slot for hash types
 
 
-* add basic trie
-** package tries
-** use embedded skip map for child nodes
-** index using []rune
-
 * add Any.InsertRange(start, end, MapFn) int
 ** only ins if mapfn is nil or returns non nil key
 ** keep insert iter running all the way and call Insert
@@ -31,13 +42,6 @@
 ** panic for embedded imps
 ** only include elems for which test returns true
 
-
-* add locks package
-** copy RW/Ctx from old
-*** rename RW to Lock
-
-* add maps.RWLockHash
-** keep one RW.lock per slot
 
 * add Any.CutAll(other Any, TestFn)
 ** return difference as new set

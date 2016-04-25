@@ -29,13 +29,13 @@ I trust you'll find godbase more RISC/Lispy than your everyday set/map api. Prov
 
 ```go
 
-// All map keys are requred to support Cmp
-type Cmp interface {
-	Less(Cmp) bool
+// All map keys are requred to support Key
+type Key interface {
+	Less(Key) bool
 }
 
 // All hash maps require a hash fn
-type HashFn func (Cmp) uint64
+type HashFn func (Key) uint64
 
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. They are positioned before start
@@ -49,7 +49,7 @@ type Iter interface {
 	HasPrev() bool
 
 	// Returns key for elem or nil if root
-	Key() Cmp
+	Key() Key
 
 	// Returns iter to next elem
 	Next() Iter
@@ -76,26 +76,26 @@ type Any interface {
 	// with start/end on opposite sides of root; are supported. Returns an iter to next 
 	// elem and number of deleted elems.
 
-	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
+	Delete(start, end Iter, key Key, val interface{}) (Iter, int)
 
 	// Returns iter for first elem after start matching key and ok;
 	// start & val are optional, specifying a start iter for hash maps only works within the 
 	// same slot.
 
-	Find(start Iter, key Cmp, val interface{}) (Iter, bool)
+	Find(start Iter, key Key, val interface{}) (Iter, bool)
 	
 	// Inserts key/val into map after start;
 	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 
 	// Returns iter to inserted val & true on success, or iter to existing val & false on dup. 
 	// Specifying a start iter for hash maps only works within the same slot.
 
-	Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
+	Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
 
 	// Returns the number of elems in map
 	Len() int64
 }
 
-type TestFn func (Cmp, interface{}) bool
+type TestFn func (Key, interface{}) bool
 
 
 ```
@@ -106,12 +106,12 @@ type TestFn func (Cmp, interface{}) bool
 
 type testKey int
 
-func (k testKey) Less(other Cmp) bool {
+func (k testKey) Less(other Key) bool {
 	return k < other.(testKey)
 }
 
-func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
-func genMapHash(k Cmp) interface{} { return k }
+func genHash(k Key) uint64 { return uint64(k.(testKey)) }
+func genMapHash(k Key) interface{} { return k }
 
 func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
@@ -139,7 +139,7 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	skipAlloc := func (_ Cmp) Any { return NewSkip(nil, 2) }
+	skipAlloc := func (_ Key) Any { return NewSkip(nil, 2) }
 	as := NewSlots(1000, genHash, skipAlloc)
 	NewHash(as)
 
@@ -164,7 +164,7 @@ func TestConstructors(t *testing.T) {
 	NewHash(ess)
 
 	// 1000 hash slots backed by hash maps with 100 embedded skip slots
-	hs := NewHashSlots(1000, genHash, func (_ Cmp) Slots { return NewESkipSlots(100, genHash) })
+	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESkipSlots(100, genHash) })
 	NewHash(hs)
 }
 

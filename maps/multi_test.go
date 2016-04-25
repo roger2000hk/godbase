@@ -23,7 +23,10 @@ func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testIte
 	for i, it := range its1 {
 		k := it.skipNode.key
 		v := &its1[i].skipNode
-		if res, cnt := m.Delete(nil, nil, k, v); cnt != 1 {
+		res, cnt := m.Delete(nil, nil, k, v); 
+		res = res.Next()
+
+		if cnt != 1 {
 			t.Errorf("%v invalid multi delete1 (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
 		}
 	}
