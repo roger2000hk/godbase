@@ -61,7 +61,32 @@ func runBasicTests(t *testing.B, label string, m testAny, its []testItem) {
 	}
 
 	if l := m.Len(); l != int64(len(its)) {
-		t.Errorf("invalid Len() after Insert(): %v / %v", l, len(its))
+		t.Errorf("invalid len after insert: %v / %v", l, len(its))
+	}
+
+	for i, it := range its {
+		k := it.skipNode.key
+		v := &its[i]
+
+		res, ok := m.testFind(nil, k, nil)
+		if res != nil {
+			res = res.Next()
+		}
+
+		if !ok || (res != nil && (res.Key() != k || 
+			(res.Val() != v && res.Val() != &v.skipNode))) {
+			t.Errorf("%v invalid find(%v) res: %v", label, k, res.Key())		
+		}
+
+		res, ok = m.testFind(nil, k, v); 
+		if res != nil {
+			res = res.Next()
+		}
+		
+		if !ok || (res != nil && (res.Key() != k || 
+			(res.Val() != v && res.Val() != &v.skipNode))) {
+			t.Errorf("%v invalid find(%v) res: %v", label, k, res.Key())		
+		}
 	}
 
 	for i := 0; i < len(its) / 2; i++ {
@@ -69,12 +94,20 @@ func runBasicTests(t *testing.B, label string, m testAny, its []testItem) {
 
 		if res, cnt := m.testDelete(nil, nil, k, nil); 
 		cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
-			t.Errorf("%v invalid Delete (%v) res: %v", label, k, res.Key())
+			t.Errorf("%v invalid delete(%v) res: %v", label, k, res.Key())
 		}
 	}
 
 	for i, it := range its {
-		m.testInsert(nil, it.skipNode.key, &its[i], false)
+		k := it.skipNode.key
+		v := &its[i]
+
+		if res, ok := m.testInsert(nil, it.skipNode.key, v, false); 
+		(((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
+			(res != nil && (res.Key() != k || 
+			(res.Val() != v && res.Val() != v.skipNode))) {
+			t.Errorf("%v invalid insert(%v) res: %v", label, k, res)		
+		}
 	}
 
 	for _, it := range its {

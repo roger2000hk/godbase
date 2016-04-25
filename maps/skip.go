@@ -128,11 +128,11 @@ func (m *Skip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 		return n, false
 	}
 
-	for val != nil && n.next.key == key && n.val != val {
+	for val != nil && n.key == key && n.val != val {
 		n = n.next
 	}
-
-	return n, n.key == key && (val == nil || n.val == val)
+	
+	return n.prev, n.key == key && (val == nil || n.val == val)
 }
 
 func (m *Skip) FindNode(start Iter, key Cmp) (*SkipNode, bool) {

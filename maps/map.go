@@ -24,7 +24,8 @@ func (m Map) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 }
 
 func (m Map) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
-	panic("Map doesn't support iters")
+	v, ok := m[key]
+	return nil, ok && (val == nil || v == val)
 }
 
 func (m Map) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {

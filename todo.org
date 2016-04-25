@@ -1,6 +1,5 @@
-* implement Map.Find
-** return nil iter
-** add find to basic tests
+* correct find result from skip
+** commit basic find tests
 
 * add Hash / HashSlots
 ** one Hash imp
