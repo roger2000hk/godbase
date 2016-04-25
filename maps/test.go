@@ -1,13 +1,10 @@
 package maps
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"time"
 	"math/rand"
-	"os"
-	"runtime/pprof"
 	"unsafe"
 )
 
@@ -169,17 +166,4 @@ func (m Map) testInsert(start Iter, key Cmp, val interface{}, allowMulti bool) (
 func (m *Skip) testInsert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool) {
 	res, ok := m.Insert(start, key, val, allowMulti)
 	return res, ok
-}
-
-func RunTests() {
-	file, err := os.Create("test.prof")
-	if err != nil {
-		panic(err)
-	}
-
-	pprof.StartCPUProfile(bufio.NewWriter(file))
-	RunBasicTests()
-	RunMultiTests()
-	RunSortedTests()
-	pprof.StopCPUProfile()
 }

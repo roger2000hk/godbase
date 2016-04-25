@@ -2,13 +2,12 @@ package maps
 
 import (
 	//"fmt"
-	"log"
-	"time"
+	"testing"
 )
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
 
-func runConstructorTests() {
+func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
 	// it only supports enough of the api to run basic tests on top of 
 	// a native map.
@@ -33,63 +32,57 @@ func runConstructorTests() {
 	NewESkipHash(genHash, 10000)
 }
 
-func runBasicTests(label string, m testAny, its testItems) {
-	start := time.Now()
+const basicReps = 50000
+var basicIts = randItems(basicReps)
+var basicSkipAlloc = NewSkipAlloc(100)
+
+func runBasicTests(t *testing.B, label string, m testAny, its []testItem) {
 	for i, it := range its {
 		m.testInsert(nil, it.skipNode.key, &its[i], false)
 	}
-	PrintTime(start, "%v * %v.Insert1", len(its), label)
 
 	if l := m.Len(); l != int64(len(its)) {
-		log.Panicf("invalid Len() after Insert(): %v / %v", l, len(its))
+		t.Errorf("invalid Len() after Insert(): %v / %v", l, len(its))
 	}
 
-	start = time.Now()
 	for i := 0; i < len(its) / 2; i++ {
 		k := its[i].skipNode.key
 
 		if res, cnt := m.testDelete(nil, nil, k, nil); 
 		cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
-			log.Panicf("%v invalid Delete (%v) res: %v", label, k, res.Key())
+			t.Errorf("%v invalid Delete (%v) res: %v", label, k, res.Key())
 		}
 	}
-	PrintTime(start, "%v * %v.Delete1", len(its), label)
 
-	start = time.Now()
 	for i, it := range its {
 		m.testInsert(nil, it.skipNode.key, &its[i], false)
 	}
-	PrintTime(start, "%v * %v.Insert2", len(its), label)
 
-
-	start = time.Now()
 	for _, it := range its {
 		m.testDelete(nil, nil, it.skipNode.key, nil)
 	}
-	PrintTime(start, "%v * %v.Delete2", len(its), label)
 }
 
-func RunBasicTests() {
-	runConstructorTests()
+func BenchmarkBasicMap(t *testing.B) {
+	runBasicTests(t, "Map", NewMap(), basicIts) 
+}
 
-	its := randItems(10000)
+func BenchmarkBasicSkip(t *testing.B) {
+	runBasicTests(t, "Skip", NewSkip(nil, 14), basicIts) 
+}
 
-	mm := NewMap()
-	runBasicTests("Map", mm, its) 
+func BenchmarkBasicSkipSlab(t *testing.B) {
+	runBasicTests(t, "Skip/Slab", NewSkip(basicSkipAlloc, 14), basicIts) 
+}
 
-	a := NewSkipAlloc(55)
-	//ssm := NewSkip(a, 1)
-	//runBasicTests("List", ssm, its) 
+func BenchmarkBasicESkip(t *testing.B) {
+	runBasicTests(t, "ESkip", NewESkip(), basicIts) 
+}
 
-	sm := NewSkip(a, 14)
-	runBasicTests("Skip", sm, its) 
+func BenchmarkBasicSkipHash(t *testing.B) {
+	runBasicTests(t, "SkipHash", NewSkipHash(genHash, 80000, basicSkipAlloc, 1), basicIts) 
+}
 
-	esm := NewESkip()
-	runBasicTests("ESkip", esm, its) 
-
-	hm := NewSkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 80000, a, 1)
-	runBasicTests("SkipHash", hm, its)
-
-	ehm := NewESkipHash(func(k Cmp) uint64 { return uint64(k.(testKey)) }, 50000)
-	runBasicTests("ESkipHash", ehm, its)
+func BenchmarkBasicESkipHash(t *testing.B) {
+	runBasicTests(t, "ESkipHash", NewESkipHash(genHash, 50000), basicIts) 
 }

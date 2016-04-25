@@ -12,6 +12,9 @@ Once sorted maps were working properly, I had the crazy idea to put a hash on to
 ## status
 Basic functionality and testing in place; bells, whistles & polish are still on the stove.
 
+## benchmarks
+go test -bench=.*
+
 ## api
 More RISC/Lispy than your everyday set/map api. Providing an optimal api is part of implementing an optimal algorithm, and there's more low hanging fruit in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
 
