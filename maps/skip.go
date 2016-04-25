@@ -118,7 +118,7 @@ func (m *Skip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	}
 
 	m.len -= int64(cnt)
-	return n.prev, cnt
+	return n, cnt
 }
 
 func (m *Skip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {

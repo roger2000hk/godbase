@@ -94,7 +94,7 @@ func (m *ESkip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	}
 
 	m.len -= int64(cnt)
-	return n.prev[ESkipLevels-1], cnt
+	return n, cnt
 }
 
 func (m *ESkip) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {

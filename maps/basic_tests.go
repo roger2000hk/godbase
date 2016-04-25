@@ -46,10 +46,11 @@ func runBasicTests(label string, m testAny, its testItems) {
 
 	start = time.Now()
 	for i := 0; i < len(its) / 2; i++ {
-		//fmt.Printf("%v\n", m)
 		k := its[i].skipNode.key
-		if res, cnt := m.testDelete(nil, nil, k, nil); cnt != 1 {
-			log.Panicf("%v invalid Delete (%v) res: %v", label, its[i].skipNode.key, res)
+
+		if res, cnt := m.testDelete(nil, nil, k, nil); 
+		cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
+			log.Panicf("%v invalid Delete (%v) res: %v", label, k, res.Key())
 		}
 	}
 	PrintTime(start, "%v * %v.Delete1", len(its), label)
