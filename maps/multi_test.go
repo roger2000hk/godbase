@@ -11,11 +11,11 @@ var multiIts1 = sortedItems(multiReps)
 var multiIts2 = sortedItems(multiReps)
 var multiIts3 = sortedItems(multiReps)
 
-func runMultiTests(t *testing.B, label string, m testAny, its1, its2, its3 []testItem) {
+func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testItem) {
 	for i, it := range its1 {
-		m.testInsert(nil, it.skipNode.key, &its1[i], true)
-		m.testInsert(nil, it.skipNode.key, &its2[i], true)
-		m.testInsert(nil, it.skipNode.key, &its3[i], true)
+		m.Insert(nil, it.skipNode.key, &its1[i].skipNode, true)
+		m.Insert(nil, it.skipNode.key, &its2[i].skipNode, true)
+		m.Insert(nil, it.skipNode.key, &its3[i].skipNode, true)
 	}
 
 	if l := m.Len(); l != int64(len(its1) * 3) {
@@ -23,7 +23,9 @@ func runMultiTests(t *testing.B, label string, m testAny, its1, its2, its3 []tes
 	}
 
 	for i, it := range its1 {
-		if res, cnt := m.testDelete(nil, nil, it.skipNode.key, &its1[i]); cnt != 1 {
+		k := it.skipNode.key
+		v := &its1[i].skipNode
+		if res, cnt := m.Delete(nil, nil, k, v); cnt != 1 {
 			t.Errorf("%v invalid multi delete1 (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
 		}
 	}
@@ -33,22 +35,28 @@ func runMultiTests(t *testing.B, label string, m testAny, its1, its2, its3 []tes
 	}
 
 	for i, it := range its1 {
-		if res, ok := m.testFind(nil, it.skipNode.key, nil); !ok {
+		k := it.skipNode.key
+
+		if res, ok := m.Find(nil, k, nil); !ok {
 			t.Errorf("%v invalid find res0: %v", label, res)
 		}
-		if res, ok := m.testFind(nil, it.skipNode.key, &its1[i]); ok {
+
+		if res, ok := m.Find(nil, k, &its1[i].skipNode); ok {
 			t.Errorf("%v invalid find res1: %v", label, res)
 		} 
-		if res, ok := m.testFind(nil, it.skipNode.key, &its2[i]); !ok {
+
+		if res, ok := m.Find(nil, k, &its2[i].skipNode); !ok {
 			t.Errorf("%v invalid find res2: %v", label, res)
 		} 
-		if res, ok := m.testFind(nil, it.skipNode.key, &its3[i]); !ok {
+
+		if res, ok := m.Find(nil, k, &its3[i].skipNode); !ok {
 			t.Errorf("%v invalid find res3: %v", label, res)
 		} 
 	}
 
 	for _, it := range its1 {
-		if res, cnt := m.testDelete(nil, nil, it.skipNode.key, nil); cnt != 2 {
+		k := it.skipNode.key
+		if res, cnt := m.Delete(nil, nil, k, nil); cnt != 2 {
 			t.Errorf("%v invalid multi delete2 (%v) res: %v/%v", 
 				label, it.skipNode.key, res, cnt)
 		}
@@ -72,10 +80,11 @@ func BenchmarkMultiESkip(t *testing.B) {
 }
 
 func BenchmarkMultiSkipHash(t *testing.B) {
-	runMultiTests(t, "SkipHash", NewSkipHash(genHash, 80000, multiSkipAlloc, 1), 
+	runMultiTests(t, "SkipHash", NewHash(NewSkipSlots(80000, genHash, multiSkipAlloc, 1)),
 		multiIts1, multiIts2, multiIts3)
 }
 
 func BenchmarkMultiESkipHash(t *testing.B) {
-	runMultiTests(t, "ESkipHash", NewESkipHash(genHash, 50000), multiIts1, multiIts2, multiIts3)
+	runMultiTests(t, "ESkipHash", NewHash(NewESkipSlots(50000, genHash)), 
+		multiIts1, multiIts2, multiIts3)
 }

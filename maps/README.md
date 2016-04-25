@@ -26,10 +26,12 @@ I trust you'll find godbase more RISC/Lispy than your everyday set/map api. Prov
 ```go
 
 // All map keys are requred to support Cmp
-
 type Cmp interface {
 	Less(Cmp) bool
 }
+
+// All hash maps require a hash fn
+type HashFn func (Cmp) uint64
 
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. They are positioned before start
@@ -56,7 +58,6 @@ type Iter interface {
 }
 
 // Basic map ops supported by all implementations
-
 type Any interface {
 	// Cuts elems from start to end for which fn returns true into new set;
 	// start, end & fn are all optional. Circular cuts, with start/end on
@@ -107,7 +108,7 @@ func (k testKey) Less(other Cmp) bool {
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
 
-func TestConstructors() {
+func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
 	// it only supports enough of the api to run basic tests on top of 
 	// a native map.
@@ -125,11 +126,17 @@ func TestConstructors() {
 	// skip map with embedded nodes
 	NewESkip()
 
-	// 2 level hashed skip map with 1000 slots and slab allocated nodes
-	NewSkipHash(genHash, 1000, a, 2)
+	// 1000 hash slots backed by 2 level skip maps with slab allocated nodes
+	ss := NewSkipSlots(1000, genHash, a, 2)
 
-	// hashed skip map with 10000 slots and embedded nodes
-	NewESkipHash(genHash, 10000)
+	// hash map based on skip slots
+	NewHash(ss)
+
+	// 500 hash slots backed by an embedded skip map
+	ess := NewESkipSlots(500, genHash)
+
+	// hash map based on embedded skip slots
+	NewHash(ess)
 }
 
 ```

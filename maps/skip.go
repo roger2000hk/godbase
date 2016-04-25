@@ -10,6 +10,7 @@ import (
 type Skip struct {
 	alloc *SkipAlloc
 	bottom *SkipNode
+	isInit bool
 	len int64
 	top SkipNode
 }
@@ -196,6 +197,7 @@ func (m *Skip) FindNode(start Iter, key Cmp) (*SkipNode, bool) {
 }
 
 func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
+	m.isInit = true
 	m.alloc = alloc
 	m.top.Init(nil, nil, nil)
 	n := &m.top

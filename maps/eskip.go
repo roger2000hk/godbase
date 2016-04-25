@@ -8,6 +8,7 @@ import (
 const ESkipLevels = 14
 
 type ESkip struct {
+	isInit bool
 	len int64
 	root ESkipNode
 }
@@ -162,6 +163,7 @@ func (m *ESkip) FindNode(start Iter, key Cmp) (*ESkipNode, bool) {
 }
 
 func (m *ESkip) Init() *ESkip {
+	m.isInit = true
 	m.root.Init(nil)
 	return m
 }

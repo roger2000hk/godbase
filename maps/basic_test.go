@@ -44,20 +44,26 @@ func TestConstructors(t *testing.T) {
 	// skip map with embedded nodes
 	NewESkip()
 
-	// 2 level hashed skip map with 1000 slots and slab allocated nodes
-	NewSkipHash(genHash, 1000, a, 2)
+	// 1000 hash slots backed by 2 level skip maps with slab allocated nodes
+	ss := NewSkipSlots(1000, genHash, a, 2)
 
-	// hashed skip map with 10000 slots and embedded nodes
-	NewESkipHash(genHash, 10000)
+	// hash map based on skip slots
+	NewHash(ss)
+
+	// 500 hash slots backed by an embedded skip map
+	ess := NewESkipSlots(500, genHash)
+
+	// hash map based on embedded skip slots
+	NewHash(ess)
 }
 
 const basicReps = 50000
 var basicIts = randItems(basicReps)
 var basicSkipAlloc = NewSkipAlloc(100)
 
-func runBasicTests(t *testing.B, label string, m testAny, its []testItem) {
+func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	for i, it := range its {
-		m.testInsert(nil, it.skipNode.key, &its[i], false)
+		m.Insert(nil, it.skipNode.key, &its[i].skipNode, false)
 	}
 
 	if l := m.Len(); l != int64(len(its)) {
@@ -66,52 +72,49 @@ func runBasicTests(t *testing.B, label string, m testAny, its []testItem) {
 
 	for i, it := range its {
 		k := it.skipNode.key
-		v := &its[i]
+		v := &its[i].skipNode
 
-		res, ok := m.testFind(nil, k, nil)
+		res, ok := m.Find(nil, k, nil)
 		if res != nil {
 			res = res.Next()
 		}
 
-		if !ok || (res != nil && (res.Key() != k || 
-			(res.Val() != v && res.Val() != &v.skipNode))) {
-			t.Errorf("%v invalid find(%v) res: %v", label, k, res.Key())		
+		if !ok || (res != nil && (res.Key() != k || res.Val() != v)) {
+			t.Errorf("%v invalid find(%v) res: %v/%v/%v/%v", label, k, ok, res.Key() == k, res.Val().(*ESkipNode).key, v.key)
 		}
 
-		res, ok = m.testFind(nil, k, v); 
+		res, ok = m.Find(nil, k, v); 
 		if res != nil {
 			res = res.Next()
 		}
 		
-		if !ok || (res != nil && (res.Key() != k || 
-			(res.Val() != v && res.Val() != &v.skipNode))) {
-			t.Errorf("%v invalid find(%v) res: %v", label, k, res.Key())		
+		if !ok || (res != nil && (res.Key() != k || res.Val() != v)) {
+			t.Errorf("%v invalid find(%v) res: %v", label, k, res)		
 		}
 	}
 
 	for i := 0; i < len(its) / 2; i++ {
 		k := its[i].skipNode.key
 
-		if res, cnt := m.testDelete(nil, nil, k, nil); 
+		if res, cnt := m.Delete(nil, nil, k, nil); 
 		cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
-			t.Errorf("%v invalid delete(%v) res: %v", label, k, res.Key())
+			t.Errorf("%v invalid delete(%v) res: %v", label, k, res)
 		}
 	}
 
 	for i, it := range its {
 		k := it.skipNode.key
-		v := &its[i]
+		v := &its[i].skipNode
 
-		if res, ok := m.testInsert(nil, it.skipNode.key, v, false); 
+		if res, ok := m.Insert(nil, it.skipNode.key, v, false); 
 		(((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
-			(res != nil && (res.Key() != k || 
-			(res.Val() != v && res.Val() != v.skipNode))) {
+			(res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid insert(%v) res: %v", label, k, res)		
 		}
 	}
 
 	for _, it := range its {
-		m.testDelete(nil, nil, it.skipNode.key, nil)
+		m.Delete(nil, nil, it.skipNode.key, nil)
 	}
 }
 
@@ -132,9 +135,9 @@ func BenchmarkBasicESkip(t *testing.B) {
 }
 
 func BenchmarkBasicSkipHash(t *testing.B) {
-	runBasicTests(t, "SkipHash", NewSkipHash(genHash, 80000, basicSkipAlloc, 1), basicIts) 
+	runBasicTests(t, "SkipHash", NewHash(NewSkipSlots(80000, genHash, basicSkipAlloc, 1)), basicIts) 
 }
 
 func BenchmarkBasicESkipHash(t *testing.B) {
-	runBasicTests(t, "ESkipHash", NewESkipHash(genHash, 50000), basicIts) 
+	runBasicTests(t, "ESkipHash", NewHash(NewESkipSlots(50000, genHash)), basicIts) 
 }

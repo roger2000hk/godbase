@@ -1,10 +1,12 @@
 package maps
 
 // All map keys are requred to support Cmp
-
 type Cmp interface {
 	Less(Cmp) bool
 }
+
+// All hash maps require a hash fn
+type HashFn func (Cmp) uint64
 
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. They are positioned before start
@@ -31,7 +33,6 @@ type Iter interface {
 }
 
 // Basic map ops supported by all implementations
-
 type Any interface {
 	// Cuts elems from start to end for which fn returns true into new set;
 	// start, end & fn are all optional. Circular cuts, with start/end on

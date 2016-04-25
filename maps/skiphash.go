@@ -1,7 +1,6 @@
 package maps
 
 type SkipHashSlots []Skip
-type HashFn func (Cmp) uint64
 
 type SkipHash struct {
 	alloc *SkipAlloc
