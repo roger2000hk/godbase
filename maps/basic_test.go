@@ -46,7 +46,7 @@ func TestConstructors(t *testing.T) {
 	NewESkip()
 
 	// 1000 slots backed by a native array and generic slot allocator
-	// generic slots could be used in any of the following examples,
+	// could be used in any of the following examples,
 	// but specializing the slot type allows allocating all slots at once and
 	// accessing by value which makes a difference in some scenarios.
 	// the allocator receives the key as param which enables choosing
@@ -57,7 +57,7 @@ func TestConstructors(t *testing.T) {
 	NewHash(as)
 
 	// 1000 slots backed by a native map and generic slot allocator
-	// map slots could also be used in any of the following examples, since it too
+	// could also be used in any of the following examples, since it too
 	// uses a generic allocator to allocate slots on demand.
 	// what map slots bring to the table, is the ability to use any kind of
 	// value except slices as hash keys; which is useful when
