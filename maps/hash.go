@@ -1,13 +1,19 @@
 package maps
 
+// All hash maps require a hash fn
+type HashFn func (Cmp) uint64
+
+type Hash struct {
+	isInit bool
+	len int64
+	slots Slots
+}
+
 type Slots interface {	
 	Get(key Cmp, create bool) Any
 }
 
-type Hash struct {
-	len int64
-	slots Slots
-}
+type SlotsAlloc func () Slots
 
 func NewHash(slots Slots) *Hash {
 	return new(Hash).Init(slots)
@@ -29,6 +35,7 @@ func (m *Hash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 }
 
 func (m *Hash) Init(slots Slots) *Hash {
+	m.isInit = true
 	m.slots = slots
 	return m
 }
@@ -47,6 +54,66 @@ func (m *Hash) Len() int64 {
 	return m.len
 }
 
+type AnySlots struct {
+	fn HashFn
+	slotAlloc Alloc
+	slots []Any
+}
+
+func NewSlots(count int, fn HashFn, slotAlloc Alloc) *AnySlots {
+	ss := new(AnySlots)
+	ss.fn = fn
+	ss.slotAlloc = slotAlloc
+	ss.slots = make([]Any, count)
+	return ss
+}
+
+func (ss *AnySlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := ss.slots[i]
+
+	if s != nil {
+		return s
+	}
+
+	if create {
+		s = ss.slotAlloc()
+		ss.slots[i] = s
+		return s
+	}
+
+	return nil
+}
+
+type HashSlots struct {
+	fn HashFn
+	slotsAlloc SlotsAlloc
+	slots []Hash
+}
+
+func NewHashSlots(count int, fn HashFn, slotsAlloc SlotsAlloc) *HashSlots {
+	ss := new(HashSlots)
+	ss.fn = fn
+	ss.slotsAlloc = slotsAlloc
+	ss.slots = make([]Hash, count)
+	return ss
+}
+
+func (ss *HashSlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := &ss.slots[i]
+
+	if s.isInit {
+		return s
+	}
+
+	if create {
+		return s.Init(ss.slotsAlloc())
+	}
+
+	return nil
+}
+
 type SkipSlots struct {
 	alloc *SkipAlloc
 	fn HashFn
@@ -63,7 +130,7 @@ func NewSkipSlots(count int, fn HashFn, alloc *SkipAlloc, levels int) *SkipSlots
 	return ss
 }
 
-func (ss SkipSlots) Get(key Cmp, create bool) Any {
+func (ss *SkipSlots) Get(key Cmp, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -90,7 +157,7 @@ func NewESkipSlots(count int, fn HashFn) *ESkipSlots {
 	return ss
 }
 
-func (ss ESkipSlots) Get(key Cmp, create bool) Any {
+func (ss *ESkipSlots) Get(key Cmp, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 

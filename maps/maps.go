@@ -5,9 +5,6 @@ type Cmp interface {
 	Less(Cmp) bool
 }
 
-// All hash maps require a hash fn
-type HashFn func (Cmp) uint64
-
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. They are positioned before start
 // on return, so you need to call Next() to get the first elem.
@@ -41,11 +38,11 @@ type Any interface {
 
 	Cut(start, end Iter, fn TestFn) Any
 
-	// Deletes all elems after start matching key/val;
-	// start, end, key & val are all optional, nil deletes all elems. Specifying 
+	// Deletes elems from start to end, matching key/val;
+	// start, end, key & val are all optional, nil means all elems. Specifying 
 	// iters for hash maps only works within the same slot. Circular deletes,
 	// with start/end on opposite sides of root; are supported. Returns an iter to next 
-	// elem and the number of deleted elems.
+	// elem and number of deleted elems.
 
 	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
 
@@ -65,5 +62,8 @@ type Any interface {
 	// Returns the number of elems in map
 	Len() int64
 }
+
+// map allocator interface
+type Alloc func () Any
 
 type TestFn func (Cmp, interface{}) bool

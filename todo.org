@@ -1,19 +1,8 @@
-* rename HashSlots to Slots
-
-* add HashSlots
-** NewHashSlots()
-
 * add MapSlots
 ** NewMapSlots()
 ** store as map[interface{}]Any
 ** add MapHashFn func(Cmp) interface{}
-*** compare perf
-
-* add AnySlots
-** NewSlots()
-** store as []Any
-*** alloc lazily
-*** compare perf
+** compare perf
 
 * update readme & commit
 
@@ -43,7 +32,7 @@
 ** only ins if mapfn is nil or returns non nil key
 ** keep insert iter running all the way and call Insert
 
-* add Any.Clone(TestFn)
+* add Any.Clone(MapFn)
 ** panic for embedded imps
 ** only include elems for which test returns true
 
@@ -52,10 +41,8 @@
 ** copy RW/Ctx from old
 *** rename RW to Lock
 
-
 * add maps.RWLockHash
 ** keep one RW.lock per slot
-
 
 * add Any.CutAll(other Any, TestFn)
 ** return difference as new set

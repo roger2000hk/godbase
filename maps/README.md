@@ -66,11 +66,11 @@ type Any interface {
 
 	Cut(start, end Iter, fn TestFn) Any
 
-	// Deletes all elems after start matching key/val;
-	// start, end, key & val are all optional, nil deletes all elems. Specifying 
+	// Deletes elems from start to end, matching key/val;
+	// start, end, key & val are all optional, nil means all elems. Specifying 
 	// iters for hash maps only works within the same slot. Circular deletes,
 	// with start/end on opposite sides of root; are supported. Returns an iter to next 
-	// elem and the number of deleted elems.
+	// elem and number of deleted elems.
 
 	Delete(start, end Iter, key Cmp, val interface{}) (Iter, int)
 
