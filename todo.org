@@ -1,9 +1,3 @@
-* change Insert to return prev & adapt tests
-
-* add 'wrapping it up' to README with Suffix
-
-* post link to wrapping it up header
-
 * add locks package
 ** copy RW/Ctx from old
 *** rename RW to Lock

@@ -218,13 +218,13 @@ func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (It
 	
 	if ok && !allowMulti {
 		n.val = val
-		return n, false
+		return n.prev, false
 	}
 	
 	nn := m.AllocNode(key, val, n) 
 	nn.down = nn
 	m.len++
-	return nn, true
+	return nn.prev, true
 }
 
 func (m *Skip) Len() int64 {

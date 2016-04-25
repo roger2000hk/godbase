@@ -130,8 +130,12 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 		k := it.skipNode.key
 		v := &its[i].skipNode
 
-		if res, ok := m.Insert(nil, it.skipNode.key, v, false); 
-		(((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
+		res, ok := m.Insert(nil, it.skipNode.key, v, false)
+		if res != nil {
+			res = res.Next()
+		}
+
+		if (((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
 			(res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid insert(%v) res: %v", label, k, res)		
 		}

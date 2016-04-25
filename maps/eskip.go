@@ -168,11 +168,11 @@ func (m *ESkip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (I
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
-		return n, false
+		return n.prev[ESkipLevels-1], false
 	}
 	n.InsertAfter(val.(*ESkipNode).Init(key), ESkipLevels-1)
  	m.len++
-	return val.(*ESkipNode), true
+	return val.(*ESkipNode).prev[ESkipLevels-1], true
 }
 
 func (m *ESkip) Len() int64 {
