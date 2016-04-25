@@ -14,8 +14,6 @@
 ** return nil iter
 ** add find to basic tests
 
-* add embedded example to readme
-
 * ---
 
 * add rec support
