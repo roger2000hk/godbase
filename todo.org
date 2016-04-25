@@ -14,6 +14,8 @@
 ** return nil iter
 ** add find to basic tests
 
+* tune tests
+
 * ---
 
 * add rec support
@@ -34,6 +36,9 @@
 ** copy RW/Ctx from old
 *** rename RW to Lock
 
+
+* add maps.RWLockHash
+** keep one RW.lock per slot
 
 * add Any.CutAll(other Any, TestFn)
 ** return difference as new set
