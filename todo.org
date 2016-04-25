@@ -1,11 +1,9 @@
-* add maps.Suffix wrap
-** adapt insert
-** adapt find
-** add tests
-*** compare to suffix array
-** commit
+* add suffix comparison to suffix array from stack overflow
 
-* add 'wrapping it up' to README
+* add Wrap.Init
+** use in Suffix
+
+* add 'wrapping it up' to README with Suffix
 
 * add locks package
 ** copy RW/Ctx from old
