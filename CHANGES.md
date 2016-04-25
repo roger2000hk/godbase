@@ -5,4 +5,4 @@
 Added an Iter interface; and Any.Cut()/Find() ops. Added start/end params and adapted Any.Insert/Delete to use Iter.
 
 ### 2016-04-25 consolidated hash implementations
-Consolidated hash implementations by extracting slot logic into a Slots interface with separate implementations for Any, ESkip, Hash, Map & Skip.
+Consolidated hash implementations by extracting slot logic into a Slots interface implemented as AnySlots, ESkipSlots, HashSlots, MapSlots & SkipSlots.

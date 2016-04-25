@@ -1,5 +1,3 @@
-* add AnySlots to multi tests
-
 * add MapSlots
 ** NewMapSlots()
 ** store as map[interface{}]Any

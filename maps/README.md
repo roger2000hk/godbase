@@ -111,11 +111,13 @@ func (k testKey) Less(other Cmp) bool {
 }
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+func genMapHash(k Cmp) interface{} { return k }
 
 func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
 	// it only supports enough of the api to run basic tests on top of 
 	// a native map.
+	
 	NewMap()
 	
 	// 10 level skip map with separately allocated nodes
@@ -130,17 +132,38 @@ func TestConstructors(t *testing.T) {
 	// skip map with embedded nodes
 	NewESkip()
 
-	// 1000 hash slots backed by 2 level skip maps with slab allocated nodes
-	ss := NewSkipSlots(1000, genHash, a, 2)
+	// 1000 slots backed by a native array and generic slot allocator
+	// generic slots could be used in any of the following examples,
+	// but specializing the slot type allows allocating all slots at once and
+	// accessing by value which makes a difference in some scenarios.
+	// the allocator receives the key as param which enables choosing
+	// differend kinds of slot chains for different keys.
 
-	// hash map based on skip slots
+	skipAlloc := func (_ Cmp) Any { return NewSkip(nil, 2) }
+	as := NewSlots(1000, genHash, skipAlloc)
+	NewHash(as)
+
+	// 1000 slots backed by a native map and generic slot allocator
+	// map slots could also be used in any of the following examples, since it too
+	// uses a generic allocator to allocate slots on demand.
+	// what map slots bring to the table, is the ability to use any kind of
+	// value except slices as hash keys; which is useful when
+	// mapping your keys to an integer is problematic.
+
+	ms := NewMapSlots(1000, genMapHash, skipAlloc)
+	NewHash(ms)
+
+	// 1000 skip slots backed by 2 level skip maps with slab allocated nodes
+	ss := NewSkipSlots(1000, genHash, a, 2)
 	NewHash(ss)
 
-	// 500 hash slots backed by embedded skip maps
-	ess := NewESkipSlots(500, genHash)
-
-	// hash map based on embedded skip slots
+	// 1000 hash slots backed by embedded skip maps
+	ess := NewESkipSlots(1000, genHash)
 	NewHash(ess)
+
+	// 1000 hash slots backed by hash maps with 100 embedded skip slots
+	hs := NewHashSlots(1000, genHash, func (_ Cmp) Slots { return NewESkipSlots(100, genHash) })
+	NewHash(hs)
 }
 
 ```

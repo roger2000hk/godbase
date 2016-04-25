@@ -15,6 +15,12 @@ type ESkipSlots struct {
 	slots []ESkip
 }
 
+type MapSlots struct {
+	fn MapHashFn
+	slotAlloc SlotAlloc
+	slots map[interface{}]Any
+}
+
 type Hash struct {
 	isInit bool
 	len int64
@@ -35,6 +41,7 @@ type SkipSlots struct {
 }
 
 type HashFn func (Cmp) uint64
+type MapHashFn func (Cmp) interface{}
 type SlotAlloc func (key Cmp) Any
 type SlotsAlloc func (key Cmp) Slots
 
@@ -54,6 +61,14 @@ func NewHashSlots(count int, fn HashFn, slotsAlloc SlotsAlloc) *HashSlots {
 	ss.fn = fn
 	ss.slotsAlloc = slotsAlloc
 	ss.slots = make([]Hash, count)
+	return ss
+}
+
+func NewMapSlots(count int, fn MapHashFn, slotAlloc SlotAlloc) *MapSlots {
+	ss := new(MapSlots)
+	ss.fn = fn
+	ss.slotAlloc = slotAlloc
+	ss.slots = make(map[interface{}]Any, count)
 	return ss
 }
 
@@ -131,6 +146,23 @@ func (ss *HashSlots) Get(key Cmp, create bool) Any {
 
 	if create {
 		return s.Init(ss.slotsAlloc(key))
+	}
+
+	return nil
+}
+
+func (ss *MapSlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key)
+	s, ok := ss.slots[i]
+
+	if ok {
+		return s
+	}
+
+	if create {
+		s = ss.slotAlloc(key)
+		ss.slots[i] = s
+		return s
 	}
 
 	return nil

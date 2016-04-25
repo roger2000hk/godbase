@@ -48,6 +48,8 @@ func (k testKey) Less(other Cmp) bool {
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
 
+func genMapHash(k Cmp) interface{} { return k }
+
 func toTestItem(node *ESkipNode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
 }

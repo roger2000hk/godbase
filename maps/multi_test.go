@@ -98,3 +98,13 @@ func BenchmarkMultiESkipAnyHash(t *testing.B) {
 	runMultiTests(t, "ESkipAnyHash", NewHash(NewSlots(testESlots, genHash, allocESkip)), 
 		multiIts1, multiIts2, multiIts3) 
 }
+
+func BenchmarkMultiSkipMapHash(t *testing.B) {
+	runMultiTests(t, "SkipMapHash", NewHash(NewMapSlots(testSlots, genMapHash, allocSkip)), 
+		multiIts1, multiIts2, multiIts3) 
+}
+
+func BenchmarkMultiESkipMapHash(t *testing.B) {
+	runMultiTests(t, "ESkipMapHash", NewHash(NewMapSlots(testESlots, genMapHash, allocESkip)), 
+		multiIts1, multiIts2, multiIts3)
+}
