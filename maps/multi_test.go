@@ -5,11 +5,9 @@ import (
 	"testing"
 )
 
-const multiReps = 20000
-var multiSkipAlloc = NewSkipAlloc(100)
-var multiIts1 = sortedItems(multiReps)
-var multiIts2 = sortedItems(multiReps)
-var multiIts3 = sortedItems(multiReps)
+var multiIts1 = sortedItems(testReps)
+var multiIts2 = sortedItems(testReps)
+var multiIts3 = sortedItems(testReps)
 
 func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testItem) {
 	for i, it := range its1 {
@@ -68,11 +66,12 @@ func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testIte
 }
 
 func BenchmarkMultiSkip(t *testing.B) {
-	runMultiTests(t, "Skip", NewSkip(nil, 14), multiIts1, multiIts2, multiIts3) 
+	runMultiTests(t, "Skip", NewSkip(nil, testLevels), multiIts1, multiIts2, multiIts3) 
 }
 
 func BenchmarkMultiSkipSlab(t *testing.B) {
-	runMultiTests(t, "Skip/Slab", NewSkip(multiSkipAlloc, 14), multiIts1, multiIts2, multiIts3) 
+	runMultiTests(t, "Skip/Slab", NewSkip(testSkipAlloc, testLevels), 
+		multiIts1, multiIts2, multiIts3) 
 }
 
 func BenchmarkMultiESkip(t *testing.B) {
@@ -80,11 +79,22 @@ func BenchmarkMultiESkip(t *testing.B) {
 }
 
 func BenchmarkMultiSkipHash(t *testing.B) {
-	runMultiTests(t, "SkipHash", NewHash(NewSkipSlots(80000, genHash, multiSkipAlloc, 1)),
+	runMultiTests(t, "SkipHash", 
+		NewHash(NewSkipSlots(testSlots, genHash, testSkipAlloc, testHashLevels)),
 		multiIts1, multiIts2, multiIts3)
 }
 
 func BenchmarkMultiESkipHash(t *testing.B) {
-	runMultiTests(t, "ESkipHash", NewHash(NewESkipSlots(50000, genHash)), 
+	runMultiTests(t, "ESkipHash", NewHash(NewESkipSlots(testESlots, genHash)), 
 		multiIts1, multiIts2, multiIts3)
+}
+
+func BenchmarkMultiSkipAnyHash(t *testing.B) {
+	runMultiTests(t, "SkipAnyHash", NewHash(NewSlots(testSlots, genHash, allocSkip)), 
+		multiIts1, multiIts2, multiIts3) 
+}
+
+func BenchmarkMultiESkipAnyHash(t *testing.B) {
+	runMultiTests(t, "ESkipAnyHash", NewHash(NewSlots(testESlots, genHash, allocESkip)), 
+		multiIts1, multiIts2, multiIts3) 
 }

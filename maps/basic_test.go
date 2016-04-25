@@ -67,9 +67,7 @@ func TestConstructors(t *testing.T) {
 	NewHash(hs)
 }
 
-const basicReps = 50000
-var basicIts = randItems(basicReps)
-var basicSkipAlloc = NewSkipAlloc(100)
+var basicIts = randItems(testReps)
 
 func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	for i, it := range its {
@@ -133,11 +131,11 @@ func BenchmarkBasicMap(t *testing.B) {
 }
 
 func BenchmarkBasicSkip(t *testing.B) {
-	runBasicTests(t, "Skip", NewSkip(nil, 14), basicIts) 
+	runBasicTests(t, "Skip", NewSkip(nil, testLevels), basicIts) 
 }
 
 func BenchmarkBasicSkipSlab(t *testing.B) {
-	runBasicTests(t, "Skip/Slab", NewSkip(basicSkipAlloc, 14), basicIts) 
+	runBasicTests(t, "Skip/Slab", NewSkip(testSkipAlloc, testLevels), basicIts) 
 }
 
 func BenchmarkBasicESkip(t *testing.B) {
@@ -145,21 +143,21 @@ func BenchmarkBasicESkip(t *testing.B) {
 }
 
 func BenchmarkBasicSkipHash(t *testing.B) {
-	runBasicTests(t, "SkipHash", NewHash(NewSkipSlots(80000, genHash, basicSkipAlloc, 1)), basicIts) 
+	runBasicTests(t, "SkipHash", 
+		NewHash(NewSkipSlots(testSlots, genHash, testSkipAlloc, testHashLevels)), 
+		basicIts) 
 }
 
-func allocSkip(_ Cmp) Any {
-	return NewSkip(basicSkipAlloc, 1)
+func BenchmarkBasicESkipHash(t *testing.B) {
+	runBasicTests(t, "ESkipHash", NewHash(NewESkipSlots(testESlots, genHash)), basicIts) 
 }
 
 func BenchmarkBasicSkipAnyHash(t *testing.B) {
-	runBasicTests(t, "SkipAnyHash", NewHash(NewSlots(80000, genHash, allocSkip)), basicIts) 
-}
-
-func allocESkip(_ Cmp) Any {
-	return NewESkip()
+	runBasicTests(t, "SkipAnyHash", NewHash(NewSlots(testSlots, genHash, allocSkip)), 
+		basicIts) 
 }
 
 func BenchmarkBasicESkipAnyHash(t *testing.B) {
-	runBasicTests(t, "ESkipAnyHash", NewHash(NewSlots(50000, genHash, allocESkip)), basicIts) 
+	runBasicTests(t, "ESkipAnyHash", NewHash(NewSlots(testESlots, genHash, allocESkip)), 
+		basicIts) 
 }

@@ -5,6 +5,18 @@ import (
 	"unsafe"
 )
 
+const (
+	testESlots = 5000
+	testHashLevels = 3
+	testLevels = 14
+	testReps = 50000
+	testSlabSize = 100
+	testSlots = 10000
+)
+
+var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)
+var testSkipAlloc = NewSkipAlloc(testSlabSize)
+
 type testAny interface {
 	Any
 	testDelete(start, end Iter, key Cmp, val interface{}) (Iter, int)
@@ -12,6 +24,11 @@ type testAny interface {
 	testInsert(start Iter, key Cmp, val interface{}, allowMulti bool) (Iter, bool)
 }
 
+type testItem struct {
+	skipNode ESkipNode
+}
+
+type testItems []testItem
 type testKey int
 
 func (k testKey) Less(other Cmp) bool {
@@ -20,17 +37,9 @@ func (k testKey) Less(other Cmp) bool {
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
 
-type testItem struct {
-	skipNode ESkipNode
-}
-
-var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)
-
 func toTestItem(node *ESkipNode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
 }
-
-type testItems []testItem
 
 func sortedItems(n int) testItems {
 	res := make(testItems, n)
@@ -61,4 +70,12 @@ func randItems(n int) testItems {
 	}
 
 	return res
+}
+
+func allocESkip(_ Cmp) Any {
+	return NewESkip()
+}
+
+func allocSkip(_ Cmp) Any {
+	return NewSkip(testSkipAlloc, testHashLevels)
 }

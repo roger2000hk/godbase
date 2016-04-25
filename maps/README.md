@@ -13,7 +13,11 @@ Once sorted maps were working properly, I had the crazy idea to put a hash on to
 Basic functionality and testing in place; bells, whistles & polish are still on the stove.
 
 ## benchmarks
-go test -bench=.*
+Several parameters are available for tuning the tests, they are defined in test.go
+
+```
+	go test -bench=.*
+```
 
 ## license
 NOP
