@@ -7,8 +7,8 @@ type Cmp interface {
 }
 
 // Iters are circular and cheap, since they are nothing but a common 
-// interface on top of actual nodes. Iters are positioned before start
-// on return, call Next() to get first elem.
+// interface on top of actual nodes. They are positioned before start
+// on return, so you need to call Next() to get the first elem.
 
 type Iter interface {
 	// Returns true if next elem is not root
