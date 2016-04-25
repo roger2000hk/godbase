@@ -5,8 +5,6 @@
 ** change to take MapFn instead of TestFn
 ** add tests
 
-* tune tests
-
 * ---
 
 * add rec support

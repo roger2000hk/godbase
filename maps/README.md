@@ -148,7 +148,9 @@ func TestConstructors(t *testing.T) {
 	// uses a generic allocator to allocate slots on demand.
 	// what map slots bring to the table, is the ability to use any kind of
 	// value except slices as hash keys; which is useful when
-	// mapping your keys to an integer is problematic.
+	// mapping your keys to an integer is problematic. On the other hand they
+	// share the same limitations as native maps, no slice keys and relatively
+	// expensive to create.
 
 	ms := NewMapSlots(1000, genMapHash, skipAlloc)
 	NewHash(ms)
