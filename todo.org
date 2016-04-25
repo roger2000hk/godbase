@@ -1,11 +1,3 @@
-* update readme
-** add Cmp, Iter & Any apis
-** list all constructors
-
-* update CHANGES
-
-* commit & post update
-
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
