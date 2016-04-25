@@ -1,6 +1,21 @@
-* add map slot types
-** add constructors NewSkipMap & NewESkipMap with maps
+* rename HashSlots to Slots
+
+* add HashSlots
+** NewHashSlots()
+
+* add MapSlots
+** NewMapSlots()
+** store as map[interface{}]Any
+** add MapHashFn func(Cmp) interface{}
 *** compare perf
+
+* add AnySlots
+** NewSlots()
+** store as []Any
+*** alloc lazily
+*** compare perf
+
+* update readme & commit
 
 * add maps.Sorted with First/Last() Iter
 ** extend Any
