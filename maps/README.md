@@ -135,7 +135,7 @@ func TestConstructors() {
 ```
 
 ### embedded nodes
-I picked up the idea of embedding nodes from the Linux kernel, but I'm sure the technique is at least as old as the C language. It's a nice tool to reduce memory allocation which bends the rules enough for the previously undoable to become possible. If you don't mind keeping a reference per collection in your type, or sprinkling a bit of unsafe magic on top; this might be for you.
+I picked up the idea of embedding nodes from the Linux kernel, but I'm sure the idea is at least as old as the C language. It's a nice tool to reduce memory allocation which bends the rules enough for the previously undoable to become possible. If you don't mind keeping a reference per collection in your type, or sprinkling a bit of unsafe magic on top; this might be for you. lists.EDouble contains a double-linked list implementation based on the same idea.
 
 ```go
 
