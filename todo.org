@@ -20,7 +20,10 @@
 *** runs within slot for hash types
 
 
-* reorg rest of code like hash
+* add basic trie
+** package tries
+** use embedded skip map for child nodes
+** index using []rune
 
 * add Any.InsertRange(start, end, MapFn) int
 ** only ins if mapfn is nil or returns non nil key
@@ -61,3 +64,5 @@
 ** protect maps with Lock 
 * add hash resizing
 * add skip resizing
+
+* reorg rest of code like hash

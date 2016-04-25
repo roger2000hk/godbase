@@ -7,22 +7,22 @@ import (
 
 const (
 	// Nr of slots for embedded hash maps
-	testESlots = 5000
+	testESlots = 20000
 
 	// Nr of levels for hashed skip maps
-	testHashLevels = 3
+	testHashLevels = 1
 
 	// Nr of levels for non-hashed skip maps
 	testLevels = 14
 
 	// Nr of elems / reps
-	testReps = 50000
+	testReps = 20000
 
 	// Size of skip node slabs
-	testSlabSize = 100
+	testSlabSize = 500
 
 	// Nr of slots for non-embedded hash maps
-	testSlots = 10000
+	testSlots = 30000
 )
 
 var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)

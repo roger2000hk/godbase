@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-const ESkipLevels = 14
+const ESkipLevels = 10
 
 type ESkip struct {
 	isInit bool
@@ -80,10 +80,6 @@ func (m *ESkip) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 	cnt := 0
 		
 	for n != end && (key == nil || n == &m.root || n.key == key) {
-		if n == start {
-			panic(fmt.Sprintf("invalid end: %v", end))
-		}
-
 		next := n.next[ESkipLevels-1]
 		
 		if n != &m.root && (val == nil || n == val) {
