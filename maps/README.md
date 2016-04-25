@@ -132,7 +132,7 @@ func TestConstructors(t *testing.T) {
 	// hash map based on skip slots
 	NewHash(ss)
 
-	// 500 hash slots backed by an embedded skip map
+	// 500 hash slots backed by embedded skip maps
 	ess := NewESkipSlots(500, genHash)
 
 	// hash map based on embedded skip slots
