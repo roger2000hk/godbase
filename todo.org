@@ -1,9 +1,8 @@
-* add suffix comparison to suffix array from stack overflow
-
-* add Wrap.Init
-** use in Suffix
+* change Insert to return prev & adapt tests
 
 * add 'wrapping it up' to README with Suffix
+
+* post link to wrapping it up header
 
 * add locks package
 ** copy RW/Ctx from old

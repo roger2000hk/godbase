@@ -1,13 +1,20 @@
 package maps
 
+import (
+	//"fmt"
+)
+
 type Suffix struct {
 	Wrap
 }
 
 func NewSuffix(m Any) *Suffix {
-	return &Suffix{Wrap: Wrap{wrapped: m}}
+	res := new(Suffix)
+	res.Init(m)
+	return res
 }
 
+// override to delete all suffixes
 func (m *Suffix) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	sk := key.(StringKey)
 	cnt := 0
@@ -22,6 +29,7 @@ func (m *Suffix) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	return res, cnt
 }
 
+// override to insert all suffixes
 func (m *Suffix) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	sk := key.(StringKey)
 

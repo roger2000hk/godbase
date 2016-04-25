@@ -16,6 +16,11 @@ func (m *Wrap) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return m.wrapped.Find(start, key, val)
 }
 
+func (m *Wrap) Init(w Any) *Wrap {
+	m.wrapped = w
+	return m
+}
+
 func (m *Wrap) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	return m.wrapped.Insert(start, key, val, allowMulti)
 }
