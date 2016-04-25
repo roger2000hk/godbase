@@ -21,6 +21,8 @@ func (k testKey) Less(other Cmp) bool {
 	return k < other.(testKey)
 }
 
+func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+
 type testItem struct {
 	skipNode ESkipNode
 }

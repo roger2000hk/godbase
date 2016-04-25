@@ -15,8 +15,11 @@ Basic functionality and testing in place; bells, whistles & polish are still on 
 ## benchmarks
 go test -bench=.*
 
-## api
-More RISC/Lispy than your everyday set/map api. Providing an optimal api is part of implementing an optimal algorithm, and there's more low hanging fruit in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
+## license
+NOP
+
+## code
+I trust you'll find godbase more RISC/Lispy than your everyday set/map api. Providing an optimal api is part of implementing an optimal algorithm, and there's more low hanging fruit in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
 
 ### interfaces
 
@@ -29,7 +32,8 @@ type Cmp interface {
 }
 
 // Iters are circular and cheap, since they are nothing but a common 
-// interface on top of actual nodes
+// interface on top of actual nodes. Iters are positioned before start
+// on return, call Next() to get first elem.
 
 type Iter interface {
 	// Returns true if next elem is not root
@@ -103,7 +107,7 @@ func (k testKey) Less(other Cmp) bool {
 
 func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
 
-func runConstructorTests() {
+func TestConstructors() {
 	// Map is mostly meant as a reference for performance comparisons,
 	// it only supports enough of the api to run basic tests on top of 
 	// a native map.
@@ -126,6 +130,52 @@ func runConstructorTests() {
 
 	// hashed skip map with 10000 slots and embedded nodes
 	NewESkipHash(genHash, 10000)
+}
+
+```
+
+### embedded nodes
+I picked up the idea of embedding nodes from the Linux kernel, but I'm sure the technique is at least as old as the C language. It's a nice tool to reduce memory allocation which bends the rules enough for the previously undoable to become possible. If you don't mind keeping a reference per collection in your type, or sprinkling a bit of unsafe magic on top; this might be for you.
+
+```go
+
+// pretend this is your value type
+type testItem struct {
+	skipNode ESkipNode
+
+	// additional fields...
+}
+
+// calculate offset of node within struct
+var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)
+
+// helper to get pointer to item from node
+func toTestItem(node *ESkipNode) *testItem {
+	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
+}
+
+func TestEmbedded(t *testing.T) {
+	m := NewESkip()
+	
+	const n = 100
+	its := make([]testItem, n)
+
+	for i := 0; i < n; i++ {
+		k := testKey(i)
+
+		// the map only deals with nodes,
+		// translation to/from values is left to client code
+		m.Insert(nil, k, &its[i].skipNode, false)
+
+		res, ok := m.Find(nil, k, nil)
+		res = res.Next()
+
+		if !ok || res.Key() != k || res.Val().(*ESkipNode) != &its[i].skipNode {
+			t.Errorf("invalid iter: %v/%v/%v", i, res.Key(), res.Val())
+		} else if toTestItem(res.Val().(*ESkipNode)) != &its[i] {
+			t.Errorf("invalid value: %v", i)
+		}
+	}
 }
 
 ```

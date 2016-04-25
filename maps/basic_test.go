@@ -5,7 +5,26 @@ import (
 	"testing"
 )
 
-func genHash(k Cmp) uint64 { return uint64(k.(testKey)) }
+func TestEmbedded(t *testing.T) {
+	m := NewESkip()
+	
+	const n = 100
+	its := make([]testItem, n)
+
+	for i := 0; i < n; i++ {
+		k := testKey(i)
+		m.Insert(nil, k, &its[i].skipNode, false)
+
+		res, ok := m.Find(nil, k, nil)
+		res = res.Next()
+
+		if !ok || res.Key() != k || res.Val().(*ESkipNode) != &its[i].skipNode {
+			t.Errorf("invalid find res: %v/%v/%v", i, res.Key(), res.Val())
+		} else if toTestItem(res.Val().(*ESkipNode)) != &its[i] {
+			t.Errorf("invalid find res: %v/%v", res.Key(), res.Val())
+		}
+	}
+}
 
 func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
