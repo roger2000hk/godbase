@@ -1,16 +1,13 @@
+* rename Cut to CutRange
+** change to take MapFn instead of TestFn
+** add tests
+
 * add locks package
 ** copy RW/Ctx from old
 *** rename RW to Lock
 
 * add locks.RWHashMap
 ** keep one locks.RW per slot
-
-* add maps.Sorted with First/Last() Iter
-** extend Any
-
-* rename Cut to CutRange
-** change to take MapFn instead of TestFn
-** add tests
 
 * ---
 
