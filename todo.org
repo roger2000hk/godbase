@@ -1,3 +1,7 @@
+* implement Map.Find
+** return nil iter
+** add find to basic tests
+
 * add Hash / HashSlots
 ** one Hash imp
 ** add HashSlots type for each chain type
@@ -8,11 +12,9 @@
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
 
-* add Cut tests
-
-* implement Map.Find
-** return nil iter
-** add find to basic tests
+* rename Cut to CutRange
+** change to take MapFn instead of TestFn
+** add tests
 
 * tune tests
 
@@ -28,9 +30,15 @@
 ** provide range ops
 *** runs within slot for hash types
 
+
+* add Any.InsertRange(start, end, MapFn) int
+** only ins if mapfn is nil or returns non nil key
+** keep insert iter running all the way and call Insert
+
 * add Any.Clone(TestFn)
 ** panic for embedded imps
 ** only include elems for which test returns true
+
 
 * add locks package
 ** copy RW/Ctx from old
@@ -40,16 +48,11 @@
 * add maps.RWLockHash
 ** keep one RW.lock per slot
 
+
 * add Any.CutAll(other Any, TestFn)
 ** return difference as new set
 ** only move elems for which test returns true
 ** operate within slot for hash maps
-
-* add locks.Locker
-** keep HashMaps of RecId => Lock
-*** one for readers, one for writers
-** protect maps with Lock 
-
 
 * add Any.Update(start, end, update UpdateFn) int
 ** type UpdateFn func(k, v) (v, bool)
@@ -63,3 +66,7 @@
 * copy maps to sets package
 ** no multi capability
 ** compare perf
+* add locks.Locker
+** keep HashMaps of RecId => Lock
+*** one for readers, one for writers
+** protect maps with Lock 
