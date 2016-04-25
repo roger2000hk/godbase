@@ -1,15 +1,15 @@
 package maps
 
-type HashSlots interface {	
+type Slots interface {	
 	Get(key Cmp, create bool) Any
 }
 
 type Hash struct {
 	len int64
-	slots HashSlots
+	slots Slots
 }
 
-func NewHash(slots HashSlots) *Hash {
+func NewHash(slots Slots) *Hash {
 	return new(Hash).Init(slots)
 }
 
@@ -28,7 +28,7 @@ func (m *Hash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 	return res, ok
 }
 
-func (m *Hash) Init(slots HashSlots) *Hash {
+func (m *Hash) Init(slots Slots) *Hash {
 	m.slots = slots
 	return m
 }
