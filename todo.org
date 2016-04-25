@@ -4,7 +4,7 @@
 ** add MapHashFn func(Cmp) interface{}
 ** compare perf
 
-* update readme & commit
+* update readme constructors & commit
 
 * add maps.Sorted with First/Last() Iter
 ** extend Any
@@ -27,6 +27,8 @@
 ** provide range ops
 *** runs within slot for hash types
 
+
+* reorg rest of code like hash
 
 * add Any.InsertRange(start, end, MapFn) int
 ** only ins if mapfn is nil or returns non nil key

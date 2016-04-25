@@ -1,7 +1,19 @@
 package maps
 
-// All hash maps require a hash fn
-type HashFn func (Cmp) uint64
+type Slots interface {	
+	Get(key Cmp, create bool) Any
+}
+
+type AnySlots struct {
+	fn HashFn
+	slotAlloc SlotAlloc
+	slots []Any
+}
+
+type ESkipSlots struct {
+	fn HashFn
+	slots []ESkip
+}
 
 type Hash struct {
 	isInit bool
@@ -9,14 +21,57 @@ type Hash struct {
 	slots Slots
 }
 
-type Slots interface {	
-	Get(key Cmp, create bool) Any
+type HashSlots struct {
+	fn HashFn
+	slotsAlloc SlotsAlloc
+	slots []Hash
 }
 
-type SlotsAlloc func () Slots
+type SkipSlots struct {
+	alloc *SkipAlloc
+	fn HashFn
+	levels int
+	slots []Skip
+}
+
+type HashFn func (Cmp) uint64
+type SlotAlloc func (key Cmp) Any
+type SlotsAlloc func (key Cmp) Slots
+
+func NewESkipSlots(count int, fn HashFn) *ESkipSlots {
+	ss := new(ESkipSlots)
+	ss.fn = fn
+	ss.slots = make([]ESkip, count)
+	return ss
+}
 
 func NewHash(slots Slots) *Hash {
 	return new(Hash).Init(slots)
+}
+
+func NewHashSlots(count int, fn HashFn, slotsAlloc SlotsAlloc) *HashSlots {
+	ss := new(HashSlots)
+	ss.fn = fn
+	ss.slotsAlloc = slotsAlloc
+	ss.slots = make([]Hash, count)
+	return ss
+}
+
+func NewSkipSlots(count int, fn HashFn, alloc *SkipAlloc, levels int) *SkipSlots {
+	ss := new(SkipSlots)
+	ss.alloc = alloc
+	ss.fn = fn
+	ss.levels = levels
+	ss.slots = make([]Skip, count)
+	return ss
+}
+
+func NewSlots(count int, fn HashFn, slotAlloc SlotAlloc) *AnySlots {
+	ss := new(AnySlots)
+	ss.fn = fn
+	ss.slotAlloc = slotAlloc
+	ss.slots = make([]Any, count)
+	return ss
 }
 
 func (m *Hash) Cut(start, end Iter, fn TestFn) Any {
@@ -32,6 +87,68 @@ func (m *Hash) Delete(start, end Iter, key Cmp, val interface{}) (Iter, int) {
 func (m *Hash) Find(start Iter, key Cmp, val interface{}) (Iter, bool) {
 	res, ok := m.slots.Get(key, true).Find(start, key, val)
 	return res, ok
+}
+
+func (ss *AnySlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := ss.slots[i]
+
+	if s != nil {
+		return s
+	}
+
+	if create {
+		s = ss.slotAlloc(key)
+		ss.slots[i] = s
+		return s
+	}
+
+	return nil
+}
+
+func (ss *ESkipSlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := &ss.slots[i]
+
+	if s.isInit {
+		return s
+	}
+
+	if create {
+		return s.Init()
+	}
+
+	return nil
+}
+
+func (ss *HashSlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := &ss.slots[i]
+
+	if s.isInit {
+		return s
+	}
+
+	if create {
+		return s.Init(ss.slotsAlloc(key))
+	}
+
+	return nil
+}
+
+func (ss *SkipSlots) Get(key Cmp, create bool) Any {
+	i := ss.fn(key) % uint64(len(ss.slots))
+	s := &ss.slots[i]
+
+	if s.isInit {
+		return s
+	}
+
+	if create {
+		return s.Init(ss.alloc, ss.levels)
+	}
+
+	return nil
 }
 
 func (m *Hash) Init(slots Slots) *Hash {
@@ -52,122 +169,4 @@ func (m *Hash) Insert(start Iter, key Cmp, val interface{}, allowMulti bool) (It
 
 func (m *Hash) Len() int64 {
 	return m.len
-}
-
-type AnySlots struct {
-	fn HashFn
-	slotAlloc Alloc
-	slots []Any
-}
-
-func NewSlots(count int, fn HashFn, slotAlloc Alloc) *AnySlots {
-	ss := new(AnySlots)
-	ss.fn = fn
-	ss.slotAlloc = slotAlloc
-	ss.slots = make([]Any, count)
-	return ss
-}
-
-func (ss *AnySlots) Get(key Cmp, create bool) Any {
-	i := ss.fn(key) % uint64(len(ss.slots))
-	s := ss.slots[i]
-
-	if s != nil {
-		return s
-	}
-
-	if create {
-		s = ss.slotAlloc()
-		ss.slots[i] = s
-		return s
-	}
-
-	return nil
-}
-
-type HashSlots struct {
-	fn HashFn
-	slotsAlloc SlotsAlloc
-	slots []Hash
-}
-
-func NewHashSlots(count int, fn HashFn, slotsAlloc SlotsAlloc) *HashSlots {
-	ss := new(HashSlots)
-	ss.fn = fn
-	ss.slotsAlloc = slotsAlloc
-	ss.slots = make([]Hash, count)
-	return ss
-}
-
-func (ss *HashSlots) Get(key Cmp, create bool) Any {
-	i := ss.fn(key) % uint64(len(ss.slots))
-	s := &ss.slots[i]
-
-	if s.isInit {
-		return s
-	}
-
-	if create {
-		return s.Init(ss.slotsAlloc())
-	}
-
-	return nil
-}
-
-type SkipSlots struct {
-	alloc *SkipAlloc
-	fn HashFn
-	levels int
-	slots []Skip
-}
-
-func NewSkipSlots(count int, fn HashFn, alloc *SkipAlloc, levels int) *SkipSlots {
-	ss := new(SkipSlots)
-	ss.alloc = alloc
-	ss.fn = fn
-	ss.levels = levels
-	ss.slots = make([]Skip, count)
-	return ss
-}
-
-func (ss *SkipSlots) Get(key Cmp, create bool) Any {
-	i := ss.fn(key) % uint64(len(ss.slots))
-	s := &ss.slots[i]
-
-	if s.isInit {
-		return s
-	}
-
-	if create {
-		return s.Init(ss.alloc, ss.levels)
-	}
-
-	return nil
-}
-
-type ESkipSlots struct {
-	fn HashFn
-	slots []ESkip
-}
-
-func NewESkipSlots(count int, fn HashFn) *ESkipSlots {
-	ss := new(ESkipSlots)
-	ss.fn = fn
-	ss.slots = make([]ESkip, count)
-	return ss
-}
-
-func (ss *ESkipSlots) Get(key Cmp, create bool) Any {
-	i := ss.fn(key) % uint64(len(ss.slots))
-	s := &ss.slots[i]
-
-	if s.isInit {
-		return s
-	}
-
-	if create {
-		return s.Init()
-	}
-
-	return nil
 }

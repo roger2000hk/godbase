@@ -44,11 +44,14 @@ func TestConstructors(t *testing.T) {
 	// skip map with embedded nodes
 	NewESkip()
 
-	// 1000 generic slots backed by allocator fn
+	// 1000 slots backed by generic map allocator
 	// generic slots could be used in any of the following examples,
 	// but specializing the slot type allows allocating all slots at once and
 	// accessing by value which makes a difference in some scenarios.
-	gs := NewSlots(1000, genHash, func () Any { return NewSkip(nil, 2) })
+	// the allocator receives the key as param which enables choosing
+	// differend kinds of slot chains for different keys.
+
+	gs := NewSlots(1000, genHash, func (_ Cmp) Any { return NewSkip(nil, 2) })
 	NewHash(gs)
 
 	// 1000 skip slots backed by 2 level skip maps with slab allocated nodes
@@ -59,10 +62,9 @@ func TestConstructors(t *testing.T) {
 	ess := NewESkipSlots(1000, genHash)
 	NewHash(ess)
 
-	// 1000 hash slots backed by 100 slot hash maps with embedded skip slots
-	hs := NewHashSlots(1000, genHash, func () Slots { return NewESkipSlots(100, genHash) })
+	// 1000 hash slots backed by hash maps with 100 embedded skip slots
+	hs := NewHashSlots(1000, genHash, func (_ Cmp) Slots { return NewESkipSlots(100, genHash) })
 	NewHash(hs)
-
 }
 
 const basicReps = 50000
@@ -146,7 +148,7 @@ func BenchmarkBasicSkipHash(t *testing.B) {
 	runBasicTests(t, "SkipHash", NewHash(NewSkipSlots(80000, genHash, basicSkipAlloc, 1)), basicIts) 
 }
 
-func allocSkip() Any {
+func allocSkip(_ Cmp) Any {
 	return NewSkip(basicSkipAlloc, 1)
 }
 
@@ -154,7 +156,7 @@ func BenchmarkBasicSkipAnyHash(t *testing.B) {
 	runBasicTests(t, "SkipAnyHash", NewHash(NewSlots(80000, genHash, allocSkip)), basicIts) 
 }
 
-func allocESkip() Any {
+func allocESkip(_ Cmp) Any {
 	return NewESkip()
 }
 
