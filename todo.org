@@ -8,10 +8,6 @@
 ** add constructors NewSkipMap & NewESkipMap with maps
 *** compare perf
 
-* convert tests to benchmark format
-
-* add multi delete tests
-
 * add Cut tests
 
 * implement Map.Find
