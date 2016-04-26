@@ -267,7 +267,7 @@ func (m *Suffix) Insert(start Iter, key Key, val interface{}, allowMulti bool) (
 maps.Suffix, like all wraps, can be used wherever maps.Any is expected; with the restriction that it only supports StringKeys, for obvious reasons. A suffix map is a nice tool to solve string completion problems, this one comes bundled with all the additional features of godbase map api.
 
 ```go
-	
+
 func TestSuffix(t *testing.T) {
 	// NewSuffix wraps any map
 	// iters only work within slots for hash maps; therefore, the obvious 
@@ -284,10 +284,13 @@ func TestSuffix(t *testing.T) {
 
 	// find first suffix starting with "de" using wrapped Find()
 	i, _ := m.Find(nil, StringKey("de"), nil)
+	
+	// since we're prefix searching, iter needs to be stepped once
 	i = i.Next()
 
+	// then we get all matching suffixes in order
 	if i.Key().(StringKey) != "def" || i.Val().(string) != "abcdef" {
-		t.Errorf("invalid find res: %v", i.Val())
+		t.Errorf("invalid find res: %v", i.Key())
 	}
 
 	i = i.Next()
@@ -298,7 +301,7 @@ func TestSuffix(t *testing.T) {
 
 	// check that Delete removes all suffixes for specified val
 	if res, cnt := m.Delete(nil, nil, StringKey("bcdef"), "abcdef"); 
-	cnt != 4 || res.Next().Key().(StringKey) != "bcdefghi" {
+	cnt != 4 || res.Next().Key().(StringKey) != "cdefghi" {
 		t.Errorf("invalid delete res: %v", res.Next().Key())	
 	}
 }
