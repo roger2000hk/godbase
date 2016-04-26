@@ -201,7 +201,7 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 	return n.prev, false
 }
 
-func (m *Skip) First(start Iter, key Key) (interface{}, bool) {
+func (m *Skip) Get(start Iter, key Key) (interface{}, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok {
