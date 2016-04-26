@@ -222,7 +222,7 @@ func TestEmbedded(t *testing.T) {
 ```
 
 ### wrapping it up
-godbase provides scaffolding for trivial extensions to the map api in form of a Wrap struct, maps.Suffix serves well as an introduction:
+godbase provides scaffolding for trivial extension of the api in form of a Wrap struct, maps.Suffix serves well as an introduction:
 
 ```go
 
