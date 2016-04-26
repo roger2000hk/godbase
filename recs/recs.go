@@ -31,7 +31,7 @@ func (r *BasicRec) Delete(c cols.Any) bool {
 }
 
 func (r *BasicRec) Get(c cols.Any) (interface{}, bool) {
-	if v, ok := r.AsMap().Get(nil, c); ok {
+	if v, ok := r.AsMap().Get(c); ok {
 		return v, true
 	}
 	

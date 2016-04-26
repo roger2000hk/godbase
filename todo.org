@@ -1,17 +1,13 @@
-* add recs_test.go
-** basic set/get val
-
-* ---
-
 * change maps.Insert/Delete/Find to return iter to current
 ** replace Iter.HasNext/HasPrev with Iter.Valid
 ** update tests
 
-* rename Delete to DeleteAll
-** add testfn
-*** only delete if testfn nil / returns true
+* add testfn to Delete
+** only delete if testfn nil / returns true
+** add simplified free fn DeleteAll(key) cnt
 
-* add simplified free fn Delete()
+* rename Insert to InsertMulti
+** add simplified free fn Insert(key, val)
 
 * ---
 

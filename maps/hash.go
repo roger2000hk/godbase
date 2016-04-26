@@ -107,8 +107,8 @@ func (m *Hash) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return m.slots.Get(key, true).Find(start, key, val)
 }
 
-func (m *Hash) Get(start Iter, key Key) (interface{}, bool) {
-	return m.slots.Get(key, true).Get(start, key)
+func (m *Hash) Get(key Key) (interface{}, bool) {
+	return m.slots.Get(key, true).Get(key)
 }
 
 func (ss *AnySlots) Get(key Key, create bool) Any {

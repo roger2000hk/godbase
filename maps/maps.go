@@ -65,7 +65,7 @@ type Any interface {
 	// Returns first val after start matching key and ok;
 	// start is optional, specifying one for hash maps only works within the same slot.
 
-	Get(start Iter, key Key) (interface{}, bool)
+	Get(key Key) (interface{}, bool)
 
 	// Inserts key/val into map after start;
 	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 

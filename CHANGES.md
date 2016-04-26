@@ -11,4 +11,4 @@ Consolidated hash implementations by extracting slot logic into a Slots interfac
 Added wrap struct for easy api extension and implemented a basic suffix map using the new functionality.
 
 ### 2016-04-27 added maps.Any.Get()
-Added method to get value without having to interact with iterators & multiple values.
+Added simplified interface to get value.

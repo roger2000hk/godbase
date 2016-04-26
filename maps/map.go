@@ -32,7 +32,7 @@ func (m Map) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return nil, ok && (val == nil || v == val)
 }
 
-func (m Map) Get(start Iter, key Key) (interface{}, bool) {
+func (m Map) Get(key Key) (interface{}, bool) {
 	v, ok := m[key]
 	return v, ok
 }

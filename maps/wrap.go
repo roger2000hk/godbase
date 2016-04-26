@@ -16,8 +16,8 @@ func (m *Wrap) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return m.wrapped.Find(start, key, val)
 }
 
-func (m *Wrap) Get(start Iter, key Key) (interface{}, bool) {
-	return m.wrapped.Get(start, key)
+func (m *Wrap) Get(key Key) (interface{}, bool) {
+	return m.wrapped.Get(key)
 }
 
 func (m *Wrap) Init(w Any) *Wrap {
