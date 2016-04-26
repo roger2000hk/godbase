@@ -63,12 +63,14 @@ type Iter interface {
 
 // Basic map ops supported by all implementations
 type Any interface {
-	// Cuts elems from start to end for which fn returns true into new set;
-	// start, end & fn are all optional. Circular cuts, with start/end on
-	// opposite sides of root; are supported. Returns a cut from the start slot
-	// for hash maps.
+	// Cuts elems from start to end for which fn returns non nil key into new set;
+	// start, end & fn are all optional. When fn is specified, the returned key/val replaces
+	// the original; except for maps with embedded nodes, where the returned val replaces the
+	// entire node. No safety checks are provided; if you mess up the ordering, you're on your
+	// own. Circular cuts, with start/end on opposite sides of root; are supported. 
+	// Returns a cut from the start slot for hash maps.
 
-	Cut(start, end Iter, fn TestFn) Any
+	Cut(start, end Iter, fn MapFn) Any
 
 	// Deletes elems from start to end, matching key/val;
 	// start, end, key & val are all optional, nil means all elems. Specifying 
@@ -93,6 +95,9 @@ type Any interface {
 
 	// Returns the number of elems in map
 	Len() int64
+
+	// Returns string repr for printing
+	String() string
 }
 
 type TestFn func (Key, interface{}) bool

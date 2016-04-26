@@ -53,17 +53,21 @@ func (m *Skip) Cut(start, end Iter, fn MapFn) Any {
 			}
 
 			if k != nil {
-				for ln, lnn := n, nn; ln.up != ln; ln = ln.up {
+				for ln, lnn := n, nn;; ln = ln.up {
 					ln.key, ln.val = k, v
 					
 					ln.prev.next = ln.next
 					ln.next.prev = ln.prev
 					
-					lnn.next = ln
-					ln.prev = lnn
-					
 					ln.next = lnn.next
 					lnn.next.prev = ln
+
+					lnn.next = ln
+					ln.prev = lnn					
+
+					if ln.up == ln {
+						break
+					}
 				}
 				
 				nn = n

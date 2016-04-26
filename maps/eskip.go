@@ -45,15 +45,16 @@ func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 				vn := v.(*ESkipNode)
 				vn.key = k
 
-				for i := 0; i < ESkipLevels-1; i++ {
-					n.prev[i].next[i] = n.next[i]
-					n.next[i].prev[i] = n.prev[i]			
-					
-					nn.next[i] = vn
-					vn.prev[i] = nn
-					
-					vn.next[i] = nn.next[i]
-					nn.next[i].prev[i] = vn
+				for i := 0; i < ESkipLevels; i++ {
+					if n.next[i] != n {
+						n.prev[i].next[i] = n.next[i]
+						n.next[i].prev[i] = n.prev[i]			
+
+						vn.next[i] = nn.next[i]
+						nn.next[i].prev[i] = vn
+						nn.next[i] = vn
+						vn.prev[i] = nn	
+					}
 				}
 				
 				nn = vn
