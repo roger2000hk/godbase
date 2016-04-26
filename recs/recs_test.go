@@ -5,11 +5,20 @@ import (
 	"testing"
 )
 
+func TestId(t *testing.T) {
+	r1, r2 := New(), New()
+
+	if r1.Id() == r2.Id() {
+		t.Errorf("equal ids")
+	}
+}
+
 func TestGetSet(t *testing.T) {
 	c := cols.NewInt64("foo")
 
-	r := NewRec(nil, 1)
-	if v, ok := r.Get(c); ok {
+	r := New()
+
+	if v, ok := r.Find(c); ok {
 		t.Errorf("invalid get res from empty rec: %v", v)
 	}
 
@@ -27,7 +36,7 @@ func TestGetSet(t *testing.T) {
 		t.Errorf("delete failed")
 	}
 
-	if v, ok := r.Get(c); ok {
+	if v, ok := r.Find(c); ok {
 		t.Errorf("invalid get res from emptied rec: %v", v)
 	}
 }

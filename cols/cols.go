@@ -27,7 +27,7 @@ type String struct {
 	BasicCol
 }
 
-type UInt64 struct {
+type UId struct {
 	BasicCol
 }
 
@@ -39,8 +39,8 @@ func NewString(n string) *String {
 	return new(String).Init(n)
 }
 
-func NewUInt64(n string) *UInt64 {
-	return new(UInt64).Init(n)
+func NewUId(n string) *UId {
+	return new(UId).Init(n)
 }
 
 func (c *Int64) Init(n string) *Int64 {
@@ -53,7 +53,7 @@ func (c *String) Init(n string) *String {
 	return c
 }
 
-func (c *UInt64) Init(n string) *UInt64 {
+func (c *UId) Init(n string) *UId {
 	c.Basic.Init(n)
 	return c
 }
@@ -78,14 +78,14 @@ func (c *String) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	return string(v), nil
 }
 
-func (c *UInt64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
-	var v uint64
+func (c *UId) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
+	var v [16]byte
 
-	if err := ReadBin(&v, r); err != nil {
+	if _, err := io.ReadFull(r, v[:]); err != nil {
 		return nil, err
 	}
 
-	return v, nil
+	return godbase.UId(v), nil
 }
 
 func (c *Int64) WriteVal(_v interface{}, w io.Writer) error {
@@ -94,15 +94,12 @@ func (c *Int64) WriteVal(_v interface{}, w io.Writer) error {
 }
 
 func (c *String) WriteVal(_v interface{}, w io.Writer) error {
-	v := []byte(_v.(string))
-	WriteSize(ValSize(len(v)), w)
-	_, err := w.Write(v)
-	return err
+	return WriteBytes([]byte(_v.(string)), w)
 }
 
-func (c *UInt64) WriteVal(_v interface{}, w io.Writer) error {
-	v := _v.(uint64)
-	return WriteBinVal(8, &v, w)
+func (c *UId) WriteVal(_v interface{}, w io.Writer) error {
+	v := [16]byte(_v.(godbase.UId))
+	return WriteBytes(v[:], w)
 }
 
 func ReadBin(ptr interface{}, r io.Reader) error {
@@ -127,6 +124,15 @@ func WriteBinVal(s ValSize, ptr interface{}, w io.Writer) error {
 	}
 
 	return binary.Write(w, godbase.ByteOrder, ptr)
+}
+
+func WriteBytes(v []byte, w io.Writer) error {
+	if err := WriteSize(ValSize(len(v)), w); err != nil {
+		return err
+	}
+
+	_, err := w.Write(v)
+	return err
 }
 
 func WriteSize(s ValSize, w io.Writer) error {

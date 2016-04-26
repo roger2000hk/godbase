@@ -1,11 +1,18 @@
 * add testfn to Delete
-** rename to DeleteMulti
 ** only delete if testfn nil / returns true
-** add Delete(key) int
+** add DeleteAll(key) int
+
+* add cols.Bool
+** add rec methods
+
+* add cols.Time
+** add rec methods
 
 * ---
 
-* add Tbl with cols
+* add Tbl with cols & recs
+** store cols in 1 level maps.Skip keyed by name/string
+** take n & recs (maps.Any) as constructor params
 
 * add Tbl.WriteRec(Rec, io.Writer) error
 ** store nr of cols
@@ -17,16 +24,18 @@
 
 * add read/write rec test
 
-* ---
+* add Tbl.Dump(io.Writer)
 
-* add locks package
-** copy RW/Ctx from old
-*** rename RW to Lock
+* add Tbl.Load(io.Writer)
+
+* add tbls/cols/recs to readme
+
+* ---
 
 * add find loop in both maps in runCutTests
 
-* add locks.RWHashMap
-** keep one locks.RW per slot
+* add maps.RWHash
+** keep one RWMutex per slot
 
 * rename multi_test to full_test
 
