@@ -3,46 +3,47 @@ package cols
 import (
 	"encoding/binary"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/defs"
 	"io"
 )
 
 type Any interface {
-	godbase.Def
+	defs.Any
 	ReadVal(io.Reader) error
 	WriteVal(interface{}, io.Writer) error
 }
 
 type BasicCol struct {
-	godbase.BasicDef
+	defs.Basic
 }
 
-type Int64Col struct {
+type Int64 struct {
 	BasicCol
 }
 
-type UInt64Col struct {
+type UInt64 struct {
 	BasicCol
 }
 
-func NewInt64Col(n string) *Int64Col {
-	return new(Int64Col).Init(n)
+func NewInt64(n string) *Int64 {
+	return new(Int64).Init(n)
 }
 
-func NewUInt64Col(n string) *UInt64Col {
-	return new(UInt64Col).Init(n)
+func NewUInt64(n string) *UInt64 {
+	return new(UInt64).Init(n)
 }
 
-func (c *Int64Col) Init(n string) *Int64Col {
-	c.BasicDef.Init(n)
+func (c *Int64) Init(n string) *Int64 {
+	c.Basic.Init(n)
 	return c
 }
 
-func (c *UInt64Col) Init(n string) *UInt64Col {
-	c.BasicDef.Init(n)
+func (c *UInt64) Init(n string) *UInt64 {
+	c.Basic.Init(n)
 	return c
 }
 
-func (c *Int64Col) ReadVal(r io.Reader) (interface{}, error) {
+func (c *Int64) ReadVal(r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := ReadBin(&v, r); err != nil {
@@ -52,7 +53,7 @@ func (c *Int64Col) ReadVal(r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (c *UInt64Col) ReadVal(r io.Reader) (interface{}, error) {
+func (c *UInt64) ReadVal(r io.Reader) (interface{}, error) {
 	var v uint64
 
 	if err := ReadBin(&v, r); err != nil {
@@ -62,13 +63,13 @@ func (c *UInt64Col) ReadVal(r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (c *Int64Col) WriteVal(_v interface{}, w io.Writer) error {
+func (c *Int64) WriteVal(_v interface{}, w io.Writer) error {
 	v := _v.(int64)
 	return WriteBin(&v, w)
 }
 
 
-func (c *UInt64Col) WriteVal(_v interface{}, w io.Writer) error {
+func (c *UInt64) WriteVal(_v interface{}, w io.Writer) error {
 	v := _v.(uint64)
 	return WriteBin(&v, w)
 }

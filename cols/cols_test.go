@@ -7,7 +7,7 @@ import (
 
 func TestReadWriteVal(t *testing.T) {
 	var buf bytes.Buffer
-	col := NewInt64Col("foo")
+	col := NewInt64("foo")
 
 	col.WriteVal(int64(42), &buf)
 	if v, err := col.ReadVal(&buf); err != nil {

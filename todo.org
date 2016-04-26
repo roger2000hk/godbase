@@ -1,3 +1,8 @@
+* add maps.Any.Get(start, key) (interface{}, bool)
+** implement using FindNode()
+
+* add basic rec test set/get val
+
 * add locks package
 ** copy RW/Ctx from old
 *** rename RW to Lock
