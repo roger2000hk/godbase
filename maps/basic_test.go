@@ -8,9 +8,9 @@ import (
 func runCutTests(t *testing.T, m Any) {
 	its := sortedItems(100)
 
-	for _, it := range its {
+	for i, it := range its {
 		k := it.skipNode.key
-		m.Insert(nil, k, k, false)
+		m.Insert(nil, k, &its[i].skipNode, false)
 	}
 
 	start, _ := m.Find(nil, its[90].skipNode.key, nil)
@@ -44,7 +44,7 @@ func runCutTests(t *testing.T, m Any) {
 
 func TestCut(t *testing.T) {
 	runCutTests(t, NewSkip(nil, 3))
-	//runCutTests(t, NewESkip())
+	runCutTests(t, NewESkip())
 }
 
 func TestEmbedded(t *testing.T) {

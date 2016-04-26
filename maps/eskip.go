@@ -27,9 +27,11 @@ func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 	}
 
 	res := NewESkip()
-	nn := &res.root
+	n, nn := start.(*ESkipNode), &res.root
 
-	for n := start.(*ESkipNode); n != end; n = n.next[ESkipLevels-1] {
+	for n != end  {
+		next := n.next[ESkipLevels-1]
+
 		if n == &m.root {
 			nn = &res.root
 		} else {
@@ -58,7 +60,9 @@ func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 				m.len--
 				res.len++
 			}
-		}		
+		}
+
+		n = next
 	}
 
 	return res
