@@ -1,7 +1,20 @@
 * add maps.Any.Get(start, key) (interface{}, bool)
 ** implement using FindNode()
 
-* add basic rec test set/get val
+* add recs_test.go
+** basic set/get val
+
+* add Tbl with cols
+
+* add Rec.Write(Tbl, io.Writer) error
+** store nr of cols
+** call writeval for all cols
+
+* add Rec.Read(Tbl, io.Reader) error
+** load vals into current rec
+** load nr of cols & readval for all cols
+
+* add read/write rec test
 
 * add locks package
 ** copy RW/Ctx from old
