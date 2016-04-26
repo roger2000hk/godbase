@@ -16,7 +16,16 @@ type Rec interface {
 type BasicRec maps.Skip
 
 func NewRec(alloc *maps.SkipAlloc, levels int) Rec {
-	return (*BasicRec)(maps.NewSkip(alloc, levels))
+	return new(BasicRec).Init(alloc, levels)
+}
+
+func (r *BasicRec) AsMap() *maps.Skip {
+	return (*maps.Skip)(r)
+}
+
+func (r *BasicRec) Init(alloc *maps.SkipAlloc, levels int) *BasicRec {
+	r.AsMap().Init(alloc, levels)
+	return r
 }
 
 func (r *BasicRec) Int64(c *cols.Int64) int64 {
@@ -43,8 +52,4 @@ func (r *BasicRec) UInt64(c *cols.UInt64) uint64 {
 	}
 
 	panic(fmt.Sprintf("field not found: %v", c.Name()))
-}
-
-func (r *BasicRec) AsMap() *maps.Skip {
-	return (*maps.Skip)(r)
 }
