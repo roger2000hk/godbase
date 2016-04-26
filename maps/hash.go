@@ -104,8 +104,11 @@ func (m *Hash) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 }
 
 func (m *Hash) Find(start Iter, key Key, val interface{}) (Iter, bool) {
-	res, ok := m.slots.Get(key, true).Find(start, key, val)
-	return res, ok
+	return m.slots.Get(key, true).Find(start, key, val)
+}
+
+func (m *Hash) First(start Iter, key Key) (interface{}, bool) {
+	return m.slots.Get(key, true).First(start, key)
 }
 
 func (ss *AnySlots) Get(key Key, create bool) Any {

@@ -170,6 +170,16 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 	return n, false
 }
 
+func (m *ESkip) First(start Iter, key Key) (interface{}, bool) {
+	n, ok := m.FindNode(start, key)
+	
+	if ok {
+		return n, true
+	}
+
+	return nil, false
+}
+
 func (m *ESkip) Init() *ESkip {
 	m.isInit = true
 	m.root.Init(nil)

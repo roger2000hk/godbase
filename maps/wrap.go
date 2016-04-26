@@ -16,6 +16,10 @@ func (m *Wrap) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return m.wrapped.Find(start, key, val)
 }
 
+func (m *Wrap) First(start Iter, key Key) (interface{}, bool) {
+	return m.wrapped.First(start, key)
+}
+
 func (m *Wrap) Init(w Any) *Wrap {
 	m.wrapped = w
 	return m

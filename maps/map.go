@@ -32,6 +32,11 @@ func (m Map) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return nil, ok && (val == nil || v == val)
 }
 
+func (m Map) First(start Iter, key Key) (interface{}, bool) {
+	v, ok := m[key]
+	return v, ok
+}
+
 func (m Map) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	if start != nil {
 		panic("Map doesn't support iters")

@@ -11,7 +11,7 @@ type ValSize uint64
 
 type Any interface {
 	defs.Any
-	ReadVal(ValSize, io.Reader) error
+	ReadVal(ValSize, io.Reader) (interface{}, error)
 	WriteVal(interface{}, io.Writer) error
 }
 

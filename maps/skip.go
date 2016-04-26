@@ -201,6 +201,16 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 	return n.prev, false
 }
 
+func (m *Skip) First(start Iter, key Key) (interface{}, bool) {
+	n, ok := m.FindNode(start, key)
+	
+	if ok {
+		return n.val, true
+	}
+
+	return nil, false
+}
+
 func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
 	m.isInit = true
 	m.alloc = alloc
