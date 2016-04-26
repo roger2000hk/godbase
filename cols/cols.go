@@ -7,9 +7,11 @@ import (
 	"io"
 )
 
+type ValSize uint64
+
 type Any interface {
 	defs.Any
-	ReadVal(io.Reader) error
+	ReadVal(ValSize, io.Reader) error
 	WriteVal(interface{}, io.Writer) error
 }
 
@@ -43,7 +45,7 @@ func (c *UInt64) Init(n string) *UInt64 {
 	return c
 }
 
-func (c *Int64) ReadVal(r io.Reader) (interface{}, error) {
+func (c *Int64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := ReadBin(&v, r); err != nil {
@@ -53,7 +55,7 @@ func (c *Int64) ReadVal(r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (c *UInt64) ReadVal(r io.Reader) (interface{}, error) {
+func (c *UInt64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	var v uint64
 
 	if err := ReadBin(&v, r); err != nil {
@@ -65,15 +67,14 @@ func (c *UInt64) ReadVal(r io.Reader) (interface{}, error) {
 
 func (c *Int64) WriteVal(_v interface{}, w io.Writer) error {
 	v := _v.(int64)
-	return WriteBin(&v, w)
+	return WriteBinVal(8, &v, w)
 }
 
 
 func (c *UInt64) WriteVal(_v interface{}, w io.Writer) error {
 	v := _v.(uint64)
-	return WriteBin(&v, w)
+	return WriteBinVal(8, &v, w)
 }
-
 
 func ReadBin(ptr interface{}, r io.Reader) error {
 	if err := binary.Read(r, godbase.ByteOrder, ptr); err != nil {
@@ -83,6 +84,28 @@ func ReadBin(ptr interface{}, r io.Reader) error {
 	return nil
 }
 
+func ReadSize(r io.Reader) (ValSize, error) {
+	var v ValSize
+
+	if err := ReadBin(&v, r); err != nil {
+		return 0, err
+	}
+
+	return v, nil
+}
+
 func WriteBin(ptr interface{}, w io.Writer) error {
 	return binary.Write(w, godbase.ByteOrder, ptr)
+}
+
+func WriteBinVal(s ValSize, ptr interface{}, w io.Writer) error {
+	if err := WriteSize(s, w); err != nil {
+		return err
+	}
+
+	return binary.Write(w, godbase.ByteOrder, ptr)
+}
+
+func WriteSize(s ValSize, w io.Writer) error {
+	return WriteBin(&s, w)
 }
