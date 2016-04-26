@@ -1,7 +1,3 @@
-* add maps.Any.Set(Key, interface{}) interface{} 
-** replaces val update in Insert
-** use Insert and update iter val if false
-
 * add testfn to Delete
 ** rename to DeleteMulti
 ** only delete if testfn nil / returns true

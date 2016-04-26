@@ -232,7 +232,6 @@ func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (It
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
-		n.val = val
 		return n, false
 	}
 	
