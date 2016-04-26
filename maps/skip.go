@@ -124,7 +124,7 @@ func (m *Skip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	}
 
 	m.len -= int64(cnt)
-	return n.prev, cnt
+	return n, cnt
 }
 
 func (m *Skip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
@@ -138,7 +138,7 @@ func (m *Skip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 		n = n.next
 	}
 	
-	return n.prev, n.key == key && (val == nil || n.val == val)
+	return n, n.key == key && (val == nil || n.val == val)
 }
 
 func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
@@ -233,13 +233,13 @@ func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (It
 	
 	if ok && !allowMulti {
 		n.val = val
-		return n.prev, false
+		return n, false
 	}
 	
 	nn := m.AllocNode(key, val, n) 
 	nn.down = nn
 	m.len++
-	return nn.prev, true
+	return nn, true
 }
 
 func (m *Skip) Len() int64 {
@@ -309,14 +309,6 @@ func (n *SkipNode) Delete() {
 	}
 }
 
-func (n *SkipNode) HasNext() bool {
-	return n.next.key != nil
-}
-
-func (n *SkipNode) HasPrev() bool {
-	return n.prev.key != nil
-}
-
 func (n *SkipNode) Init(key Key, val interface{}, prev *SkipNode) *SkipNode {
 	n.key, n.val = key, val
 	n.up = n
@@ -351,6 +343,10 @@ func (n *SkipNode) Top() *SkipNode {
 
 func (n *SkipNode) Val() interface{} {
 	return n.val
+}
+
+func (n *SkipNode) Valid() bool {
+	return n.key != nil
 }
 
 type SkipSlab []SkipNode

@@ -14,15 +14,11 @@ func runCutTests(t *testing.T, m Any) {
 	}
 
 	start, _ := m.Find(nil, its[90].skipNode.key, nil)
-	start = start.Next()
-
 	if k := start.Key(); int(k.(testKey)) != 90 {
 		t.Errorf("invalid start: %v", start)
 	}
 
-	end, _ := m.Find(nil, its[9].skipNode.key, nil)
-	end = end.Next().Next()
-
+	end, _ := m.Find(nil, its[10].skipNode.key, nil)
 	if k := end.Key(); int(k.(testKey)) != 10 {
 		t.Errorf("invalid end: %v", end)
 	}
@@ -59,8 +55,6 @@ func TestEmbedded(t *testing.T) {
 		m.Insert(nil, k, &its[i].skipNode, false)
 
 		res, ok := m.Find(nil, k, nil)
-		res = res.Next()
-
 		if !ok || res.Key() != k || res.Val().(*ESkipNode) != &its[i].skipNode {
 			t.Errorf("invalid find res: %v/%v/%v", i, res.Key(), res.Val())
 		} else if toTestItem(res.Val().(*ESkipNode)) != &its[i] {
@@ -126,7 +120,9 @@ var basicIts = randItems(testReps)
 
 func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	for i, it := range its {
-		m.Insert(nil, it.skipNode.key, &its[i].skipNode, false)
+		if res, ok := m.Insert(nil, it.skipNode.key, &its[i].skipNode, false); !ok {
+			t.Errorf("invalid insert res: %v", res)
+		}
 	}
 
 	if l := m.Len(); l != int64(len(its)) {
@@ -160,10 +156,6 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 		k := its[i].skipNode.key
 
 		res, cnt := m.Delete(nil, nil, k, nil);
-		if res != nil {
-			res = res.Next()
-		}
-
 		if cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
 			t.Errorf("%v invalid delete(%v) res: %v", label, k, res)
 		}
@@ -174,10 +166,6 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 		v := &its[i].skipNode
 
 		res, ok := m.Insert(nil, it.skipNode.key, v, false)
-		if res != nil {
-			res = res.Next()
-		}
-
 		if (((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
 			(res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid insert(%v) res: %v", label, k, res)		
@@ -185,7 +173,9 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	}
 
 	for _, it := range its {
-		m.Delete(nil, nil, it.skipNode.key, nil)
+		if res, cnt := m.Delete(nil, nil, it.skipNode.key, nil); cnt != 1 {
+			t.Errorf("invalid delete res: %v", res)
+		}
 	}
 }
 

@@ -1,7 +1,3 @@
-* change maps.Insert/Delete/Find to return iter to current
-** replace Iter.HasNext/HasPrev with Iter.Valid
-** update tests
-
 * add testfn to Delete
 ** rename to DeleteMulti
 ** only delete if testfn nil / returns true
@@ -27,6 +23,8 @@
 ** load nr of cols & readval for all cols
 
 * add read/write rec test
+
+* ---
 
 * add locks package
 ** copy RW/Ctx from old

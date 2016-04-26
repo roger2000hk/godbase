@@ -1,5 +1,5 @@
 # changes in reverse chronological order
-### last updated 2016-04-24
+### last updated 2016-04-27
 
 ### 2016-04-24 added iters & basic range ops
 Added an Iter interface; and Any.Cut()/Find() ops. Added start/end params and adapted Any.Insert/Delete to use Iter.
@@ -12,3 +12,6 @@ Added wrap struct for easy api extension and implemented a basic suffix map usin
 
 ### 2016-04-27 added maps.Any.Get()
 Added simplified interface to get value.
+
+### 2016-04-27 changed maps.Any.Delete/Find/Insert iter semantics
+All methods now return iter to current if found, not prev as before.

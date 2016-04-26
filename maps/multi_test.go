@@ -23,10 +23,7 @@ func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testIte
 	for i, it := range its1 {
 		k := it.skipNode.key
 		v := &its1[i].skipNode
-		res, cnt := m.Delete(nil, nil, k, v); 
-		res = res.Next()
-
-		if cnt != 1 {
+		if res, cnt := m.Delete(nil, nil, k, v); cnt != 1 {
 			t.Errorf("%v invalid multi delete1 (%v) res: %v/%v", label, it.skipNode.key, res, cnt)
 		}
 	}
@@ -46,11 +43,13 @@ func runMultiTests(t *testing.B, label string, m Any, its1, its2, its3 []testIte
 			t.Errorf("%v invalid find res1: %v", label, res)
 		} 
 
-		if res, ok := m.Find(nil, k, &its2[i].skipNode); !ok {
+		if res, ok := m.Find(nil, k, &its2[i].skipNode); 
+		!ok || res.Val() != &its2[i].skipNode {
 			t.Errorf("%v invalid find res2: %v", label, res)
 		} 
 
-		if res, ok := m.Find(nil, k, &its3[i].skipNode); !ok {
+		if res, ok := m.Find(nil, k, &its3[i].skipNode); 
+		!ok  || res.Val() != &its3[i].skipNode {
 			t.Errorf("%v invalid find res3: %v", label, res)
 		} 
 	}

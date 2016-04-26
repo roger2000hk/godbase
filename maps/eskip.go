@@ -103,7 +103,7 @@ func (m *ESkip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	}
 
 	m.len -= int64(cnt)
-	return n.prev[ESkipLevels-1], cnt
+	return n, cnt
 }
 
 func (m *ESkip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
@@ -117,7 +117,7 @@ func (m *ESkip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 		n = n.next[ESkipLevels-1]
 	}
 
-	return n.prev[ESkipLevels-1], n.key == key && (val == nil || n == val)
+	return n, n.key == key && (val == nil || n == val)
 }
 
 func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
@@ -190,11 +190,11 @@ func (m *ESkip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (I
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
-		return n.prev[ESkipLevels-1], false
+		return n, false
 	}
 	n.InsertAfter(val.(*ESkipNode).Init(key), ESkipLevels-1)
  	m.len++
-	return val.(*ESkipNode).prev[ESkipLevels-1], true
+	return val.(*ESkipNode), true
 }
 
 func (m *ESkip) Len() int64 {
@@ -233,14 +233,6 @@ func (n *ESkipNode) Delete() {
 	}
 }
 
-func (n *ESkipNode) HasNext() bool {
-	return n.next[ESkipLevels-1].key != nil
-}
-
-func (n *ESkipNode) HasPrev() bool {
-	return n.prev[ESkipLevels-1].key != nil
-}
-
 func (n *ESkipNode) Init(key Key) *ESkipNode {
 	n.key = key
 
@@ -273,4 +265,8 @@ func (n *ESkipNode) Prev() Iter {
 
 func (n *ESkipNode) Val() interface{} {
 	return n
+}
+
+func (n *SkipNode) Valid() bool {
+	return n.key != nil
 }

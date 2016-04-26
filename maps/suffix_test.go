@@ -21,8 +21,11 @@ func TestSuffix(t *testing.T) {
 
 	// find first suffix starting with "de" using wrapped Find()
 	i, _ := m.Find(nil, StringKey("de"), nil)
+	
+	// since we're prefix searching, iter needs to be stepped once
 	i = i.Next()
 
+	// then we get all matching suffixes in order
 	if i.Key().(StringKey) != "def" || i.Val().(string) != "abcdef" {
 		t.Errorf("invalid find res: %v", i.Key())
 	}
@@ -35,7 +38,7 @@ func TestSuffix(t *testing.T) {
 
 	// check that Delete removes all suffixes for specified val
 	if res, cnt := m.Delete(nil, nil, StringKey("bcdef"), "abcdef"); 
-	cnt != 4 || res.Next().Key().(StringKey) != "bcdefghi" {
+	cnt != 4 || res.Next().Key().(StringKey) != "cdefghi" {
 		t.Errorf("invalid delete res: %v", res.Next().Key())	
 	}
 }
