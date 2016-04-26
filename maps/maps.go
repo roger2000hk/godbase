@@ -58,9 +58,7 @@ type Any interface {
 
 	Find(start Iter, key Key, val interface{}) (Iter, bool)
 	
-	// Returns first val after start matching key and ok;
-	// start is optional, specifying one for hash maps only works within the same slot.
-
+	// Returns val for key and ok
 	Get(key Key) (interface{}, bool)
 
 	// Inserts key/val into map after start;
