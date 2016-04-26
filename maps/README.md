@@ -38,16 +38,9 @@ type Key interface {
 type HashFn func (Key) uint64
 
 // Iters are circular and cheap, since they are nothing but a common 
-// interface on top of actual nodes. They are positioned before start
-// on return, so you need to call Next() to get the first elem.
+// interface on top of actual nodes. 
 
 type Iter interface {
-	// Returns true if next elem is not root
-	HasNext() bool
-
-	// Returns true if prev elem is not root
-	HasPrev() bool
-
 	// Returns key for elem or nil if root
 	Key() Key
 
@@ -57,8 +50,11 @@ type Iter interface {
 	// Returns iter to prev elem
 	Prev() Iter
 
-	// Returns val for elem or nil if root
+	// Returns val for elem
 	Val() interface{}
+
+	// Returns true if not root
+	Valid() bool
 }
 
 // Basic map ops supported by all implementations

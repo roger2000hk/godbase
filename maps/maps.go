@@ -26,7 +26,7 @@ type Iter interface {
 	// Returns iter to prev elem
 	Prev() Iter
 
-	// Returns val for elem or nil if root
+	// Returns val for elem
 	Val() interface{}
 
 	// Returns true if not root

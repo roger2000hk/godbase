@@ -267,6 +267,6 @@ func (n *ESkipNode) Val() interface{} {
 	return n
 }
 
-func (n *SkipNode) Valid() bool {
+func (n *ESkipNode) Valid() bool {
 	return n.key != nil
 }
