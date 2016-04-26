@@ -4,7 +4,7 @@ type Wrap struct {
 	wrapped Any
 }
 
-func (m *Wrap) Cut(start, end Iter, fn TestFn) Any {
+func (m *Wrap) Cut(start, end Iter, fn MapFn) Any {
 	return m.wrapped.Cut(start, end, fn)
 }
 

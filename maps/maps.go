@@ -40,9 +40,11 @@ type Iter interface {
 // Basic map ops supported by all implementations
 type Any interface {
 	// Cuts elems from start to end for which fn returns non nil key into new set;
-	// start, end & fn are all optional. When fn is specified, the returned val replaces
-	// the original one. Circular cuts, with start/end on opposite sides of root; are 
-	// supported. Returns a cut from the start slot for hash maps.
+	// start, end & fn are all optional. When fn is specified, the returned key/val replaces
+	// the original; except for maps with embedded nodes, where the returned val replaces the
+	// entire node. No safety checks are provided; if you mess up the ordering, you're on your
+	// own. Circular cuts, with start/end on opposite sides of root; are supported. 
+	// Returns a cut from the start slot for hash maps.
 
 	Cut(start, end Iter, fn MapFn) Any
 

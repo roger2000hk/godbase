@@ -5,6 +5,48 @@ import (
 	"testing"
 )
 
+func runCutTests(t *testing.T, m Any) {
+	its := sortedItems(100)
+
+	for _, it := range its {
+		k := it.skipNode.key
+		m.Insert(nil, k, k, false)
+	}
+
+	start, _ := m.Find(nil, its[90].skipNode.key, nil)
+	start = start.Next()
+
+	if k := start.Key(); int(k.(testKey)) != 90 {
+		t.Errorf("invalid start: %v", start)
+	}
+
+	end, _ := m.Find(nil, its[9].skipNode.key, nil)
+	end = end.Next().Next()
+
+	if k := end.Key(); int(k.(testKey)) != 10 {
+		t.Errorf("invalid end: %v", end)
+	}
+
+	cm := m.Cut(start, end, 
+		func (k Key, v interface{}) (Key, interface{}) { 
+			return testKey(int(k.(testKey)) * 2), v
+		})
+
+	if l := cm.Len(); l != 20 {
+		t.Errorf("invalid cut target len: %v", l)
+	}
+
+	if l := m.Len(); l != 80 {
+		t.Errorf("invalid cut src len: %v", l)
+	}
+}
+
+
+func TestCut(t *testing.T) {
+	runCutTests(t, NewSkip(nil, 3))
+	//runCutTests(t, NewESkip())
+}
+
 func TestEmbedded(t *testing.T) {
 	m := NewESkip()
 	

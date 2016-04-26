@@ -1,6 +1,3 @@
-** change Cut to take MapFn instead of TestFn
-** add tests
-
 * add locks package
 ** copy RW/Ctx from old
 *** rename RW to Lock

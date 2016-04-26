@@ -27,47 +27,52 @@ func (m *Skip) AllocNode(key Key, val interface{}, prev *SkipNode) *SkipNode{
 	return m.alloc.New(key, val, prev)
 }
 
-func (m *Skip) Cut(start, end Iter, fn TestFn) Any {
+func (m *Skip) Cut(start, end Iter, fn MapFn) Any {
 	if start == nil {
 		start = m.bottom.next
-	} else {
-		start = start.(*SkipNode).Bottom()
-	}
+	} else
 
 	if end == nil {
 		end = m.bottom.prev
-	} else {
-		end = end.(*SkipNode).Bottom()
 	}
 
 	res := NewSkip(m.alloc, m.Levels())
 	nn := res.bottom
 
-	for n := start.(*SkipNode); 
-	Iter(n) != end; 
-	n = n.next {
-		if Iter(n) == start {
-			panic(fmt.Sprintf("invalid end: %v", end))
-		}
-
+	n := start.(*SkipNode); 
+	for Iter(n) != end {
+		next := n.next
+		
 		if n == m.bottom {
 			nn = res.bottom
-		} else if fn == nil || fn(n.key, n) {
-			for ln, lnn := n, nn; n.up != n; n = n.up {
-				ln.prev.next = ln.next
-				ln.next.prev = ln.prev
-				
-				lnn.next = ln
-				ln.prev = lnn
+		} else {
+			k, v := n.key, n.val
 
-				ln.next = lnn.next
-				lnn.next.prev = ln
+			if fn != nil {
+				k, v = fn(k, v)
 			}
-			
-			nn = n
-			m.len--
-			res.len++
-		}		
+
+			if k != nil {
+				for ln, lnn := n, nn; ln.up != ln; ln = ln.up {
+					ln.key, ln.val = k, v
+					
+					ln.prev.next = ln.next
+					ln.next.prev = ln.prev
+					
+					lnn.next = ln
+					ln.prev = lnn
+					
+					ln.next = lnn.next
+					lnn.next.prev = ln
+				}
+				
+				nn = n
+				m.len--
+				res.len++
+			}
+		}
+		
+		n = next
 	}
 
 	return res
@@ -112,10 +117,6 @@ func (m *Skip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 		}
 		
 		n = next
-
-		if n == start {
-			panic(fmt.Sprintf("invalid end: %v", end))
-		}
 	}
 
 	m.len -= int64(cnt)

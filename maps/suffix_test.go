@@ -24,7 +24,7 @@ func TestSuffix(t *testing.T) {
 	i = i.Next()
 
 	if i.Key().(StringKey) != "def" || i.Val().(string) != "abcdef" {
-		t.Errorf("invalid find res: %v", i.Val())
+		t.Errorf("invalid find res: %v", i.Key())
 	}
 
 	i = i.Next()

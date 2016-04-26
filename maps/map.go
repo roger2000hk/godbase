@@ -10,7 +10,7 @@ func NewMap() Map {
 	return make(Map)
 }
 
-func (m Map) Cut(start, end Iter, fn TestFn) Any {
+func (m Map) Cut(start, end Iter, fn MapFn) Any {
 	panic("Map doesn't support iters")
 }
 

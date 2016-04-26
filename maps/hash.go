@@ -93,7 +93,7 @@ func NewSlots(count int, fn HashFn, slotAlloc SlotAlloc) *AnySlots {
 	return ss
 }
 
-func (m *Hash) Cut(start, end Iter, fn TestFn) Any {
+func (m *Hash) Cut(start, end Iter, fn MapFn) Any {
 	return m.slots.Get(start.Key(), true).Cut(start, end, fn)
 }
 

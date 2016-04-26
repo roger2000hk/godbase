@@ -17,7 +17,7 @@ func NewESkip() *ESkip {
 	return new(ESkip).Init()
 }
 
-func (m *ESkip) Cut(start, end Iter, fn TestFn) Any {
+func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 	if start == nil {
 		start = m.root.next[ESkipLevels-1]
 	}
@@ -30,27 +30,34 @@ func (m *ESkip) Cut(start, end Iter, fn TestFn) Any {
 	nn := &res.root
 
 	for n := start.(*ESkipNode); n != end; n = n.next[ESkipLevels-1] {
-		if Iter(n) == start {
-			panic(fmt.Sprintf("invalid end: %v", end))
-		}
-
 		if n == &m.root {
 			nn = &res.root
-		} else if fn == nil || fn(n.key, n) {
-			for i := 0; i < ESkipLevels-1; i++ {
-				n.prev[i].next[i] = n.next[i]
-				n.next[i].prev[i] = n.prev[i]			
-
-				nn.next[i] = n
-				n.prev[i] = nn
-
-				n.next[i] = nn.next[i]
-				nn.next[i].prev[i] = n
-			}
+		} else {
+			k, v := n.key, interface{}(n)
 			
-			nn = n
-			m.len--
-			res.len++
+			if fn != nil {
+				k, v = fn(k, v)
+			}
+
+			if k != nil {
+				vn := v.(*ESkipNode)
+				vn.key = k
+
+				for i := 0; i < ESkipLevels-1; i++ {
+					n.prev[i].next[i] = n.next[i]
+					n.next[i].prev[i] = n.prev[i]			
+					
+					nn.next[i] = vn
+					vn.prev[i] = nn
+					
+					vn.next[i] = nn.next[i]
+					nn.next[i].prev[i] = vn
+				}
+				
+				nn = vn
+				m.len--
+				res.len++
+			}
 		}		
 	}
 
