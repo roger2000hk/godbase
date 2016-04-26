@@ -11,7 +11,9 @@ type Rec interface {
 	Get(cols.Any) (interface{}, bool)
 	Int64(*cols.Int64) int64
 	SetInt64(*cols.Int64, int64) int64
+	SetString(*cols.String, string) string
 	SetUInt64(*cols.UInt64, uint64) uint64
+	String(*cols.String) string
 	UInt64(*cols.UInt64) uint64
 }
 
@@ -52,13 +54,23 @@ func (r *BasicRec) Int64(c *cols.Int64) int64 {
 }
 
 func (r *BasicRec) SetInt64(c *cols.Int64, v int64) int64 {
-	r.AsMap().Insert(nil, c, v, false)
-	return v
+	return r.AsMap().Set(c, v).(int64)
+}
+
+func (r *BasicRec) SetString(c *cols.String, v string) string {
+	return r.AsMap().Set(c, v).(string)
 }
 
 func (r *BasicRec) SetUInt64(c *cols.UInt64, v uint64) uint64 {
-	r.AsMap().Insert(nil, c, v, false)
-	return v
+	return r.AsMap().Set(c, v).(uint64)
+}
+
+func (r *BasicRec) String(c *cols.String) string {
+	if v, ok := r.Get(c); ok {
+		return v.(string)
+	}
+
+	panic(fmt.Sprintf("field not found: %v", c.Name()))
 }
 
 func (r *BasicRec) UInt64(c *cols.UInt64) uint64 {

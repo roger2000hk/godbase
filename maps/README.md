@@ -95,6 +95,9 @@ type Any interface {
 	// Returns the number of elems in map
 	Len() int64
 
+	// Inserts/updates key to val and returns val
+	Set(key Key, val interface{}) interface{}
+
 	// Returns string repr for printing
 	String() string
 }

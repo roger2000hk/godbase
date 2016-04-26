@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestReadWriteVal(t *testing.T) {
+func TestReadWrite(t *testing.T) {
 	var buf bytes.Buffer
 	col := NewInt64("foo")
 

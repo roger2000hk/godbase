@@ -10,8 +10,8 @@ Consolidated hash implementations by extracting slot logic into a Slots interfac
 ### 2016-04-26 added maps.Wrap & maps.Suffix
 Added wrap struct for easy api extension and implemented a basic suffix map using the new functionality.
 
-### 2016-04-27 added maps.Any.Get()
-Added simplified interface to get value.
+### 2016-04-27 added maps.Any.Get/Set
+Added simplified methods to get / set value for key.
 
 ### 2016-04-27 changed maps.Any.Delete/Find/Insert iter semantics
-All methods now return iter to current if found, not prev as before.
+All methods now return iter to current if found, not prev.

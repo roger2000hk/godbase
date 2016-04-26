@@ -23,6 +23,10 @@ type Int64 struct {
 	BasicCol
 }
 
+type String struct {
+	BasicCol
+}
+
 type UInt64 struct {
 	BasicCol
 }
@@ -31,11 +35,20 @@ func NewInt64(n string) *Int64 {
 	return new(Int64).Init(n)
 }
 
+func NewString(n string) *String {
+	return new(String).Init(n)
+}
+
 func NewUInt64(n string) *UInt64 {
 	return new(UInt64).Init(n)
 }
 
 func (c *Int64) Init(n string) *Int64 {
+	c.Basic.Init(n)
+	return c
+}
+
+func (c *String) Init(n string) *String {
 	c.Basic.Init(n)
 	return c
 }
@@ -55,6 +68,16 @@ func (c *Int64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
+func (c *String) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
+	v := make([]byte, s)
+
+	if _, err := io.ReadFull(r, v); err != nil {
+		return nil, err
+	}
+
+	return string(v), nil
+}
+
 func (c *UInt64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	var v uint64
 
@@ -70,6 +93,12 @@ func (c *Int64) WriteVal(_v interface{}, w io.Writer) error {
 	return WriteBinVal(8, &v, w)
 }
 
+func (c *String) WriteVal(_v interface{}, w io.Writer) error {
+	v := []byte(_v.(string))
+	WriteSize(ValSize(len(v)), w)
+	_, err := w.Write(v)
+	return err
+}
 
 func (c *UInt64) WriteVal(_v interface{}, w io.Writer) error {
 	v := _v.(uint64)
@@ -84,14 +113,8 @@ func ReadBin(ptr interface{}, r io.Reader) error {
 	return nil
 }
 
-func ReadSize(r io.Reader) (ValSize, error) {
-	var v ValSize
-
-	if err := ReadBin(&v, r); err != nil {
-		return 0, err
-	}
-
-	return v, nil
+func ReadSize(r io.Reader) (s ValSize, err error) {
+	return s, ReadBin(&s, r)
 }
 
 func WriteBin(ptr interface{}, w io.Writer) error {

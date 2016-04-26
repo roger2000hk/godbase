@@ -58,6 +58,11 @@ func (m Map) Len() int64 {
 	return int64(len(m))
 }
 
+func (m Map) Set(key Key, val interface{}) interface{} {
+	m[key] = val
+	return val
+}
+
 func (m Map) String() string {
 	return fmt.Sprintf("%v", m)
 }

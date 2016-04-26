@@ -201,6 +201,16 @@ func (m *ESkip) Len() int64 {
 	return m.len
 }
 
+func (m *ESkip) Set(key Key, val interface{}) interface{} {
+	i, ok := m.Insert(nil, key, val, false)
+
+	if !ok && i != val {
+		panic("changing embedded val for key is not supported!")
+	}
+
+	return val
+}
+
 func (m *ESkip) String() string {
 	var buf bytes.Buffer
 

@@ -256,6 +256,16 @@ func (m *Skip) Levels() int {
 	return res
 }
 
+func (m *Skip) Set(key Key, val interface{}) interface{} {
+	i, ok := m.Insert(nil, key, val, false)
+
+	if !ok {
+		i.(*SkipNode).val = val
+	}
+
+	return val
+}
+
 func (m *Skip) String() string {
 	var buf bytes.Buffer
 	start := &m.top

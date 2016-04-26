@@ -33,6 +33,10 @@ func (m *Wrap) Len() int64 {
 	return m.wrapped.Len()
 }
 
+func (m *Wrap) Set(key Key, val interface{}) interface{} {
+	return m.wrapped.Set(key, val)
+}
+
 func (m *Wrap) String() string {
 	return m.wrapped.String()
 }
