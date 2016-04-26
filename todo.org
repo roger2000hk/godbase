@@ -3,11 +3,16 @@
 ** update tests
 
 * add testfn to Delete
+** rename to DeleteMulti
 ** only delete if testfn nil / returns true
-** add simplified free fn DeleteAll(key) cnt
+** add Delete(key) int
 
 * rename Insert to InsertMulti
-** add simplified free fn Insert(key, val)
+** add Insert(key, interface{}) bool
+
+* add maps.Any.Set(Key, interface{}) interface{} 
+** replaces val update in Insert
+** use Insert and update iter val if false
 
 * ---
 
