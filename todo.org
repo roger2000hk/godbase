@@ -2,6 +2,8 @@
 ** copy RW/Ctx from old
 *** rename RW to Lock
 
+* add find loop in both maps in runCutTests
+
 * add locks.RWHashMap
 ** keep one locks.RW per slot
 
