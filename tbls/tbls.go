@@ -10,24 +10,29 @@ import (
 	"io"
 )
 
-type ColIter maps.Iter
-
 type Any interface {
 	defs.Any
 	Add(cols.Any) cols.Any
 	Col(n string) cols.Any
 	Cols() ColIter
 	Read(rec recs.Any, r io.Reader) (recs.Any, error)
+	Upsert(rec recs.Any) recs.Any
 	Write(recs.Any, io.Writer) error
 }
 
 type Basic struct {
-	cols maps.Skip
 	defs.Basic
+	cols maps.Skip
+	recIdHash recs.IdHash
+	recs maps.Hash
 }
 
-func New(n string) Any {
-	return new(Basic).Init(n)
+type RecAlloc *maps.SkipAlloc
+type ColIter maps.Iter
+type RecIterIter maps.Iter
+
+func New(n string, rsc int, ra RecAlloc, rls int) Any {
+	return new(Basic).Init(n, rsc, ra, rls)
 }
 
 func (t *Basic) Col(n string) cols.Any {
@@ -46,9 +51,17 @@ func (t *Basic) Add(c cols.Any) cols.Any {
 	return t.cols.Set(maps.StringKey(c.Name()), c).(cols.Any)
 }
 
-func (t *Basic) Init(n string) *Basic {
+func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
+	t.recIdHash.Init()
+
+	hashRecId := func(_id maps.Key) uint64 {
+		id := _id.(recs.Id)
+		return t.recIdHash.Hash(id)
+	}
+
+	t.recs.Init(maps.NewSkipSlots(rsc, hashRecId, ra, rls))
 	t.Add(recs.CreatedAtCol())
 	t.Add(recs.IdCol())
 	return t
@@ -79,6 +92,21 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 	}
 
 	return rec, nil
+}
+
+func (t *Basic) Upsert(rec recs.Any) recs.Any {
+	id := rec.Id()
+	rr := rec.New()
+	
+	for i := r.cols.First(); i.Valid(); i = i.Next() {
+		c := i.Val().(cols.Any)
+		if v, ok := rec.Get(c); ok {
+			rr.Set(c, v)
+		}
+	}
+	
+	t.recs.Set(id, rr)
+	return rec
 }
 
 func (t *Basic) Write(rec recs.Any, w io.Writer) error {

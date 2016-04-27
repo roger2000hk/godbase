@@ -10,7 +10,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	foos := New("foos")
+	foos := New("foos", 100, nil, 1)
 
 	foos.Add(cols.NewInt64("int64"))
 	foos.Add(cols.NewString("string"))
@@ -37,7 +37,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestReadWriteRec(t *testing.T) {
-	foos := New("foos")
+	foos := New("foos", 100, nil, 1)
 
 	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64)
 	stringCol := foos.Add(cols.NewString("string")).(*cols.String)

@@ -110,7 +110,7 @@ func (c *Time) Read(s ValSize, r io.Reader) (interface{}, error) {
 }
 
 func (c *UId) Read(s ValSize, r io.Reader) (interface{}, error) {
-	var v [16]byte
+	var v godbase.UId
 
 	if _, err := io.ReadFull(r, v[:]); err != nil {
 		return nil, err
@@ -139,7 +139,7 @@ func (c *Time) Write(_v interface{}, w io.Writer) error {
 }
 
 func (c *UId) Write(_v interface{}, w io.Writer) error {
-	v := [16]byte(_v.(godbase.UId))
+	v := _v.(godbase.UId)
 	return WriteBytes(v[:], w)
 }
 

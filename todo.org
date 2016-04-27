@@ -1,19 +1,22 @@
-* add tbls.Basic.recs maps.Any
-** take as constructor param
+* add maps.Any.New()
+** return new empty of same type
+** add to readme
+
+* add Tbl.Len()
+
+* add Tbl.Iter()
+** extend maps.Iter
+
 
 * add Tbl.Dump(io.Writer)
 ** write all recs
 
-* add Tbl.Load(io.Writer)
+* add Tbl.Slurp(io.Writer)
 ** read until eof
 
-* add Tbl.Len()
+* rename Less to KeyLess in project
 
-* add Tbl.Upsert()
-** insert into rec map
-
-* add Tbl.Iter()
-** extend maps.Iter
+* ---
 
 * add testfn to Delete
 ** only delete if testfn nil / returns true
@@ -31,6 +34,15 @@
 
 * add cols.Bytes
 * add cols.Float64
+
+
+* add Tbl.Delete()
+
+* add tbls.Wrap
+
+* add tbls.Log wrap
+** keep []Rec queue
+** insert DeleteRec on delete
 
 
 * add tbls/cols/recs to readme
