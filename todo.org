@@ -1,33 +1,47 @@
-* add Tbl.WriteRec(Rec, io.Writer) error
-** store nr of cols
-** call writeval for all cols
+* add Tbl.ReadRec(Rec, io.Reader) (Rec, error)
+** read into existing rec and return
+** look up columns via tbl
+** add to tbls_test
+*** loop cols via iter & check vals
 
-* add Rec.Read(Tbl, io.Reader) error
-** load vals into current rec
-** load nr of cols & readval for all cols
-
-* add read/write rec test
+* add tbls.Basic.recs maps.Any
+** take as constructor param
 
 * add Tbl.Dump(io.Writer)
+** write all recs
 
 * add Tbl.Load(io.Writer)
+** read until eof
 
+* add cols.Time
+** add rec methods
+** add recs.createdCol
+*** add Rec.Created()
+**** init to time.Now() if nil
 
-* add testfn to Delete
-** only delete if testfn nil / returns true
-** add DeleteAll(key) int
+* add Tbl.Upsert()
+
+* add Tbl.Upserted(Rec) time.Time
+** add Basic.upsertCol
+** init to time.Now() in Upsert()
+
+* add Tbl.RevisionCol()
+** init to 1 if not exists, otherwise inc in Upsert()
 
 * add cols.Bool
 ** add rec methods
 
-* add cols.Time
-** add rec methods
-
+* add cols.Bytes
 * add cols.Float64
+
 
 * add tbls/cols/recs to readme
 
 * ---
+
+* add testfn to Delete
+** only delete if testfn nil / returns true
+** add DeleteAll(key) int
 
 * add find loop in both maps in runCutTests
 
