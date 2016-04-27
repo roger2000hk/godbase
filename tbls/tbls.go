@@ -18,7 +18,7 @@ type Any interface {
 	Len() int64
 	Reset(recs.Any) (recs.Any, bool)
 	Read(recs.Any, io.Reader) (recs.Any, error)
-	Upsert(recs.Any) recs.Any
+	Upsert(recs.Any) (recs.Any, bool)
 	Write(recs.Any, io.Writer) error
 }
 
@@ -68,8 +68,8 @@ func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
 	}
 
 	t.recs.Init(maps.NewSkipSlots(rsc, hashRecId, ra, rls))
-	t.Add(recs.CreatedAtCol())
-	t.Add(recs.IdCol())
+	t.Add(cols.CreatedAt())
+	t.Add(cols.RecId())
 	return t
 }
 
@@ -118,7 +118,7 @@ func (t *Basic) Reset(rec recs.Any) (recs.Any, bool) {
 	return rec, true
 }
 
-func (t *Basic) Upsert(rec recs.Any) recs.Any {
+func (t *Basic) Upsert(rec recs.Any) (recs.Any, bool) {
 	id := rec.Id()
 	rr := rec.New()
 	
@@ -129,8 +129,8 @@ func (t *Basic) Upsert(rec recs.Any) recs.Any {
 		}
 	}
 	
-	t.recs.Set(id, rr)
-	return rec
+	
+	return rec, t.recs.Set(id, rr)
 }
 
 func (t *Basic) Write(rec recs.Any, w io.Writer) error {

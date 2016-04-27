@@ -21,12 +21,12 @@ func TestCreate(t *testing.T) {
 	}
 
 	i := foos.Cols()
-	if c := i.Val().(cols.Any); c != recs.CreatedAtCol() {
+	if c := i.Val().(cols.Any); c != cols.CreatedAt() {
 		t.Errorf("invalid col: %v", c)
 	}
 
 	i = i.Next()
-	if c := i.Val().(cols.Any); c != recs.IdCol() {
+	if c := i.Val().(cols.Any); c != cols.RecId() {
 		t.Errorf("invalid col: %v", c)
 	}
 
@@ -70,7 +70,7 @@ func TestReadWriteRec(t *testing.T) {
 
 func TestUpsert(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
-	r := foos.Upsert(recs.New(nil))
+	r, _ := foos.Upsert(recs.New(nil))
 
 	if l := foos.Len(); l != 1 {
 		t.Errorf("invalid len after upsert: %v", l)	
