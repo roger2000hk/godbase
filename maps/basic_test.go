@@ -134,18 +134,12 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 		v := &its[i].skipNode
 
 		res, ok := m.Find(nil, k, nil)
-		if res != nil {
-			res = res.Next()
-		}
 
 		if !ok || (res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid find(%v) res: %v/%v/%v/%v", label, k, ok, res.Key() == k, res.Val().(*ESkipNode).key, v.key)
 		}
 
 		res, ok = m.Find(nil, k, v); 
-		if res != nil {
-			res = res.Next()
-		}
 		
 		if !ok || (res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid find(%v) res: %v", label, k, res)		

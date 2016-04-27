@@ -163,7 +163,12 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 			n = n.next
 		}
 
-		for n.key != nil && n.key.Less(key) {
+		isless := false
+		if n.key != nil {
+			isless = n.key.Less(key)
+		}
+
+		for isless {
 			if steps == maxSteps && pn != nil {
 				var nn *SkipNode
 				nn = m.AllocNode(n.key, n.val, pn)
@@ -173,10 +178,11 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 			}
 
 			n = n.next
+			isless = n.key != nil && n.key.Less(key)
 			steps++
 		}
 
-		if n.key == key {
+		if !isless && n.key == key {
 			n = n.Bottom()
 
 			for n.prev.key == key {

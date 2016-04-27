@@ -138,17 +138,24 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 	maxSteps, steps := 1, 1
 
 	for i := 0; i < ESkipLevels; i++ {
-		for n != &m.root && n.key.Less(key)  {
+		isless := false
+
+		if n != &m.root {
+			isless = n.key.Less(key)
+		}
+		
+		for isless  {
 			if steps == maxSteps && i > 0 {
 				pn = pn.InsertAfter(n, i-1)
 				steps = 0
 			}
 			
 			n = n.next[i]
+			isless = n != &m.root && n.key.Less(key)
 			steps++
 		}
 		
-		if n.key == key {
+		if !isless && n.key == key {
 			for n.prev[ESkipLevels-1].key == key {
 				n = n.prev[ESkipLevels-1]
 			}
