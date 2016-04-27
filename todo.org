@@ -2,11 +2,33 @@
 ** return new empty of same type
 ** add to readme
 
+* add cols.Any.Clone(interface{})
+
+* add Rec.Clone(cs cols.Set) Any
+** add cols.Set with EachCol
+*** implement for Tbl / Col
+** use New() & cols.Clone()
+** use in Tbl.Upsert instead of loop
+
 * add Tbl.Len()
 
 * add Tbl.Iter()
 ** extend maps.Iter
 
+
+* move recs.IdCol() & recs.CreatedAtCol() to cols
+** turn into public vars
+** remove fns
+** init with init fn
+** grab address with &
+
+* add cols.Type interface
+** add BasicType
+** add Any.ColType() Type
+** move Read/Write to Type
+** init Basic with type
+** try to convert col types to aliases
+*** problem with ptr receivers?
 
 * add Tbl.Dump(io.Writer)
 ** write all recs
@@ -48,6 +70,9 @@
 * add tbls/cols/recs to readme
 
 * ---
+
+* add maps.Any.Clone(start, end, MapFn)
+** like Cut, but clone elems
 
 * add find loop in both maps in runCutTests
 
