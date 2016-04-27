@@ -18,6 +18,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	foos.Add(bar)
 
 	// fill table with recs
+
 	rs := make([]recs.Any, nrecs)
 
 	for i, _ := range rs {
@@ -46,6 +47,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	}
 
 	// slurp recs from buffer
+
 	if err := foos.Slurp(&buf); err != nil {
 		panic(err)
 	}
