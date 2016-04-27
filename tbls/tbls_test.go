@@ -37,7 +37,7 @@ func TestWriteRec(t *testing.T) {
 	stringCol := foos.Add(cols.NewString("string")).(*cols.String)
 	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UId)
 	
-	r := recs.New()
+	r := recs.New(nil)
 	r.SetInt64(int64Col, 1)
 	r.SetString(stringCol, "abc")
 	r.SetUId(uidCol, godbase.NewUId())

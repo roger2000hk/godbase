@@ -6,7 +6,7 @@ import (
 )
 
 func TestId(t *testing.T) {
-	r1, r2 := New(), New()
+	r1, r2 := New(nil), New(nil)
 
 	if r1.Id() == r2.Id() {
 		t.Errorf("equal ids")
@@ -16,7 +16,7 @@ func TestId(t *testing.T) {
 func TestGetSet(t *testing.T) {
 	c := cols.NewInt64("foo")
 
-	r := New()
+	r := New(nil)
 
 	if v, ok := r.Find(c); ok {
 		t.Errorf("invalid get res from empty rec: %v", v)

@@ -1,3 +1,10 @@
+* add cols.Time
+** add rec methods
+** add recs.createdCol
+** add to cols in tbl.init
+*** add Rec.Created()
+** init to time.Now() in rec.init
+
 * add Tbl.ReadRec(Rec, io.Reader) (Rec, error)
 ** read into existing rec and return
 ** look up columns via tbl
@@ -12,12 +19,6 @@
 
 * add Tbl.Load(io.Writer)
 ** read until eof
-
-* add cols.Time
-** add rec methods
-** add recs.createdCol
-*** add Rec.Created()
-**** init to time.Now() if nil
 
 * add Tbl.Upsert()
 

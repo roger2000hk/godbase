@@ -26,6 +26,7 @@ type Basic maps.Skip
 type Id godbase.UId
 type Iter maps.Iter
 type Size uint32
+type Alloc maps.SkipAlloc
 
 var idCol = cols.NewUId("godbase/id")
 
@@ -33,8 +34,12 @@ func IdCol() *cols.UId {
 	return idCol
 }
 
-func New() Any {
-	return new(Basic).Init()
+func New(alloc *Alloc) Any {
+	return new(Basic).Init(alloc)
+}
+
+func NewAlloc(s int) *Alloc {
+	return (*Alloc)(maps.NewSkipAlloc(s))
 }
 
 func NewId() Id {
@@ -67,17 +72,12 @@ func (r *Basic) Get(c cols.Any) interface{} {
 }
 
 func (r *Basic) Id() Id {
-	if v, ok := r.Find(IdCol()); ok {
-		return v.(Id)
-	}
-
-	res := NewId()
-	r.SetUId(IdCol(), godbase.UId(res))
-	return res
+	return Id(r.UId(idCol))
 }
 
-func (r *Basic) Init() *Basic {
-	r.AsMap().Init(nil, 1)
+func (r *Basic) Init(alloc *Alloc) *Basic {
+	r.AsMap().Init((*maps.SkipAlloc)(alloc), 1)
+	r.SetUId(idCol, godbase.NewUId())
 	return r
 }
 
