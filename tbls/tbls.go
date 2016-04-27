@@ -17,6 +17,7 @@ type Any interface {
 	Add(cols.Any) cols.Any
 	Col(n string) cols.Any
 	Cols() ColIter
+	Read(rec recs.Any, r io.Reader) (recs.Any, error)
 	Write(recs.Any, io.Writer) error
 }
 
@@ -52,14 +53,41 @@ func (t *Basic) Init(n string) *Basic {
 	return t
 }
 
-func (t *Basic) Write(r recs.Any, w io.Writer) error {
-	s := recs.Size(r.Len())
+func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
+	var s recs.Size
 
-	if err := godbase.WriteVal(&s, w); err != nil {
+	if err := godbase.Read(&s, r); err != nil {
+		return nil, err
+	}
+	
+	for i := recs.Size(0); i < s; i++ {
+		var n string
+		var err error
+
+		if n, err = cols.ReadName(r); err != nil {
+			return nil, err
+		}
+
+		c := t.Col(n)
+		var v interface{}
+		if v, err = cols.Read(c, r); err != nil {
+			return nil, err
+		}
+
+		rec.Set(c, v)
+	}
+
+	return rec, nil
+}
+
+func (t *Basic) Write(rec recs.Any, w io.Writer) error {
+	s := recs.Size(rec.Len())
+
+	if err := godbase.Write(&s, w); err != nil {
 		return err
 	}
 
-	for i := r.Iter(); i.Valid(); i=i.Next() {
+	for i := rec.Iter(); i.Valid(); i=i.Next() {
 		if err := cols.Write(i.Key().(cols.Any), i.Val(), w); err != nil {
 			return err
 		}

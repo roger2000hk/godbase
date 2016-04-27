@@ -30,7 +30,7 @@ func TestCreate(t *testing.T) {
 	}
 }
 
-func TestWriteRec(t *testing.T) {
+func TestReadWriteRec(t *testing.T) {
 	foos := New("foos")
 
 	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64)
@@ -44,6 +44,18 @@ func TestWriteRec(t *testing.T) {
 
 	var buf bytes.Buffer
 	if err := foos.Write(r, &buf); err != nil {
-		t.Errorf("write error: %v", err)
+		panic(err)
+	}
+
+	rr, err := foos.Read(recs.New(nil), &buf);
+	if err != nil {
+		panic(err)
+	}
+
+	for i := foos.Cols(); i.Valid(); i = i.Next() {
+		c := i.Val().(cols.Any)
+		if rr.Get(c) != r.Get(c) {
+			t.Errorf("invalid loaded val: %v/%v", rr.Get(c), r.Get(c))
+		}
 	}
 }

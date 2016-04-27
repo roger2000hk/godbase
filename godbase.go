@@ -20,7 +20,7 @@ func NewUId() UId {
 	return UId(res)
 }
 
-func ReadVal(ptr interface{}, r io.Reader) error {
+func Read(ptr interface{}, r io.Reader) error {
 	if err := binary.Read(r, ByteOrder, ptr); err != nil {
 		return err
 	}
@@ -28,6 +28,6 @@ func ReadVal(ptr interface{}, r io.Reader) error {
 	return nil
 }
 
-func WriteVal(ptr interface{}, w io.Writer) error {
+func Write(ptr interface{}, w io.Writer) error {
 	return binary.Write(w, ByteOrder, ptr)
 }

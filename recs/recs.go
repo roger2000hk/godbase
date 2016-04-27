@@ -15,6 +15,7 @@ type Any interface {
 	Int64(*cols.Int64) int64
 	Iter() Iter
 	Len() int
+	Set(cols.Any, interface{}) interface{}
 	SetInt64(*cols.Int64, int64) int64
 	SetString(*cols.String, string) string
 	SetUId(*cols.UId, godbase.UId) godbase.UId
@@ -46,17 +47,13 @@ func NewId() Id {
 	return Id(godbase.NewUId())
 }
 
-func (r *Basic) AsMap() *maps.Skip {
-	return (*maps.Skip)(r)
-}
-
 func (r *Basic) Delete(c cols.Any) bool {
-	_, cnt := r.AsMap().Delete(nil, nil, c, nil)
+	_, cnt := r.asMap().Delete(nil, nil, c, nil)
 	return cnt == 1
 }
 
 func (r *Basic) Find(c cols.Any) (interface{}, bool) {
-	if v, ok := r.AsMap().Get(c); ok {
+	if v, ok := r.asMap().Get(c); ok {
 		return v, true
 	}
 	
@@ -76,13 +73,13 @@ func (r *Basic) Id() Id {
 }
 
 func (r *Basic) Init(alloc *Alloc) *Basic {
-	r.AsMap().Init((*maps.SkipAlloc)(alloc), 1)
+	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
 	r.SetUId(idCol, godbase.NewUId())
 	return r
 }
 
 func (r *Basic) Iter() Iter {
-	return Iter(r.AsMap().First())
+	return Iter(r.asMap().First())
 }
 
 func (r *Basic) Int64(c *cols.Int64) int64 {
@@ -90,19 +87,23 @@ func (r *Basic) Int64(c *cols.Int64) int64 {
 }
 
 func (r *Basic) Len() int {
-	return int(r.AsMap().Len())
+	return int(r.asMap().Len())
+}
+
+func (r *Basic) Set(c cols.Any, v interface{}) interface{} {
+	return r.asMap().Set(c, v)
 }
 
 func (r *Basic) SetInt64(c *cols.Int64, v int64) int64 {
-	return r.AsMap().Set(c, v).(int64)
+	return r.Set(c, v).(int64)
 }
 
 func (r *Basic) SetString(c *cols.String, v string) string {
-	return r.AsMap().Set(c, v).(string)
+	return r.Set(c, v).(string)
 }
 
 func (r *Basic) SetUId(c *cols.UId, v godbase.UId) godbase.UId {
-	return r.AsMap().Set(c, v).(godbase.UId)
+	return r.Set(c, v).(godbase.UId)
 }
 
 func (r *Basic) String(c *cols.String) string {
@@ -111,4 +112,8 @@ func (r *Basic) String(c *cols.String) string {
 
 func (r *Basic) UId(c *cols.UId) godbase.UId {
 	return r.Get(c).(godbase.UId)
+}
+
+func (r *Basic) asMap() *maps.Skip {
+	return (*maps.Skip)(r)
 }
