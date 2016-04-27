@@ -21,3 +21,6 @@ Added methods to get iter to first elem and implemented for sorted maps.
 
 ### 2016-04-27 added maps.Any.New
 Added method to return a new map of the same type.
+
+### 2016-04-28 added maps.Any.Clear/While
+Added methods for clearing map & for looping with callback.

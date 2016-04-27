@@ -109,6 +109,9 @@ type Any interface {
 
 	// Returns string repr for printing
 	String() string
+
+	// Calls fn with successive elems until it returns false; returns false on early exit
+	While(TestFn) bool
 }
 
 type TestFn func (Key, interface{}) bool
