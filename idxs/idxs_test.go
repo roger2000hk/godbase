@@ -4,8 +4,8 @@ import (
 	"testing"
 )
 
-func TestKey(t *testing.T) {
-	if [2]string{"abc", "def"} != [2]string{"abc", "def"} {
+func TestKeyEq(t *testing.T) {
+	if [2]interface{}{"abc", "def"} != [2]interface{}{"abc", "def"} {
 		t.Errorf("not equal")
 	}
 }

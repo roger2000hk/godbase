@@ -6,6 +6,7 @@ import (
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/recs"
 	"testing"
+	"time"
 )
 
 func TestCreate(t *testing.T) {
@@ -20,6 +21,11 @@ func TestCreate(t *testing.T) {
 	}
 
 	i := foos.Cols()
+	if c := i.Val().(cols.Any); c != recs.CreatedCol() {
+		t.Errorf("invalid col: %v", c)
+	}
+
+	i = i.Next()
 	if c := i.Val().(cols.Any); c != recs.IdCol() {
 		t.Errorf("invalid col: %v", c)
 	}
@@ -35,11 +41,13 @@ func TestReadWriteRec(t *testing.T) {
 
 	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64)
 	stringCol := foos.Add(cols.NewString("string")).(*cols.String)
+	timeCol := foos.Add(cols.NewTime("time")).(*cols.Time)
 	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UId)
 	
 	r := recs.New(nil)
 	r.SetInt64(int64Col, 1)
 	r.SetString(stringCol, "abc")
+	r.SetTime(timeCol, time.Now())
 	r.SetUId(uidCol, godbase.NewUId())
 
 	var buf bytes.Buffer

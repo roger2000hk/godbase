@@ -5,12 +5,6 @@
 *** add Rec.Created()
 ** init to time.Now() in rec.init
 
-* add Tbl.ReadRec(Rec, io.Reader) (Rec, error)
-** read into existing rec and return
-** look up columns via tbl
-** add to tbls_test
-*** loop cols via iter & check vals
-
 * add tbls.Basic.recs maps.Any
 ** take as constructor param
 

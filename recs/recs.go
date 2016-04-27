@@ -5,6 +5,7 @@ import (
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/maps"
+	"time"
 )
 
 type Any interface {
@@ -18,8 +19,10 @@ type Any interface {
 	Set(cols.Any, interface{}) interface{}
 	SetInt64(*cols.Int64, int64) int64
 	SetString(*cols.String, string) string
+	SetTime(*cols.Time, time.Time) time.Time
 	SetUId(*cols.UId, godbase.UId) godbase.UId
 	String(*cols.String) string
+	Time(*cols.Time) time.Time
 	UId(*cols.UId) godbase.UId
 }
 
@@ -29,7 +32,12 @@ type Iter maps.Iter
 type Size uint32
 type Alloc maps.SkipAlloc
 
+var createdCol = cols.NewTime("godbase/created")
 var idCol = cols.NewUId("godbase/id")
+
+func CreatedCol() *cols.Time {
+	return createdCol
+}
 
 func IdCol() *cols.UId {
 	return idCol
@@ -74,6 +82,7 @@ func (r *Basic) Id() Id {
 
 func (r *Basic) Init(alloc *Alloc) *Basic {
 	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
+	r.SetTime(createdCol, time.Now())
 	r.SetUId(idCol, godbase.NewUId())
 	return r
 }
@@ -102,12 +111,20 @@ func (r *Basic) SetString(c *cols.String, v string) string {
 	return r.Set(c, v).(string)
 }
 
+func (r *Basic) SetTime(c *cols.Time, v time.Time) time.Time {
+	return r.Set(c, v).(time.Time)
+}
+
 func (r *Basic) SetUId(c *cols.UId, v godbase.UId) godbase.UId {
 	return r.Set(c, v).(godbase.UId)
 }
 
 func (r *Basic) String(c *cols.String) string {
 	return r.Get(c).(string)
+}
+
+func (r *Basic) Time(c *cols.Time) time.Time {
+	return r.Get(c).(time.Time)
 }
 
 func (r *Basic) UId(c *cols.UId) godbase.UId {

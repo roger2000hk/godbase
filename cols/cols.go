@@ -5,6 +5,7 @@ import (
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/defs"
 	"io"
+	"time"
 )
 
 type NameSize uint8
@@ -28,6 +29,10 @@ type String struct {
 	BasicCol
 }
 
+type Time struct {
+	BasicCol
+}
+
 type UId struct {
 	BasicCol
 }
@@ -40,6 +45,10 @@ func NewString(n string) *String {
 	return new(String).Init(n)
 }
 
+func NewTime(n string) *Time {
+	return new(Time).Init(n)
+}
+
 func NewUId(n string) *UId {
 	return new(UId).Init(n)
 }
@@ -50,6 +59,11 @@ func (c *Int64) Init(n string) *Int64 {
 }
 
 func (c *String) Init(n string) *String {
+	c.Basic.Init(n)
+	return c
+}
+
+func (c *Time) Init(n string) *Time {
 	c.Basic.Init(n)
 	return c
 }
@@ -79,6 +93,22 @@ func (c *String) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return string(v), nil
 }
 
+func (c *Time) Read(s ValSize, r io.Reader) (interface{}, error) {
+	bs := make([]byte, s)
+
+	if _, err := io.ReadFull(r, bs); err != nil {
+		return nil, err
+	}
+
+	var v time.Time
+	
+	if err := v.UnmarshalBinary(bs); err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
 func (c *UId) Read(s ValSize, r io.Reader) (interface{}, error) {
 	var v [16]byte
 
@@ -96,6 +126,16 @@ func (c *Int64) Write(_v interface{}, w io.Writer) error {
 
 func (c *String) Write(_v interface{}, w io.Writer) error {
 	return WriteBytes([]byte(_v.(string)), w)
+}
+
+func (c *Time) Write(_v interface{}, w io.Writer) error {
+	bs, err := _v.(time.Time).MarshalBinary()
+
+	if err != nil {
+		return err
+	}
+
+	return WriteBytes(bs, w)
 }
 
 func (c *UId) Write(_v interface{}, w io.Writer) error {
