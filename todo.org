@@ -1,16 +1,6 @@
-* switch keys to literal types in idx demo
-
-* add Tbl.Iter() RecIter
-** add RecIter type
-** add to tests
-
-* add Tbl.Dump(io.Writer)
-** write all recs
-
-* add Tbl.Slurp(io.Writer)
-** read until eof
-
-* add dump/slurp tests
+* add maps.Any.While(func(Key, interface{}) bool) bool
+** run dump/slurp tests
+** commit dump/slurp
 
 * ---
 
@@ -31,20 +21,24 @@
 * add cols.Bool
 ** add rec methods
 
+
+* add Tbl.Delete()
+
+* run rw lock test with race tool
+
+* update poorslab
+
+* add tbls/cols/recs to readme
+
 * add cols.Bytes
 * add cols.Float64
 
-
-* add Tbl.Delete()
 
 * add tbls.Wrap
 
 * add tbls.Log wrap
 ** keep []Rec queue
 ** insert DeleteRec on delete
-
-
-* add tbls/cols/recs to readme
 
 * ---
 

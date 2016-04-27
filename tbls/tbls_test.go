@@ -59,12 +59,9 @@ func TestReadWriteRec(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
-
-	for i := foos.Cols(); i.Valid(); i = i.Next() {
-		c := i.Val().(cols.Any)
-		if rr.Get(c) != r.Get(c) {
-			t.Errorf("invalid loaded val: %v/%v", rr.Get(c), r.Get(c))
-		}
+	
+	if !rr.Eq(r) {
+		t.Errorf("invalid loaded val: %v/%v", rr, r)
 	}
 }
 
@@ -76,7 +73,45 @@ func TestUpsert(t *testing.T) {
 		t.Errorf("invalid len after upsert: %v", l)	
 	}
 
-	if rr, ok := foos.Reset(recs.Get(r.Id(), nil)); !ok || !rr.Eq(r) {
+	if rr, ok := foos.Reset(recs.Init(r.Id(), nil)); !ok || !rr.Eq(r) {
 		t.Errorf("invalid loaded rec: %v/%v", rr, r)
+	}
+}
+
+func TestDumpClearSlurp(t *testing.T) {
+	const nrecs = 1000
+
+	foos := New("foos", 100, nil, 1)
+
+
+	rs := make([]recs.Any, nrecs)
+
+	for i, _ := range rs {
+		rs[i], _ = foos.Upsert(recs.New(nil))
+	}
+
+	var buf bytes.Buffer
+	if err := foos.Dump(&buf); err != nil {
+		panic(err)
+	}
+
+	foos.Clear()
+
+	if l := foos.Len(); l != 0 {
+		t.Errorf("wrong len after clear: %v", l)
+	}
+
+	if err := foos.Slurp(&buf); err != nil {
+		panic(err)
+	}
+
+	if l := foos.Len(); l != nrecs {
+		t.Errorf("wrong len after slurp: %v", l)
+	}
+
+	for _, r := range rs {
+		if rr, ok := foos.Reset(recs.Init(r.Id(), nil)); !ok || !r.Eq(rr) {
+			t.Errorf("invalid loaded rec: %v/%v", rr, r)
+		}
 	}
 }

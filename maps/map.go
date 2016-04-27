@@ -10,6 +10,12 @@ func NewMap() Map {
 	return make(Map)
 }
 
+func (m Map) Clear() {
+	for k := range m {
+		delete(m, k)
+	}
+}
+
 func (m Map) Cut(start, end Iter, fn MapFn) Any {
 	panic("Map doesn't support iters")
 }
@@ -74,4 +80,14 @@ func (m Map) Set(key Key, val interface{}) bool {
 
 func (m Map) String() string {
 	return fmt.Sprintf("%v", m)
+}
+
+func (m Map) While(fn TestFn) bool {
+	for k, v := range m {
+		if !fn(k, v) {
+			return false
+		}
+	}
+	
+	return true
 }

@@ -15,7 +15,10 @@ type StringKey string
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. 
 
-type ValIter interface {
+type Iter interface {
+	// Returns key for elem or nil if root
+	Key() Key
+
 	// Returns iter to next elem
 	Next() Iter
 
@@ -29,15 +32,11 @@ type ValIter interface {
 	Valid() bool
 }
 
-type Iter interface {
-	ValIter
-
-	// Returns key for elem or nil if root
-	Key() Key
-}
-
 // Basic map ops supported by all implementations
 type Any interface {
+	// Clears all elems from map. Deallocates nodes for maps that use allocators.
+	Clear()
+
 	// Cuts elems from start to end for which fn returns non nil key into new set;
 	// start, end & fn are all optional. When fn is specified, the returned key/val replaces
 	// the original; except for maps with embedded nodes, where the returned val replaces the
@@ -50,7 +49,8 @@ type Any interface {
 	// Deletes elems from start to end, matching key/val;
 	// start, end, key & val are all optional, nil means all elems. Specifying 
 	// iters for hash maps only works within the same slot. Circular deletes,
-	// with start/end on opposite sides of root; are supported. Returns an iter to next 
+	// with start/end on opposite sides of root; are supported. Deallocates nodes
+	// for maps that use allocators. Returns an iter to next 
 	// elem and number of deleted elems.
 
 	Delete(start, end Iter, key Key, val interface{}) (Iter, int)
@@ -85,6 +85,9 @@ type Any interface {
 
 	// Returns string repr for printing
 	String() string
+	
+	// Calls fn with successive elems until it returns false; returns false on early exit
+	While(TestFn) bool
 }
 
 // map allocator interface

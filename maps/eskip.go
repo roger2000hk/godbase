@@ -13,8 +13,22 @@ type ESkip struct {
 	root ESkipNode
 }
 
+type ESkipNode struct {
+	key Key
+	next [ESkipLevels]*ESkipNode
+	prev [ESkipLevels]*ESkipNode
+}
+
 func NewESkip() *ESkip {
 	return new(ESkip).Init()
+}
+
+func (m *ESkip) Clear() {
+	for i := 0; i < ESkipLevels; i++ {
+		m.root.next[i], m.root.prev[i] = nil, nil
+	}
+
+	m.len = 0
 }
 
 func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
@@ -244,12 +258,6 @@ func (m *ESkip) String() string {
 	return buf.String()
 }
 
-type ESkipNode struct {
-	key Key
-	next [ESkipLevels]*ESkipNode
-	prev [ESkipLevels]*ESkipNode
-}
-
 func (n *ESkipNode) Delete() {
 	for i := 0; i < ESkipLevels; i++ {
 		n.prev[i].next[i] = n.next[i]
@@ -294,4 +302,14 @@ func (n *ESkipNode) Val() interface{} {
 
 func (n *ESkipNode) Valid() bool {
 	return n.key != nil
+}
+
+func (m *ESkip) While(fn TestFn) bool {
+	for n := m.root.next[ESkipLevels-1]; n != &m.root; n = n.next[ESkipLevels-1] {
+		if !fn(n.key, n) {
+			return false
+		}
+	} 
+
+	return true
 }

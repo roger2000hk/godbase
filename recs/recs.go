@@ -35,17 +35,18 @@ type IdHash struct {
 	imp hash.Hash64
 }
 
+type Alloc *maps.SkipAlloc
 type Basic maps.Skip
 type Id godbase.UId
 type Iter maps.Iter
 type Size uint32
-type Alloc *maps.SkipAlloc
+type TestFn func(Any) bool
 
 func BasicNew(alloc Alloc) Any {
 	return new(Basic).BasicInit(alloc)
 }
 
-func Get(id Id, alloc Alloc) Any {
+func Init(id Id, alloc Alloc) Any {
 	r := new(Basic).BasicInit(alloc)
 	r.SetUId(cols.RecId(), godbase.UId(id))
 	return r

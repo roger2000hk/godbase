@@ -40,7 +40,10 @@ type HashFn func (Key) uint64
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. 
 
-type ValIter interface {
+type Iter interface {
+	// Returns key for elem or nil if root
+	Key() Key
+
 	// Returns iter to next elem
 	Next() Iter
 
@@ -54,15 +57,11 @@ type ValIter interface {
 	Valid() bool
 }
 
-type Iter interface {
-	ValIter
-
-	// Returns key for elem or nil if root
-	Key() Key
-}
-
 // Basic map ops supported by all implementations
 type Any interface {
+	// Clears all elems from map. Deallocates nodes for maps that use allocators.
+	Clear()
+
 	// Cuts elems from start to end for which fn returns non nil key into new set;
 	// start, end & fn are all optional. When fn is specified, the returned key/val replaces
 	// the original; except for maps with embedded nodes, where the returned val replaces the

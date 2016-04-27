@@ -13,11 +13,14 @@ import (
 type Any interface {
 	defs.Any
 	Add(cols.Any) cols.Any
+	Clear()
 	Col(string) cols.Any
 	Cols() ColIter
+	Dump(io.Writer) error
 	Len() int64
 	Reset(recs.Any) (recs.Any, bool)
 	Read(recs.Any, io.Reader) (recs.Any, error)
+	Slurp(io.Reader) error
 	Upsert(recs.Any) (recs.Any, bool)
 	Write(recs.Any, io.Writer) error
 }
@@ -31,7 +34,6 @@ type Basic struct {
 
 type RecAlloc *maps.SkipAlloc
 type ColIter maps.Iter
-type RecIterIter maps.Iter
 
 func New(n string, rsc int, ra RecAlloc, rls int) Any {
 	return new(Basic).Init(n, rsc, ra, rls)
@@ -55,6 +57,30 @@ func (t *Basic) Add(c cols.Any) cols.Any {
 	}
 
 	panic(fmt.Sprintf("dup col: %v!", c.Name()))
+}
+
+func (t *Basic) Clear() {
+	t.recs.Clear()
+}
+
+func (t *Basic) While(fn recs.TestFn) bool {
+	return t.recs.While(func (_ maps.Key, v interface{}) bool {
+		return fn(v.(recs.Any))
+	})
+}
+
+func (t *Basic) Dump(w io.Writer) error {
+	var err error
+
+	t.While(func (r recs.Any) bool {
+		if err = t.Write(r, w); err != nil {
+			return false
+		}
+
+		return true
+	})
+
+	return err
 }
 
 func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
@@ -116,6 +142,24 @@ func (t *Basic) Reset(rec recs.Any) (recs.Any, bool) {
 	}
 	
 	return rec, true
+}
+
+func (t *Basic) Slurp(r io.Reader) error {
+	for true {
+		rec, err := t.Read(recs.New(nil), r)
+
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return err
+		}
+		
+		t.recs.Set(rec.Id(), rec)
+	}
+
+	return nil
 }
 
 func (t *Basic) Upsert(rec recs.Any) (recs.Any, bool) {

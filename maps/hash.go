@@ -4,9 +4,11 @@ import (
 	"fmt"
 )
 
-type Slots interface {	
+type Slots interface {
+	Clear()
 	Get(key Key, create bool) Any
 	New() Slots
+	While(fn TestFn) bool
 }
 
 type AnySlots struct {
@@ -92,6 +94,41 @@ func NewSlots(sc int, fn HashFn, a SlotAlloc) *AnySlots {
 	ss.alloc = a
 	ss.slots = make([]Any, sc)
 	return ss
+}
+
+func (ss *AnySlots) Clear() {
+	for i := range ss.slots {
+		ss.slots[i] = nil
+	}
+}
+
+func (ss *ESkipSlots) Clear() {
+	for i := range ss.slots {
+		ss.slots[i].Clear()
+	}
+}
+
+func (m *Hash) Clear() {
+	m.slots.Clear()
+	m.len = 0
+}
+
+func (ss *HashSlots) Clear() {
+	for i := range ss.slots {
+		ss.slots[i].Clear()
+	}
+}
+
+func (ss *MapSlots) Clear() {
+	for i := range ss.slots {
+		ss.slots[i] = nil
+	}
+}
+
+func (ss *SkipSlots) Clear() {
+	for i := range ss.slots {
+		ss.slots[i].Clear()
+	}
 }
 
 func (m *Hash) Cut(start, end Iter, fn MapFn) Any {
@@ -219,6 +256,10 @@ func (ss *AnySlots) New() Slots {
 	return NewSlots(len(ss.slots), ss.fn, ss.alloc)
 }
 
+func (ss *ESkipSlots) New() Slots {
+	return NewESkipSlots(len(ss.slots), ss.fn)
+}
+
 func (m *Hash) New() Any {
 	return NewHash(m.slots.New())
 }
@@ -247,3 +288,58 @@ func (m *Hash) Set(key Key, val interface{}) bool {
 func (m *Hash) String() string {
 	return fmt.Sprintf("%v", m.slots)
 }
+
+func (ss *AnySlots) While(fn TestFn) bool {
+	for _, s := range ss.slots {
+		if s != nil && !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (ss *ESkipSlots) While(fn TestFn) bool {
+	for _, s := range ss.slots {
+		if s.isInit && !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (m *Hash) While(fn TestFn) bool {
+	return m.slots.While(fn)
+}
+
+func (ss *HashSlots) While(fn TestFn) bool {
+	for _, s := range ss.slots {
+		if s.isInit && !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (ss *MapSlots) While(fn TestFn) bool {
+	for _, s := range ss.slots {
+		if !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (ss *SkipSlots) While(fn TestFn) bool {
+	for _, s := range ss.slots {
+		if s.isInit && !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
+}
+
