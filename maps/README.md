@@ -10,7 +10,7 @@ I ended up with two designs based on deterministic skip lists. One with a config
 Once sorted maps were working properly, I had the crazy idea to put a hash on top just to see what happens. It turns out that dividing the dataset into a tuned number of ordered sets occasionally beats native maps in the synthetic performance game for millions of items. That's far from the end of the story though. I still haven't had enough time to ponder the consequences of having access to both hashed and ordered aspects of the data simultaneously, but I have a hunch it will bend the rules to my advantage in a number of tricky scenarios. Additionally; any kind of map can be hashed, which opens the door for multi level hashing where each chain is another hash that further divides the dataset along a potentially orthogonal axis.
 
 ## status
-Basic functionality and testing in place; bells, whistles & polish are still on the stove.
+Basic functionality and testing in place. The rest of godbase is being built on top as we speak, have a look around in the other sub packages for examples.
 
 ## benchmarks
 Several parameters are available for tuning the tests, they are defined in test.go
