@@ -1,11 +1,7 @@
-* implement CloneVal & Eq for col types
-
-* try to convert col types to aliases
-** problem with ptr receivers?
-
-* make tests run & commit
-
 * move recs.IdCol() & recs.CreatedAtCol() to cols
+** RecId() & CreatedAt()
+** init vars instead of allocating
+** update code in recs / tbls
 
 * add Tbl.Iter() RecIter
 ** add RecIter type
@@ -17,7 +13,7 @@
 * add Tbl.Slurp(io.Writer)
 ** read until eof
 
-* rename Less to KeyLess in project
+* add dump/slurp tests
 
 * ---
 
