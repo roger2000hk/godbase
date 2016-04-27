@@ -1,12 +1,5 @@
-* add maps.Any.While(func(Key, interface{}) bool) bool
-** run dump/slurp tests
-** commit dump/slurp
-
-* ---
-
-* add testfn to Delete
-** only delete if testfn nil / returns true
-** add DeleteAll(key) int
+* add Tbl.Find(Id) (recs.Any, bool)
+** update example to use Find
 
 * add Tbl.UpsertedAt(Rec) time.Time
 ** add Basic.upsertedAt
@@ -28,8 +21,6 @@
 
 * update poorslab
 
-* add tbls/cols/recs to readme
-
 * add cols.Bytes
 * add cols.Float64
 
@@ -39,6 +30,10 @@
 * add tbls.Log wrap
 ** keep []Rec queue
 ** insert DeleteRec on delete
+
+* add testfn to Delete
+** only delete if testfn nil / returns true
+** add DeleteAll(key) int
 
 * ---
 
