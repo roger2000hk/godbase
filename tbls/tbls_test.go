@@ -73,8 +73,10 @@ func TestUpsert(t *testing.T) {
 		t.Errorf("invalid len after upsert: %v", l)	
 	}
 
-	if rr, ok := foos.Reset(recs.Init(r.Id(), nil)); !ok || !rr.Eq(r) {
-		t.Errorf("invalid loaded rec: %v/%v", rr, r)
+	if rr, err := foos.Get(r.Id()); err != nil {
+		panic(err)
+	} else if !rr.Eq(r) {
+		t.Errorf("invalid rec found: %v/%v", rr, r)
 	}
 }
 
@@ -87,7 +89,11 @@ func TestDumpClearSlurp(t *testing.T) {
 	rs := make([]recs.Any, nrecs)
 
 	for i, _ := range rs {
-		rs[i], _ = foos.Upsert(recs.New(nil))
+		var err error
+
+		if rs[i], err = foos.Upsert(recs.New(nil)); err != nil {
+			panic(err)
+		}
 	}
 
 	var buf bytes.Buffer
@@ -110,8 +116,10 @@ func TestDumpClearSlurp(t *testing.T) {
 	}
 
 	for _, r := range rs {
-		if rr, ok := foos.Reset(recs.Init(r.Id(), nil)); !ok || !r.Eq(rr) {
-			t.Errorf("invalid loaded rec: %v/%v", rr, r)
+		if rr, err := foos.Get(r.Id()); err != nil {
+			panic(err)
+		} else if !r.Eq(rr) {
+			t.Errorf("invalid rec found: %v/%v", rr, r)
 		}
 	}
 }

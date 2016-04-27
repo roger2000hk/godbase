@@ -17,11 +17,12 @@ type Any interface {
 	Col(string) cols.Any
 	Cols() ColIter
 	Dump(io.Writer) error
+	Get(recs.Id) (recs.Any, error)
 	Len() int64
-	Reset(recs.Any) (recs.Any, bool)
+	Reset(recs.Any) (recs.Any, error)
 	Read(recs.Any, io.Reader) (recs.Any, error)
 	Slurp(io.Reader) error
-	Upsert(recs.Any) (recs.Any, bool)
+	Upsert(recs.Any) (recs.Any, error)
 	Write(recs.Any, io.Writer) error
 }
 
@@ -34,6 +35,7 @@ type Basic struct {
 
 type RecAlloc *maps.SkipAlloc
 type ColIter maps.Iter
+type RecNotFound recs.Id
 
 func New(n string, rsc int, ra RecAlloc, rls int) Any {
 	return new(Basic).Init(n, rsc, ra, rls)
@@ -83,6 +85,19 @@ func (t *Basic) Dump(w io.Writer) error {
 	return err
 }
 
+func (e RecNotFound) Error() string {
+	return fmt.Sprintf("rec not found: %v", recs.Id(e).String())
+}
+
+func (t *Basic) Get(id recs.Id) (recs.Any, error) {
+	rr, ok := t.recs.Get(id)
+	if !ok {
+		return nil, RecNotFound(id)
+	}
+	
+	return rr.(recs.Any).Clone(), nil
+}
+
 func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
@@ -130,10 +145,11 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 	return rec, nil
 }
 
-func (t *Basic) Reset(rec recs.Any) (recs.Any, bool) {
-	rr, ok := t.recs.Get(rec.Id())
+func (t *Basic) Reset(rec recs.Any) (recs.Any, error) {
+	id := rec.Id()
+	rr, ok := t.recs.Get(id)
 	if !ok {
-		return nil, false
+		return nil, RecNotFound(id)
 	}
 	
 	for i := rr.(recs.Any).Iter(); i.Valid(); i = i.Next() {
@@ -141,7 +157,7 @@ func (t *Basic) Reset(rec recs.Any) (recs.Any, bool) {
 		rec.Set(c, c.CloneVal(i.Val()))
 	}
 	
-	return rec, true
+	return rec, nil
 }
 
 func (t *Basic) Slurp(r io.Reader) error {
@@ -162,7 +178,7 @@ func (t *Basic) Slurp(r io.Reader) error {
 	return nil
 }
 
-func (t *Basic) Upsert(rec recs.Any) (recs.Any, bool) {
+func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
 	id := rec.Id()
 	rr := rec.New()
 	
@@ -173,8 +189,8 @@ func (t *Basic) Upsert(rec recs.Any) (recs.Any, bool) {
 		}
 	}
 	
-	
-	return rec, t.recs.Set(id, rr)
+	t.recs.Set(id, rr)
+	return rec, nil
 }
 
 func (t *Basic) Write(rec recs.Any, w io.Writer) error {

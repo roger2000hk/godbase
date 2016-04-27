@@ -12,15 +12,16 @@ import (
 )
 
 type Any interface {
-	Eq(Any) bool
-	New() Any
+	Clone() Any
 	Delete(cols.Any) bool
+	Eq(Any) bool
 	Find(cols.Any) (interface{}, bool)
 	Get(cols.Any) interface{}
 	Id() Id
 	Int64(*cols.Int64Col) int64
 	Iter() Iter
 	Len() int
+	New() Any
 	Set(cols.Any, interface{}) interface{}
 	SetInt64(*cols.Int64Col, int64) int64
 	SetString(*cols.StringCol, string) string
@@ -75,6 +76,17 @@ func (r *Basic) BasicInit(alloc Alloc) *Basic {
 
 func (r *Basic) CreatedAt() time.Time {
 	return r.Time(cols.CreatedAt())
+}
+
+func (r *Basic) Clone() Any {
+	res := r.New()
+
+	for i := r.Iter(); i.Valid(); i = i.Next() {
+		c := i.Key().(cols.Any)
+		res.Set(c, c.CloneVal(i.Val()))
+	}
+	
+	return res
 }
 
 func (r *Basic) Delete(c cols.Any) bool {
@@ -175,6 +187,10 @@ func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) godbase.UId {
 
 func (r *Basic) String(c *cols.StringCol) string {
 	return r.Get(c).(string)
+}
+
+func (id Id) String() string {
+	return godbase.UId(id).String()
 }
 
 func (r *Basic) Time(c *cols.TimeCol) time.Time {

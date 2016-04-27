@@ -1,8 +1,10 @@
-* add Tbl.Find(Id) (recs.Any, bool)
-** update example to use Find
+* add custom error recs.NotFound
+** change return value of Reset to error
 
-* move all examples to examples_test
-** update README
+* change return value of Upsert to error
+
+* add Tbl.Find(Id) (recs.Any, error)
+** update example to use Find
 
 * add Tbl.UpsertedAt(Rec) time.Time
 ** add Basic.upsertedAt

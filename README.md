@@ -29,9 +29,9 @@ func TestDumpClearSlurp(t *testing.T) {
 		r := recs.New(nil)
 		r.SetInt64(bar, int64(i))
 		
-		var ok bool
-		if rs[i], ok = foos.Upsert(r); !ok {
-			t.Errorf("upsert failed: %v", i)
+		var err error
+		if rs[i], err = foos.Upsert(r); err != nil {
+			panic(err)
 		}
 	}
 
@@ -66,7 +66,9 @@ func TestDumpClearSlurp(t *testing.T) {
 		// recs.Init() creates a new rec from existing id
 		// Eq() compares values for all cols in receiver
 
-		if rr, ok := foos.Reset(recs.Init(r.Id(), nil)); !ok || !r.Eq(rr) {
+		if rr, err := foos.Get(r.Id()); err != nil {
+			panic(err)
+		} else if !r.Eq(rr) {
 			t.Errorf("invalid loaded rec: %v/%v", rr, r)
 		}
 	}

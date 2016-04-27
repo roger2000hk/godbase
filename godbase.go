@@ -20,6 +20,11 @@ func NewUId() UId {
 	return UId(res)
 }
 
+
+func (id UId) String() string {
+	return uuid.UUID(id).String()
+}
+
 func Read(ptr interface{}, r io.Reader) error {
 	if err := binary.Read(r, ByteOrder, ptr); err != nil {
 		return err
