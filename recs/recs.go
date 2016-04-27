@@ -32,11 +32,11 @@ type Iter maps.Iter
 type Size uint32
 type Alloc maps.SkipAlloc
 
-var createdCol = cols.NewTime("godbase/created")
+var createdAtCol = cols.NewTime("godbase/createdAt")
 var idCol = cols.NewUId("godbase/id")
 
-func CreatedCol() *cols.Time {
-	return createdCol
+func CreatedAtCol() *cols.Time {
+	return createdAtCol
 }
 
 func IdCol() *cols.UId {
@@ -53,6 +53,10 @@ func NewAlloc(s int) *Alloc {
 
 func NewId() Id {
 	return Id(godbase.NewUId())
+}
+
+func (r *Basic) CreatedAt() time.Time {
+	return r.Time(createdAtCol)
 }
 
 func (r *Basic) Delete(c cols.Any) bool {
@@ -82,7 +86,7 @@ func (r *Basic) Id() Id {
 
 func (r *Basic) Init(alloc *Alloc) *Basic {
 	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
-	r.SetTime(createdCol, time.Now())
+	r.SetTime(createdAtCol, time.Now())
 	r.SetUId(idCol, godbase.NewUId())
 	return r
 }

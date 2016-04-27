@@ -7,10 +7,20 @@
 * add Tbl.Load(io.Writer)
 ** read until eof
 
-* add Tbl.Upsert()
+* add Tbl.Len()
 
-* add Tbl.Upserted(Rec) time.Time
-** add Basic.upsertCol
+* add Tbl.Upsert()
+** insert into rec map
+
+* add Tbl.Iter()
+** extend maps.Iter
+
+* add testfn to Delete
+** only delete if testfn nil / returns true
+** add DeleteAll(key) int
+
+* add Tbl.UpsertedAt(Rec) time.Time
+** add Basic.upsertedAt
 ** init to time.Now() in Upsert()
 
 * add Tbl.Revision(Rec) recs.Revision
@@ -26,10 +36,6 @@
 * add tbls/cols/recs to readme
 
 * ---
-
-* add testfn to Delete
-** only delete if testfn nil / returns true
-** add DeleteAll(key) int
 
 * add find loop in both maps in runCutTests
 

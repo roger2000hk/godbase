@@ -21,7 +21,7 @@ func TestCreate(t *testing.T) {
 	}
 
 	i := foos.Cols()
-	if c := i.Val().(cols.Any); c != recs.CreatedCol() {
+	if c := i.Val().(cols.Any); c != recs.CreatedAtCol() {
 		t.Errorf("invalid col: %v", c)
 	}
 

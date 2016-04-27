@@ -10,7 +10,7 @@ import (
 	"io"
 )
 
-type ColIter maps.ValIter
+type ColIter maps.Iter
 
 type Any interface {
 	defs.Any
@@ -49,7 +49,7 @@ func (t *Basic) Add(c cols.Any) cols.Any {
 func (t *Basic) Init(n string) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
-	t.Add(recs.CreatedCol())
+	t.Add(recs.CreatedAtCol())
 	t.Add(recs.IdCol())
 	return t
 }
