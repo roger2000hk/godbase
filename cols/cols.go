@@ -7,7 +7,8 @@ import (
 	"io"
 )
 
-type ValSize uint64
+type NameSize uint8
+type ValSize uint32
 
 type Any interface {
 	defs.Any
@@ -61,7 +62,7 @@ func (c *UId) Init(n string) *UId {
 func (c *Int64) ReadVal(s ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
-	if err := ReadBin(&v, r); err != nil {
+	if err := godbase.ReadVal(&v, r); err != nil {
 		return nil, err
 	}
 
@@ -102,21 +103,10 @@ func (c *UId) WriteVal(_v interface{}, w io.Writer) error {
 	return WriteBytes(v[:], w)
 }
 
-func ReadBin(ptr interface{}, r io.Reader) error {
-	if err := binary.Read(r, godbase.ByteOrder, ptr); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func ReadSize(r io.Reader) (s ValSize, err error) {
-	return s, ReadBin(&s, r)
+	return s, godbase.ReadVal(&s, r)
 }
 
-func WriteBin(ptr interface{}, w io.Writer) error {
-	return binary.Write(w, godbase.ByteOrder, ptr)
-}
 
 func WriteBinVal(s ValSize, ptr interface{}, w io.Writer) error {
 	if err := WriteSize(s, w); err != nil {
@@ -136,5 +126,20 @@ func WriteBytes(v []byte, w io.Writer) error {
 }
 
 func WriteSize(s ValSize, w io.Writer) error {
-	return WriteBin(&s, w)
+	return godbase.WriteVal(&s, w)
+}
+
+func Write(c Any, v interface{}, w io.Writer) error {
+	n := []byte(c.Name())
+	s := NameSize(len(n))
+
+	if err := godbase.WriteVal(&s, w); err != nil {
+		return err
+	}
+
+	if _, err := w.Write(n); err != nil {
+		return err
+	}
+
+	return c.WriteVal(v, w)
 }

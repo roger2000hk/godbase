@@ -3,6 +3,7 @@ package godbase
 import (
 	"encoding/binary"
 	"github.com/wayn3h0/go-uuid"
+	"io"
 )
 
 type UId uuid.UUID
@@ -17,4 +18,16 @@ func NewUId() UId {
 	}
 
 	return UId(res)
+}
+
+func ReadVal(ptr interface{}, r io.Reader) error {
+	if err := binary.Read(r, ByteOrder, ptr); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func WriteVal(ptr interface{}, w io.Writer) error {
+	return binary.Write(w, ByteOrder, ptr)
 }

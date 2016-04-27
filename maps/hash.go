@@ -107,6 +107,10 @@ func (m *Hash) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return m.slots.Get(key, true).Find(start, key, val)
 }
 
+func (m *Hash) First() Iter {
+	panic("Hash doesn't support First()!")
+}
+
 func (m *Hash) Get(key Key) (interface{}, bool) {
 	return m.slots.Get(key, true).Get(key)
 }

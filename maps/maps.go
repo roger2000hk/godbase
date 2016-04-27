@@ -12,14 +12,10 @@ type Key interface {
 type IntKey int
 type StringKey string
 
-
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. 
 
-type Iter interface {
-	// Returns key for elem or nil if root
-	Key() Key
-
+type ValIter interface {
 	// Returns iter to next elem
 	Next() Iter
 
@@ -31,6 +27,13 @@ type Iter interface {
 
 	// Returns true if not root
 	Valid() bool
+}
+
+type Iter interface {
+	ValIter
+
+	// Returns key for elem or nil if root
+	Key() Key
 }
 
 // Basic map ops supported by all implementations
@@ -58,6 +61,9 @@ type Any interface {
 
 	Find(start Iter, key Key, val interface{}) (Iter, bool)
 	
+	// Returns iter to first elem; not supported by hash maps
+	First() Iter
+
 	// Returns val for key and ok
 	Get(key Key) (interface{}, bool)
 

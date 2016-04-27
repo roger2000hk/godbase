@@ -13,6 +13,8 @@ type Any interface {
 	Get(cols.Any) interface{}
 	Id() Id
 	Int64(*cols.Int64) int64
+	Iter() Iter
+	Len() int
 	SetInt64(*cols.Int64, int64) int64
 	SetString(*cols.String, string) string
 	SetUId(*cols.UId, godbase.UId) godbase.UId
@@ -20,9 +22,10 @@ type Any interface {
 	UId(*cols.UId) godbase.UId
 }
 
-type Id godbase.UId
-
 type Basic maps.Skip
+type Id godbase.UId
+type Iter maps.Iter
+type Size uint32
 
 var idCol = cols.NewUId("godbase/id")
 
@@ -78,8 +81,16 @@ func (r *Basic) Init() *Basic {
 	return r
 }
 
+func (r *Basic) Iter() Iter {
+	return Iter(r.AsMap().First())
+}
+
 func (r *Basic) Int64(c *cols.Int64) int64 {
 	return r.Get(c).(int64)
+}
+
+func (r *Basic) Len() int {
+	return int(r.AsMap().Len())
 }
 
 func (r *Basic) SetInt64(c *cols.Int64, v int64) int64 {

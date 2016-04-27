@@ -170,6 +170,10 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 	return n, false
 }
 
+func (m *ESkip) First() Iter {
+	return m.root.next[ESkipLevels-1]
+}
+
 func (m *ESkip) Get(key Key) (interface{}, bool) {
 	n, ok := m.FindNode(nil, key)
 	
