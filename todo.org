@@ -23,10 +23,13 @@
 
 * add Tbl.UpsertedAt(Rec) time.Time
 ** add Basic.upsertedAt
-** init to time.Now() in Upsert()
+** add to cols
+** init incoming to time.Now() in Upsert()
 
 * add Tbl.Revision(Rec) recs.Revision
-** init to 1 if not exists, otherwise inc in Upsert()
+** add Basic.revision
+** add to cols
+** init to 1 in Upsert if not exists, otherwise inc
 
 * add cols.Bool
 ** add rec methods
