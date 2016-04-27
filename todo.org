@@ -1,3 +1,5 @@
+* switch keys to literal types in idx demo
+
 * add Tbl.Iter() RecIter
 ** add RecIter type
 ** add to tests

@@ -11,33 +11,25 @@ import (
 type testKey2 [2]interface{}
 type testKey3 [3]interface{}
 
-func genKey2(k1, k2 interface{}) interface{} {
-	return testKey2{k1, k2}
-}
-
-func genKey3(k1, k2, k3 interface{}) interface{} {
-	return testKey3{k1, k2, k3}
-}
-
 func TestKeyEq(t *testing.T) {
-	if l, r := genKey2("abc", "def"), genKey2("abc", "def"); l != r {
+	if l, r := (testKey2{"abc", "def"}), (testKey2{"abc", "def"}); l != r {
 		t.Errorf("not equal")
 	}
 
-	if l, r := genKey2("abc", "def"), genKey2("abc", "ghi"); l == r {
+	if l, r := (testKey2{"abc", "def"}), (testKey2{"abc", "ghi"}); l == r {
 		t.Errorf("equal")
 	}
 
-	if l, r := genKey2(1, 2), genKey2(1, 2); l != r {
+	if l, r := (testKey2{1, 2}), (testKey2{1, 2}); l != r {
 		t.Errorf("not equal")
 	}
 
 	// mixed types works just as well
-	if l, r := genKey2("abc", "def"), genKey2(1, 2); l == r {
+	if l, r := (testKey2{"abc", "def"}), (testKey2{1, 2}); l == r {
 		t.Errorf("equal")
 	}
 
-	if l, r := genKey2("abc", 1), genKey2("abc", 1); l != r {
+	if l, r := (testKey2{"abc", 1}), (testKey2{"abc", 1}); l != r {
 		t.Errorf("not equal")
 	}
 
@@ -45,7 +37,7 @@ func TestKeyEq(t *testing.T) {
 
 	m := make(map[interface{}]interface{})
 
-	k2 := genKey2("abc", "def")
+	k2 := testKey2{"abc", "def"}
 	m[k2] = 42
 
 	if v := m[k2]; v != 42 {
@@ -53,7 +45,7 @@ func TestKeyEq(t *testing.T) {
 	}
 
 	// mixed keys
-	k3 := genKey3(1, 2, 3)
+	k3 := testKey3{1, 2, 3}
 	m[k3] = "any value"
 
 	if v := m[k3]; v != "any value" {
