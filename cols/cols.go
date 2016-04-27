@@ -13,67 +13,163 @@ type ValSize uint32
 
 type Any interface {
 	defs.Any
+	CloneVal(interface{}) interface{}
+	Eq(interface{}, interface{}) bool
 	Read(ValSize, io.Reader) (interface{}, error)
 	Write(interface{}, io.Writer) error
 }
 
-type BasicCol struct {
+type Type interface {
+	Name() string
+	CloneVal(Any, interface{}) interface{}
+	Eq(Any, interface{}, interface{}) bool
+	Read(Any, ValSize, io.Reader) (interface{}, error)
+	Write(Any, interface{}, io.Writer) error	
+}
+
+type BasicType struct {
+	name string
+}
+
+type Int64Type struct {
+	BasicType
+}
+
+type StringType struct {
+	BasicType
+}
+
+type TimeType struct {
+	BasicType
+}
+
+type UIdType struct {
+	BasicType
+}
+
+var (
+	int64Type Int64Type
+	stringType StringType
+	timeType TimeType
+	uidType UIdType
+)
+
+func init() {
+	int64Type.Init("Int64")
+	stringType.Init("String")
+	timeType.Init("Time")
+	uidType.Init("UId")
+}
+
+func Int64() Type {
+	return &int64Type
+}
+
+func String() Type {
+	return &stringType
+}
+
+func Time() Type {
+	return &timeType
+}
+
+func UId() Type {
+	return &uidType
+}
+
+type Basic struct {
 	defs.Basic
+	colType Type
 }
 
-type Int64 struct {
-	BasicCol
+type Int64Col struct {
+	Basic
 }
 
-type String struct {
-	BasicCol
+type StringCol struct {
+	Basic
 }
 
-type Time struct {
-	BasicCol
+type TimeCol struct {
+	Basic
 }
 
-type UId struct {
-	BasicCol
+type UIdCol struct {
+	Basic
 }
 
-func NewInt64(n string) *Int64 {
-	return new(Int64).Init(n)
+func NewInt64(n string) *Int64Col {
+	return new(Int64Col).Init(n)
 }
 
-func NewString(n string) *String {
-	return new(String).Init(n)
+func NewString(n string) *StringCol {
+	return new(StringCol).Init(n)
 }
 
-func NewTime(n string) *Time {
-	return new(Time).Init(n)
+func NewTime(n string) *TimeCol {
+	return new(TimeCol).Init(n)
 }
 
-func NewUId(n string) *UId {
-	return new(UId).Init(n)
+func NewUId(n string) *UIdCol {
+	return new(UIdCol).Init(n)
 }
 
-func (c *Int64) Init(n string) *Int64 {
+func (c *Basic) CloneVal(v interface{}) interface{} {
+	return c.colType.CloneVal(c, v)
+}
+
+func (_ *BasicType) CloneVal(_ Any, v interface{}) interface{} {
+	return v
+}
+
+func (_ *BasicType) Eq(_ Any, l, r interface{}) bool {
+	return l == r
+}
+
+func (c *Basic) Eq(l, r interface{}) bool {
+	return c.colType.Eq(c, l, r)
+}
+
+func (c *Basic) Init(n string, ct Type) *Basic {
 	c.Basic.Init(n)
+	c.colType = ct
 	return c
 }
 
-func (c *String) Init(n string) *String {
-	c.Basic.Init(n)
+func (t *BasicType) Init(n string) *BasicType {
+	t.name = n
+	return t
+}
+
+func (c *Int64Col) Init(n string) *Int64Col {
+	c.Basic.Init(n, Int64())
 	return c
 }
 
-func (c *Time) Init(n string) *Time {
-	c.Basic.Init(n)
+func (c *StringCol) Init(n string) *StringCol {
+	c.Basic.Init(n, String())
 	return c
 }
 
-func (c *UId) Init(n string) *UId {
-	c.Basic.Init(n)
+func (c *TimeCol) Init(n string) *TimeCol {
+	c.Basic.Init(n, Time())
 	return c
 }
 
-func (c *Int64) Read(s ValSize, r io.Reader) (interface{}, error) {
+func (c *UIdCol) Init(n string) *UIdCol {
+	c.Basic.Init(n, UId())
+	return c
+}
+
+func (t *BasicType) Name() string {
+	return t.name
+}
+
+func (c *Basic) Read(s ValSize, r io.Reader) (interface{}, error) {
+	return c.colType.Read(c, s, r)
+}
+
+func (_ *Int64Type) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -83,7 +179,7 @@ func (c *Int64) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (c *String) Read(s ValSize, r io.Reader) (interface{}, error) {
+func (_ *StringType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	v := make([]byte, s)
 
 	if _, err := io.ReadFull(r, v); err != nil {
@@ -93,7 +189,7 @@ func (c *String) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return string(v), nil
 }
 
-func (c *Time) Read(s ValSize, r io.Reader) (interface{}, error) {
+func (_ *TimeType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -109,7 +205,7 @@ func (c *Time) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (c *UId) Read(s ValSize, r io.Reader) (interface{}, error) {
+func (_ *UIdType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	var v godbase.UId
 
 	if _, err := io.ReadFull(r, v[:]); err != nil {
@@ -119,16 +215,20 @@ func (c *UId) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return godbase.UId(v), nil
 }
 
-func (c *Int64) Write(_v interface{}, w io.Writer) error {
+func (c *Basic) Write(v interface{}, w io.Writer) error {
+	return c.colType.Write(c, v, w)
+}
+
+func (_ *Int64Type) Write(_ Any, _v interface{}, w io.Writer) error {
 	v := _v.(int64)
 	return WriteBinVal(8, &v, w)
 }
 
-func (c *String) Write(_v interface{}, w io.Writer) error {
+func (_ *StringType) Write(_ Any, _v interface{}, w io.Writer) error {
 	return WriteBytes([]byte(_v.(string)), w)
 }
 
-func (c *Time) Write(_v interface{}, w io.Writer) error {
+func (_ *TimeType) Write(_ Any, _v interface{}, w io.Writer) error {
 	bs, err := _v.(time.Time).MarshalBinary()
 
 	if err != nil {
@@ -138,7 +238,7 @@ func (c *Time) Write(_v interface{}, w io.Writer) error {
 	return WriteBytes(bs, w)
 }
 
-func (c *UId) Write(_v interface{}, w io.Writer) error {
+func (_ *UIdType) Write(_ Any, _v interface{}, w io.Writer) error {
 	v := _v.(godbase.UId)
 	return WriteBytes(v[:], w)
 }

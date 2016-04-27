@@ -12,22 +12,27 @@ import (
 )
 
 type Any interface {
+	Eq(Any) bool
 	New() Any
 	Delete(cols.Any) bool
 	Find(cols.Any) (interface{}, bool)
 	Get(cols.Any) interface{}
 	Id() Id
-	Int64(*cols.Int64) int64
+	Int64(*cols.Int64Col) int64
 	Iter() Iter
 	Len() int
 	Set(cols.Any, interface{}) interface{}
-	SetInt64(*cols.Int64, int64) int64
-	SetString(*cols.String, string) string
-	SetTime(*cols.Time, time.Time) time.Time
-	SetUId(*cols.UId, godbase.UId) godbase.UId
-	String(*cols.String) string
-	Time(*cols.Time) time.Time
-	UId(*cols.UId) godbase.UId
+	SetInt64(*cols.Int64Col, int64) int64
+	SetString(*cols.StringCol, string) string
+	SetTime(*cols.TimeCol, time.Time) time.Time
+	SetUId(*cols.UIdCol, godbase.UId) godbase.UId
+	String(*cols.StringCol) string
+	Time(*cols.TimeCol) time.Time
+	UId(*cols.UIdCol) godbase.UId
+}
+
+type IdHash struct {
+	imp hash.Hash64
 }
 
 type Basic maps.Skip
@@ -39,26 +44,18 @@ type Alloc *maps.SkipAlloc
 var createdAtCol = cols.NewTime("godbase/createdAt")
 var idCol = cols.NewUId("godbase/id")
 
-func CreatedAtCol() *cols.Time {
+func BasicNew(alloc Alloc) Any {
+	return new(Basic).BasicInit(alloc)
+}
+
+func CreatedAtCol() *cols.TimeCol {
 	return createdAtCol
 }
 
-type IdHash struct {
-	imp hash.Hash64
-}
-
-func NewIdHash() *IdHash {
-	return new(IdHash).Init()
-}
-
-func (h *IdHash) Hash(id Id) uint64 {
-	h.imp.Reset()
-	h.imp.Write(id[:])
-	return h.imp.Sum64()
-}
-
-func IdCol() *cols.UId {
-	return idCol
+func Get(id Id, alloc Alloc) Any {
+	r := new(Basic).BasicInit(alloc)
+	r.SetUId(idCol, godbase.UId(id))
+	return r
 }
 
 func New(alloc Alloc) Any {
@@ -71,6 +68,19 @@ func NewAlloc(s int) Alloc {
 
 func NewId() Id {
 	return Id(godbase.NewUId())
+}
+
+func NewIdHash() *IdHash {
+	return new(IdHash).Init()
+}
+
+func IdCol() *cols.UIdCol {
+	return idCol
+}
+
+func (r *Basic) BasicInit(alloc Alloc) *Basic {
+	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
+	return r
 }
 
 func (r *Basic) CreatedAt() time.Time {
@@ -98,12 +108,29 @@ func (r *Basic) Get(c cols.Any) interface{} {
 	panic(fmt.Sprintf("field not found: %v", c.Name()))
 }
 
+func (r *Basic) Eq(other Any) bool {
+	for i := r.Iter(); i.Valid(); i = i.Next() {
+		c := i.Key().(cols.Any)
+		if ov, ok := other.Find(c); !ok || !c.Eq(ov, i.Val()) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (h *IdHash) Hash(id Id) uint64 {
+	h.imp.Reset()
+	h.imp.Write(id[:])
+	return h.imp.Sum64()
+}
+
 func (r *Basic) Id() Id {
 	return Id(r.UId(idCol))
 }
 
 func (r *Basic) Init(alloc Alloc) *Basic {
-	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
+	r.BasicInit(alloc)
 	r.SetTime(createdAtCol, time.Now())
 	r.SetUId(idCol, godbase.NewUId())
 	return r
@@ -118,7 +145,7 @@ func (r *Basic) Iter() Iter {
 	return Iter(r.asMap().First())
 }
 
-func (r *Basic) Int64(c *cols.Int64) int64 {
+func (r *Basic) Int64(c *cols.Int64Col) int64 {
 	return r.Get(c).(int64)
 }
 
@@ -132,38 +159,39 @@ func (id Id) Less(other maps.Key) bool {
 }
 
 func (r *Basic) New() Any {
-	return r.asMap().New()
+	return (*Basic)(r.asMap().New().(*maps.Skip))
 }
 
 func (r *Basic) Set(c cols.Any, v interface{}) interface{} {
-	return r.asMap().Set(c, v)
+	r.asMap().Set(c, v)
+	return v
 }
 
-func (r *Basic) SetInt64(c *cols.Int64, v int64) int64 {
+func (r *Basic) SetInt64(c *cols.Int64Col, v int64) int64 {
 	return r.Set(c, v).(int64)
 }
 
-func (r *Basic) SetString(c *cols.String, v string) string {
+func (r *Basic) SetString(c *cols.StringCol, v string) string {
 	return r.Set(c, v).(string)
 }
 
-func (r *Basic) SetTime(c *cols.Time, v time.Time) time.Time {
+func (r *Basic) SetTime(c *cols.TimeCol, v time.Time) time.Time {
 	return r.Set(c, v).(time.Time)
 }
 
-func (r *Basic) SetUId(c *cols.UId, v godbase.UId) godbase.UId {
+func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) godbase.UId {
 	return r.Set(c, v).(godbase.UId)
 }
 
-func (r *Basic) String(c *cols.String) string {
+func (r *Basic) String(c *cols.StringCol) string {
 	return r.Get(c).(string)
 }
 
-func (r *Basic) Time(c *cols.Time) time.Time {
+func (r *Basic) Time(c *cols.TimeCol) time.Time {
 	return r.Get(c).(time.Time)
 }
 
-func (r *Basic) UId(c *cols.UId) godbase.UId {
+func (r *Basic) UId(c *cols.UIdCol) godbase.UId {
 	return r.Get(c).(godbase.UId)
 }
 

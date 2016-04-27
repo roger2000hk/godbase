@@ -248,6 +248,7 @@ func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (It
 	nn := m.AllocNode(key, val, n) 
 	nn.down = nn
 	m.len++
+
 	return nn, true
 }
 
@@ -265,14 +266,18 @@ func (m *Skip) Levels() int {
 	return res
 }
 
-func (m *Skip) Set(key Key, val interface{}) interface{} {
+func (m *Skip) New() Any {
+	return NewSkip(m.alloc, m.Levels())
+}
+
+func (m *Skip) Set(key Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok {
 		i.(*SkipNode).val = val
 	}
 
-	return val
+	return ok
 }
 
 func (m *Skip) String() string {

@@ -5,7 +5,11 @@ import (
 )
 
 func TestKeyEq(t *testing.T) {
-	if [2]interface{}{"abc", "def"} != [2]interface{}{"abc", "def"} {
+	gen := func() interface{} {
+		return [2]interface{}{"abc", "def"}
+	}
+	
+	if  l, r := gen(), gen(); l != r {
 		t.Errorf("not equal")
 	}
 }

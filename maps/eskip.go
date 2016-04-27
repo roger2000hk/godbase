@@ -212,14 +212,18 @@ func (m *ESkip) Len() int64 {
 	return m.len
 }
 
-func (m *ESkip) Set(key Key, val interface{}) interface{} {
+func (m *ESkip) New() Any {
+	return NewESkip()
+}
+
+func (m *ESkip) Set(key Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok && i != val {
 		panic("changing embedded val for key is not supported!")
 	}
 
-	return val
+	return ok
 }
 
 func (m *ESkip) String() string {

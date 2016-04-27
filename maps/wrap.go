@@ -37,7 +37,11 @@ func (m *Wrap) Len() int64 {
 	return m.wrapped.Len()
 }
 
-func (m *Wrap) Set(key Key, val interface{}) interface{} {
+func (m *Wrap) New() Any {
+	return m.wrapped.New()
+}
+
+func (m *Wrap) Set(key Key, val interface{}) bool {
 	return m.wrapped.Set(key, val)
 }
 

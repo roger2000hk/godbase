@@ -74,11 +74,14 @@ type Any interface {
 
 	Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
 
+	// Returns a new, empty map of the same type as the receiver
+	New() Any
+
 	// Returns the number of elems in map
 	Len() int64
 
 	// Inserts/updates key to val and returns val
-	Set(key Key, val interface{}) interface{}
+	Set(key Key, val interface{}) bool
 
 	// Returns string repr for printing
 	String() string

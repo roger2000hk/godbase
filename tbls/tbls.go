@@ -13,10 +13,12 @@ import (
 type Any interface {
 	defs.Any
 	Add(cols.Any) cols.Any
-	Col(n string) cols.Any
+	Col(string) cols.Any
 	Cols() ColIter
-	Read(rec recs.Any, r io.Reader) (recs.Any, error)
-	Upsert(rec recs.Any) recs.Any
+	Len() int64
+	Reset(recs.Any) (recs.Any, bool)
+	Read(recs.Any, io.Reader) (recs.Any, error)
+	Upsert(recs.Any) recs.Any
 	Write(recs.Any, io.Writer) error
 }
 
@@ -48,7 +50,11 @@ func (t *Basic) Cols() ColIter {
 }
 
 func (t *Basic) Add(c cols.Any) cols.Any {
-	return t.cols.Set(maps.StringKey(c.Name()), c).(cols.Any)
+	if _, ok := t.cols.Insert(nil, maps.StringKey(c.Name()), c, false); ok {
+		return c
+	}
+
+	panic(fmt.Sprintf("dup col: %v!", c.Name()))
 }
 
 func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
@@ -65,6 +71,10 @@ func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
 	t.Add(recs.CreatedAtCol())
 	t.Add(recs.IdCol())
 	return t
+}
+
+func (t *Basic) Len() int64 {
+	return t.recs.Len()
 }
 
 func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
@@ -94,14 +104,28 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 	return rec, nil
 }
 
+func (t *Basic) Reset(rec recs.Any) (recs.Any, bool) {
+	rr, ok := t.recs.Get(rec.Id())
+	if !ok {
+		return nil, false
+	}
+	
+	for i := rr.(recs.Any).Iter(); i.Valid(); i = i.Next() {
+		c := i.Key().(cols.Any)
+		rec.Set(c, c.CloneVal(i.Val()))
+	}
+	
+	return rec, true
+}
+
 func (t *Basic) Upsert(rec recs.Any) recs.Any {
 	id := rec.Id()
 	rr := rec.New()
 	
-	for i := r.cols.First(); i.Valid(); i = i.Next() {
+	for i := t.cols.First(); i.Valid(); i = i.Next() {
 		c := i.Val().(cols.Any)
-		if v, ok := rec.Get(c); ok {
-			rr.Set(c, v)
+		if v, ok := rec.Find(c); ok {
+			rr.Set(c, c.CloneVal(v))
 		}
 	}
 	

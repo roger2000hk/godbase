@@ -18,3 +18,6 @@ All methods now return iter to current if found, not prev.
 
 ### 2016-04-27 added maps.Any.First
 Added methods to get iter to first elem and implemented for sorted maps.
+
+### 2016-04-27 added maps.Any.New
+Added method to return a new map of the same type.

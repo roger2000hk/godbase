@@ -6,11 +6,12 @@ import (
 
 type Slots interface {	
 	Get(key Key, create bool) Any
+	New() Slots
 }
 
 type AnySlots struct {
 	fn HashFn
-	slotAlloc SlotAlloc
+	alloc SlotAlloc
 	slots []Any
 }
 
@@ -21,7 +22,7 @@ type ESkipSlots struct {
 
 type MapSlots struct {
 	fn MapHashFn
-	slotAlloc SlotAlloc
+	alloc SlotAlloc
 	slots map[interface{}]Any
 }
 
@@ -33,7 +34,7 @@ type Hash struct {
 
 type HashSlots struct {
 	fn HashFn
-	slotsAlloc SlotsAlloc
+	alloc SlotsAlloc
 	slots []Hash
 }
 
@@ -49,10 +50,10 @@ type MapHashFn func (Key) interface{}
 type SlotAlloc func (key Key) Any
 type SlotsAlloc func (key Key) Slots
 
-func NewESkipSlots(count int, fn HashFn) *ESkipSlots {
+func NewESkipSlots(sc int, fn HashFn) *ESkipSlots {
 	ss := new(ESkipSlots)
 	ss.fn = fn
-	ss.slots = make([]ESkip, count)
+	ss.slots = make([]ESkip, sc)
 	return ss
 }
 
@@ -60,36 +61,36 @@ func NewHash(slots Slots) *Hash {
 	return new(Hash).Init(slots)
 }
 
-func NewHashSlots(count int, fn HashFn, slotsAlloc SlotsAlloc) *HashSlots {
+func NewHashSlots(sc int, fn HashFn, a SlotsAlloc) *HashSlots {
 	ss := new(HashSlots)
 	ss.fn = fn
-	ss.slotsAlloc = slotsAlloc
-	ss.slots = make([]Hash, count)
+	ss.alloc = a
+	ss.slots = make([]Hash, sc)
 	return ss
 }
 
-func NewMapSlots(count int, fn MapHashFn, slotAlloc SlotAlloc) *MapSlots {
+func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
 	ss := new(MapSlots)
 	ss.fn = fn
-	ss.slotAlloc = slotAlloc
-	ss.slots = make(map[interface{}]Any, count)
+	ss.alloc = a
+	ss.slots = make(map[interface{}]Any, sc)
 	return ss
 }
 
-func NewSkipSlots(count int, fn HashFn, alloc *SkipAlloc, levels int) *SkipSlots {
+func NewSkipSlots(sc int, fn HashFn, a *SkipAlloc, ls int) *SkipSlots {
 	ss := new(SkipSlots)
-	ss.alloc = alloc
+	ss.alloc = a
 	ss.fn = fn
-	ss.levels = levels
-	ss.slots = make([]Skip, count)
+	ss.levels = ls
+	ss.slots = make([]Skip, sc)
 	return ss
 }
 
-func NewSlots(count int, fn HashFn, slotAlloc SlotAlloc) *AnySlots {
+func NewSlots(sc int, fn HashFn, a SlotAlloc) *AnySlots {
 	ss := new(AnySlots)
 	ss.fn = fn
-	ss.slotAlloc = slotAlloc
-	ss.slots = make([]Any, count)
+	ss.alloc = a
+	ss.slots = make([]Any, sc)
 	return ss
 }
 
@@ -124,7 +125,7 @@ func (ss *AnySlots) Get(key Key, create bool) Any {
 	}
 
 	if create {
-		s = ss.slotAlloc(key)
+		s = ss.alloc(key)
 		ss.slots[i] = s
 		return s
 	}
@@ -156,7 +157,7 @@ func (ss *HashSlots) Get(key Key, create bool) Any {
 	}
 
 	if create {
-		return s.Init(ss.slotsAlloc(key))
+		return s.Init(ss.alloc(key))
 	}
 
 	return nil
@@ -171,7 +172,7 @@ func (ss *MapSlots) Get(key Key, create bool) Any {
 	}
 
 	if create {
-		s = ss.slotAlloc(key)
+		s = ss.alloc(key)
 		ss.slots[i] = s
 		return s
 	}
@@ -200,7 +201,7 @@ func (m *Hash) Init(slots Slots) *Hash {
 	return m
 }
 
-func (m *Hash) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {	
+func (m *Hash) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	res, ok := m.slots.Get(key, true).Insert(start, key, val, allowMulti)
 
 	if ok {
@@ -214,8 +215,33 @@ func (m *Hash) Len() int64 {
 	return m.len
 }
 
-func (m *Hash) Set(key Key, val interface{}) interface{} {
-	return m.slots.Get(key, true).Set(key, val)
+func (ss *AnySlots) New() Slots {
+	return NewSlots(len(ss.slots), ss.fn, ss.alloc)
+}
+
+func (m *Hash) New() Any {
+	return NewHash(m.slots.New())
+}
+
+func (ss *HashSlots) New() Slots {
+	return NewHashSlots(len(ss.slots), ss.fn, ss.alloc)
+}
+
+func (ss *MapSlots) New() Slots {
+	return NewMapSlots(len(ss.slots), ss.fn, ss.alloc)
+}
+
+func (ss *SkipSlots) New() Slots {
+	return NewSkipSlots(len(ss.slots), ss.fn, ss.alloc, ss.levels)
+}
+
+func (m *Hash) Set(key Key, val interface{}) bool {
+	if m.slots.Get(key, true).Set(key, val) {
+		m.len++
+		return true
+	}
+
+	return false
 }
 
 func (m *Hash) String() string {

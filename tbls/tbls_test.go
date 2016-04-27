@@ -39,10 +39,10 @@ func TestCreate(t *testing.T) {
 func TestReadWriteRec(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
-	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64)
-	stringCol := foos.Add(cols.NewString("string")).(*cols.String)
-	timeCol := foos.Add(cols.NewTime("time")).(*cols.Time)
-	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UId)
+	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64Col)
+	stringCol := foos.Add(cols.NewString("string")).(*cols.StringCol)
+	timeCol := foos.Add(cols.NewTime("time")).(*cols.TimeCol)
+	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UIdCol)
 	
 	r := recs.New(nil)
 	r.SetInt64(int64Col, 1)
@@ -65,5 +65,18 @@ func TestReadWriteRec(t *testing.T) {
 		if rr.Get(c) != r.Get(c) {
 			t.Errorf("invalid loaded val: %v/%v", rr.Get(c), r.Get(c))
 		}
+	}
+}
+
+func TestUpsert(t *testing.T) {
+	foos := New("foos", 100, nil, 1)
+	r := foos.Upsert(recs.New(nil))
+
+	if l := foos.Len(); l != 1 {
+		t.Errorf("invalid len after upsert: %v", l)	
+	}
+
+	if rr, ok := foos.Reset(recs.Get(r.Id(), nil)); !ok || !rr.Eq(r) {
+		t.Errorf("invalid loaded rec: %v/%v", rr, r)
 	}
 }

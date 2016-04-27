@@ -62,9 +62,14 @@ func (m Map) Len() int64 {
 	return int64(len(m))
 }
 
-func (m Map) Set(key Key, val interface{}) interface{} {
+func (m Map) New() Any {
+	return NewMap()
+}
+
+func (m Map) Set(key Key, val interface{}) bool {
+	_, ok := m[key]
 	m[key] = val
-	return val
+	return ok
 }
 
 func (m Map) String() string {
