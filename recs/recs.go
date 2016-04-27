@@ -41,20 +41,13 @@ type Iter maps.Iter
 type Size uint32
 type Alloc *maps.SkipAlloc
 
-var createdAtCol = cols.NewTime("godbase/createdAt")
-var idCol = cols.NewUId("godbase/id")
-
 func BasicNew(alloc Alloc) Any {
 	return new(Basic).BasicInit(alloc)
 }
 
-func CreatedAtCol() *cols.TimeCol {
-	return createdAtCol
-}
-
 func Get(id Id, alloc Alloc) Any {
 	r := new(Basic).BasicInit(alloc)
-	r.SetUId(idCol, godbase.UId(id))
+	r.SetUId(cols.RecId(), godbase.UId(id))
 	return r
 }
 
@@ -74,17 +67,13 @@ func NewIdHash() *IdHash {
 	return new(IdHash).Init()
 }
 
-func IdCol() *cols.UIdCol {
-	return idCol
-}
-
 func (r *Basic) BasicInit(alloc Alloc) *Basic {
 	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
 	return r
 }
 
 func (r *Basic) CreatedAt() time.Time {
-	return r.Time(createdAtCol)
+	return r.Time(cols.CreatedAt())
 }
 
 func (r *Basic) Delete(c cols.Any) bool {
@@ -126,13 +115,13 @@ func (h *IdHash) Hash(id Id) uint64 {
 }
 
 func (r *Basic) Id() Id {
-	return Id(r.UId(idCol))
+	return Id(r.UId(cols.RecId()))
 }
 
 func (r *Basic) Init(alloc Alloc) *Basic {
 	r.BasicInit(alloc)
-	r.SetTime(createdAtCol, time.Now())
-	r.SetUId(idCol, godbase.NewUId())
+	r.SetTime(cols.CreatedAt(), time.Now())
+	r.SetUId(cols.RecId(), godbase.NewUId())
 	return r
 }
 

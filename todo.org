@@ -1,8 +1,3 @@
-* move recs.IdCol() & recs.CreatedAtCol() to cols
-** RecId() & CreatedAt()
-** init vars instead of allocating
-** update code in recs / tbls
-
 * add Tbl.Iter() RecIter
 ** add RecIter type
 ** add to tests

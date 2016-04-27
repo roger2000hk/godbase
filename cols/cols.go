@@ -27,20 +27,41 @@ type Type interface {
 	Write(Any, interface{}, io.Writer) error	
 }
 
+type Basic struct {
+	defs.Basic
+	colType Type
+}
+
 type BasicType struct {
 	name string
+}
+
+type Int64Col struct {
+	Basic
 }
 
 type Int64Type struct {
 	BasicType
 }
 
+type StringCol struct {
+	Basic
+}
+
 type StringType struct {
 	BasicType
 }
 
+type TimeCol struct {
+	Basic
+}
+
 type TimeType struct {
 	BasicType
+}
+
+type UIdCol struct {
+	Basic
 }
 
 type UIdType struct {
@@ -52,6 +73,9 @@ var (
 	stringType StringType
 	timeType TimeType
 	uidType UIdType
+	
+	recId UIdCol
+	createdAt TimeCol
 )
 
 func init() {
@@ -59,10 +83,21 @@ func init() {
 	stringType.Init("String")
 	timeType.Init("Time")
 	uidType.Init("UId")
+
+	recId.Init("godbase/id")
+	createdAt.Init("godbase/createdAt")
+}
+
+func CreatedAt() *TimeCol {
+	return &createdAt
 }
 
 func Int64() Type {
 	return &int64Type
+}
+
+func RecId() *UIdCol {
+	return &recId
 }
 
 func String() Type {
@@ -75,27 +110,6 @@ func Time() Type {
 
 func UId() Type {
 	return &uidType
-}
-
-type Basic struct {
-	defs.Basic
-	colType Type
-}
-
-type Int64Col struct {
-	Basic
-}
-
-type StringCol struct {
-	Basic
-}
-
-type TimeCol struct {
-	Basic
-}
-
-type UIdCol struct {
-	Basic
 }
 
 func NewInt64(n string) *Int64Col {
