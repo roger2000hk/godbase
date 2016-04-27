@@ -64,9 +64,8 @@ func TestDumpClearSlurp(t *testing.T) {
 	}
 
 	for _, r := range rs {
-		// Reset() updates specified rec to stored val for all cols in tbl
-		// recs.Init() creates a new rec from existing id
-		// Eq() compares values for all cols in receiver
+		// Get() returns rec for id or err
+		// Eq() compares vals for all cols in receiver with param
 
 		if rr, err := foos.Get(r.Id()); err != nil {
 			panic(err)
