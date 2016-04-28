@@ -1,7 +1,3 @@
-* add cols.Bool
-** add rec methods
-** add to tests
-
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
 ** start & id are optional
@@ -11,12 +7,15 @@
 
 * add idx.Dump/Load like Tbl
 
-* add README.md to idxs
-
 * add reverse idx for offsets
 ** Idx.Basic/Reverse
 ** extend Any
 ** use id as key & store val for col
+
+* add README.md to idxs
+
+* add remento project
+** check old
 
 * run rw lock test with race tool
 
