@@ -22,11 +22,11 @@ type Any interface {
 	Iter() Iter
 	Len() int
 	New() Any
-	Set(cols.Any, interface{}) interface{}
-	SetInt64(*cols.Int64Col, int64) int64
-	SetString(*cols.StringCol, string) string
-	SetTime(*cols.TimeCol, time.Time) time.Time
-	SetUId(*cols.UIdCol, godbase.UId) godbase.UId
+	Set(cols.Any, interface{}) Any
+	SetInt64(*cols.Int64Col, int64) Any
+	SetString(*cols.StringCol, string) Any
+	SetTime(*cols.TimeCol, time.Time) Any
+	SetUId(*cols.UIdCol, godbase.UId) Any
 	String(*cols.StringCol) string
 	Time(*cols.TimeCol) time.Time
 	UId(*cols.UIdCol) godbase.UId
@@ -164,25 +164,25 @@ func (r *Basic) New() Any {
 	return (*Basic)(r.asMap().New().(*maps.Skip))
 }
 
-func (r *Basic) Set(c cols.Any, v interface{}) interface{} {
+func (r *Basic) Set(c cols.Any, v interface{}) Any {
 	r.asMap().Set(c, v)
-	return v
+	return r
 }
 
-func (r *Basic) SetInt64(c *cols.Int64Col, v int64) int64 {
-	return r.Set(c, v).(int64)
+func (r *Basic) SetInt64(c *cols.Int64Col, v int64) Any {
+	return r.Set(c, v)
 }
 
-func (r *Basic) SetString(c *cols.StringCol, v string) string {
-	return r.Set(c, v).(string)
+func (r *Basic) SetString(c *cols.StringCol, v string) Any {
+	return r.Set(c, v)
 }
 
-func (r *Basic) SetTime(c *cols.TimeCol, v time.Time) time.Time {
-	return r.Set(c, v).(time.Time)
+func (r *Basic) SetTime(c *cols.TimeCol, v time.Time) Any {
+	return r.Set(c, v)
 }
 
-func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) godbase.UId {
-	return r.Set(c, v).(godbase.UId)
+func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) Any {
+	return r.Set(c, v)
 }
 
 func (r *Basic) String(c *cols.StringCol) string {
