@@ -21,6 +21,17 @@ func TestCreate(t *testing.T) {
 	}
 
 	i := foos.Cols()
+
+	if c := i.Val().(cols.Any); c.Name() != "foos/revision" {
+		t.Errorf("invalid col: %v", c)
+	}
+
+	i = i.Next()
+	if c := i.Val().(cols.Any); c.Name() != "foos/upsertedAt" {
+		t.Errorf("invalid col: %v", c)
+	}
+
+	i = i.Next()
 	if c := i.Val().(cols.Any); c != cols.CreatedAt() {
 		t.Errorf("invalid col: %v", c)
 	}
@@ -29,6 +40,7 @@ func TestCreate(t *testing.T) {
 	if c := i.Val().(cols.Any); c != cols.RecId() {
 		t.Errorf("invalid col: %v", c)
 	}
+
 
 	i = i.Next()
 	if c := i.Val().(cols.Any); c.Name() != "int64" {
@@ -67,10 +79,30 @@ func TestReadWriteRec(t *testing.T) {
 
 func TestUpsert(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
-	r, _ := foos.Upsert(recs.New(nil))
+
+	r := recs.New(nil)
+
+	if v := foos.Revision(r); v != -1 {
+		t.Errorf("invalid revision before upsert: %v", v)	
+	}
+
+	var zt time.Time
+	if v := foos.UpsertedAt(r); v != zt {
+		t.Errorf("invalid upsert time before upsert: %v", v)	
+	}
+
+	foos.Upsert(r)
 
 	if l := foos.Len(); l != 1 {
 		t.Errorf("invalid len after upsert: %v", l)	
+	}
+
+	if v := foos.Revision(r); v != 0 {
+		t.Errorf("invalid revision after upsert: %v", v)	
+	}
+
+	if v := foos.UpsertedAt(r); !v.After(zt) {
+		t.Errorf("invalid upsert time after upsert: %v", v)	
 	}
 
 	if rr, err := foos.Get(r.Id()); err != nil {

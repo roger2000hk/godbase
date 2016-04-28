@@ -9,6 +9,7 @@ import (
 	"github.com/fncodr/godbase/recs"
 	"io"
 	"log"
+	"time"
 )
 
 type Any interface {
@@ -22,8 +23,10 @@ type Any interface {
 	Len() int64
 	Reset(recs.Any) (recs.Any, error)
 	Read(recs.Any, io.Reader) (recs.Any, error)
+	Revision(r recs.Any) int64
 	Slurp(io.Reader) error
 	Upsert(recs.Any) (recs.Any, error)
+	UpsertedAt(recs.Any) time.Time
 	Write(recs.Any, io.Writer) error
 }
 
@@ -32,6 +35,8 @@ type Basic struct {
 	cols maps.Skip
 	recIdHash recs.IdHash
 	recs maps.Hash
+	revision cols.Int64Col
+	upsertedAt cols.TimeCol
 }
 
 type ColIter maps.Iter
@@ -68,12 +73,6 @@ func (t *Basic) Clear() {
 	})
 
 	t.recs.Clear()
-}
-
-func (t *Basic) While(fn recs.TestFn) bool {
-	return t.recs.While(func (_ maps.Key, v interface{}) bool {
-		return fn(v.(recs.Any))
-	})
 }
 
 func (t *Basic) Dump(w io.Writer) error {
@@ -116,6 +115,8 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SkipAlloc, rls int) *Basic {
 	t.recs.Init(maps.NewSkipSlots(rsc, hashRecId, ra, rls))
 	t.Add(cols.CreatedAt())
 	t.Add(cols.RecId())
+	t.Add(t.revision.Init(fmt.Sprintf("%v/revision", n)))
+	t.Add(t.upsertedAt.Init(fmt.Sprintf("%v/upsertedAt", n)))
 	return t
 }
 
@@ -181,6 +182,14 @@ func (t *Basic) Reset(rec recs.Any) (recs.Any, error) {
 	return rec, nil
 }
 
+func (t *Basic) Revision(r recs.Any) (v int64) {
+	if v, ok := r.Find(&t.revision); ok {
+		return v.(int64)
+	}
+	
+	return -1
+}
+
 func (t *Basic) Slurp(r io.Reader) error {
 	for true {
 		rec, err := t.Read(recs.New(nil), r)
@@ -201,6 +210,14 @@ func (t *Basic) Slurp(r io.Reader) error {
 
 func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
 	id := rec.Id()
+
+	if v, ok := rec.Find(&t.revision); ok {
+		rec.Set(&t.revision, v.(int64) + 1)
+	} else {
+		rec.Set(&t.revision, int64(0))
+	}
+
+	rec.Set(&t.upsertedAt, time.Now())
 	rr := rec.New()
 	
 	for i := t.cols.First(); i.Valid(); i = i.Next() {
@@ -212,6 +229,20 @@ func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
 	
 	t.recs.Set(id, rr)
 	return rec, nil
+}
+
+func (t *Basic) UpsertedAt(r recs.Any) (res time.Time) {
+	if v, ok := r.Find(&t.upsertedAt); ok {
+		return v.(time.Time)
+	}
+
+	return res	
+}
+
+func (t *Basic) While(fn recs.TestFn) bool {
+	return t.recs.While(func (_ maps.Key, v interface{}) bool {
+		return fn(v.(recs.Any))
+	})
 }
 
 func (t *Basic) Write(rec recs.Any, w io.Writer) error {
