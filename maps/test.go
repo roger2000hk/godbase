@@ -9,24 +9,24 @@ const (
 	// Nr of slots for embedded hash maps
 	testESlots = 20000
 
-	// Nr of levels for hashed skip maps
+	// Nr of levels for hashed maps
 	testHashLevels = 1
 
-	// Nr of levels for non-hashed skip maps
+	// Nr of levels for non-hashed maps
 	testLevels = 14
 
 	// Nr of elems / reps
 	testReps = 20000
 
-	// Size of skip node slabs
+	// Size of slabs
 	testSlabSize = 500
 
 	// Nr of slots for non-embedded hash maps
 	testSlots = 30000
 )
 
-var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)
-var testSkipAlloc = NewSkipAlloc(testSlabSize)
+var testItemOffs = unsafe.Offsetof(new(testItem).node)
+var testAlloc = NewSlabAlloc(testSlabSize)
 
 type testAny interface {
 	Any
@@ -36,7 +36,7 @@ type testAny interface {
 }
 
 type testItem struct {
-	skipNode ESkipNode
+	node ENode
 }
 
 type testItems []testItem
@@ -50,7 +50,7 @@ func genHash(k Key) uint64 { return uint64(k.(testKey)) }
 
 func genMapHash(k Key) interface{} { return k }
 
-func toTestItem(node *ESkipNode) *testItem {
+func toTestItem(node *ENode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
 }
 
@@ -58,7 +58,7 @@ func sortedItems(n int) testItems {
 	res := make(testItems, n)
 
 	for i := 0; i < n; i++ {
-		res[i].skipNode.Init(testKey(i))
+		res[i].node.Init(testKey(i))
 	}
 
 	return res
@@ -68,7 +68,7 @@ func reverseItems(n int) testItems {
 	res := make(testItems, n)
 
 	for i := n-1; i >= 0; i-- {
-		res[i].skipNode.Init(testKey(i))
+		res[i].node.Init(testKey(i))
 	}
 
 	return res
@@ -79,16 +79,16 @@ func randItems(n int) testItems {
 
 	for i := 0; i < n; i++ {
 		j := rand.Intn(n)
-		res[i].skipNode.key, res[j].skipNode.key = res[j].skipNode.key, res[i].skipNode.key
+		res[i].node.key, res[j].node.key = res[j].node.key, res[i].node.key
 	}
 
 	return res
 }
 
-func allocESkip(_ Key) Any {
-	return NewESkip()
+func allocESort(_ Key) Any {
+	return NewESort()
 }
 
-func allocSkip(_ Key) Any {
-	return NewSkip(testSkipAlloc, testHashLevels)
+func allocSlab(_ Key) Any {
+	return NewSlab(testAlloc, testHashLevels)
 }

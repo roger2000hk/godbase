@@ -5,46 +5,46 @@ import (
 	"fmt"
 )
 
-const ESkipLevels = 10
+const ELevels = 10
 
-type ESkip struct {
+type ESort struct {
 	isInit bool
 	len int64
-	root ESkipNode
+	root ENode
 }
 
-type ESkipNode struct {
+type ENode struct {
 	key Key
-	next [ESkipLevels]*ESkipNode
-	prev [ESkipLevels]*ESkipNode
+	next [ELevels]*ENode
+	prev [ELevels]*ENode
 }
 
-func NewESkip() *ESkip {
-	return new(ESkip).Init()
+func NewESort() *ESort {
+	return new(ESort).Init()
 }
 
-func (m *ESkip) Clear() {
-	for i := 0; i < ESkipLevels; i++ {
+func (m *ESort) Clear() {
+	for i := 0; i < ELevels; i++ {
 		m.root.next[i], m.root.prev[i] = nil, nil
 	}
 
 	m.len = 0
 }
 
-func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
+func (m *ESort) Cut(start, end Iter, fn MapFn) Any {
 	if start == nil {
-		start = m.root.next[ESkipLevels-1]
+		start = m.root.next[ELevels-1]
 	}
 
 	if end == nil {
 		end = &m.root
 	}
 
-	res := NewESkip()
-	n, nn := start.(*ESkipNode), &res.root
+	res := NewESort()
+	n, nn := start.(*ENode), &res.root
 
 	for n != end  {
-		next := n.next[ESkipLevels-1]
+		next := n.next[ELevels-1]
 
 		if n == &m.root {
 			nn = &res.root
@@ -56,10 +56,10 @@ func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 			}
 
 			if k != nil {
-				vn := v.(*ESkipNode)
+				vn := v.(*ENode)
 				vn.key = k
 
-				for i := 0; i < ESkipLevels; i++ {
+				for i := 0; i < ELevels; i++ {
 					if n.next[i] != n {
 						n.prev[i].next[i] = n.next[i]
 						n.next[i].prev[i] = n.prev[i]			
@@ -83,13 +83,13 @@ func (m *ESkip) Cut(start, end Iter, fn MapFn) Any {
 	return res
 }
 
-func (m *ESkip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
-	n := m.root.next[ESkipLevels-1]
+func (m *ESort) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+	n := m.root.next[ELevels-1]
 
 	if start == nil {
 		start = m.root.next[0]
 	} else {
-		n = start.(*ESkipNode)
+		n = start.(*ENode)
 	}
 
 	if end == nil {
@@ -106,7 +106,7 @@ func (m *ESkip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	cnt := 0
 		
 	for n != end && (key == nil || n == &m.root || n.key == key) {
-		next := n.next[ESkipLevels-1]
+		next := n.next[ELevels-1]
 		
 		if n != &m.root && (val == nil || n == val) {
 			n.Delete()
@@ -120,7 +120,7 @@ func (m *ESkip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	return n, cnt
 }
 
-func (m *ESkip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m *ESort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 
 	if !ok {
@@ -128,30 +128,30 @@ func (m *ESkip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	}
 	
 	for val != nil && n != val && n.key == key {
-		n = n.next[ESkipLevels-1]
+		n = n.next[ELevels-1]
 	}
 
 	return n, n.key == key && (val == nil || n == val)
 }
 
-func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
+func (m *ESort) FindNode(start Iter, key Key) (*ENode, bool) {
 	if start == nil {
 		start = m.root.next[0]
 	}
 
-	if next := m.root.next[ESkipLevels-1]; next != &m.root && key.Less(next.key) {
+	if next := m.root.next[ELevels-1]; next != &m.root && key.Less(next.key) {
 		return &m.root, false
 	}
 
-	if prev := m.root.prev[ESkipLevels-1]; prev != &m.root && prev.key.Less(key) {
+	if prev := m.root.prev[ELevels-1]; prev != &m.root && prev.key.Less(key) {
 		return prev, false
 	}
 
-	n := start.(*ESkipNode)
-	var pn *ESkipNode
+	n := start.(*ENode)
+	var pn *ENode
 	maxSteps, steps := 1, 1
 
-	for i := 0; i < ESkipLevels; i++ {
+	for i := 0; i < ELevels; i++ {
 		isless := false
 
 		if n != &m.root {
@@ -170,8 +170,8 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 		}
 		
 		if !isless && n.key == key {
-			for n.prev[ESkipLevels-1].key == key {
-				n = n.prev[ESkipLevels-1]
+			for n.prev[ELevels-1].key == key {
+				n = n.prev[ELevels-1]
 			}
 
 			return n, true
@@ -180,7 +180,7 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 		n = n.prev[i]
 		pn = n
 
-		if i < ESkipLevels-1 {
+		if i < ELevels-1 {
 			n = n.next[i+1]
 		}
 
@@ -191,11 +191,11 @@ func (m *ESkip) FindNode(start Iter, key Key) (*ESkipNode, bool) {
 	return n, false
 }
 
-func (m *ESkip) First() Iter {
-	return m.root.next[ESkipLevels-1]
+func (m *ESort) First() Iter {
+	return m.root.next[ELevels-1]
 }
 
-func (m *ESkip) Get(key Key) (interface{}, bool) {
+func (m *ESort) Get(key Key) (interface{}, bool) {
 	n, ok := m.FindNode(nil, key)
 	
 	if ok {
@@ -205,32 +205,32 @@ func (m *ESkip) Get(key Key) (interface{}, bool) {
 	return nil, false
 }
 
-func (m *ESkip) Init() *ESkip {
+func (m *ESort) Init() *ESort {
 	m.isInit = true
 	m.root.Init(nil)
 	return m
 }
 
-func (m *ESkip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *ESort) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
 		return n, false
 	}
-	n.InsertAfter(val.(*ESkipNode).Init(key), ESkipLevels-1)
+	n.InsertAfter(val.(*ENode).Init(key), ELevels-1)
  	m.len++
-	return val.(*ESkipNode), true
+	return val.(*ENode), true
 }
 
-func (m *ESkip) Len() int64 {
+func (m *ESort) Len() int64 {
 	return m.len
 }
 
-func (m *ESkip) New() Any {
-	return NewESkip()
+func (m *ESort) New() Any {
+	return NewESort()
 }
 
-func (m *ESkip) Set(key Key, val interface{}) bool {
+func (m *ESort) Set(key Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok && i != val {
@@ -240,10 +240,10 @@ func (m *ESkip) Set(key Key, val interface{}) bool {
 	return ok
 }
 
-func (m *ESkip) String() string {
+func (m *ESort) String() string {
 	var buf bytes.Buffer
 
-	for i := 0; i < ESkipLevels; i++ {
+	for i := 0; i < ELevels; i++ {
 		buf.WriteString("[")
 		sep := ""
 
@@ -258,25 +258,25 @@ func (m *ESkip) String() string {
 	return buf.String()
 }
 
-func (n *ESkipNode) Delete() {
-	for i := 0; i < ESkipLevels; i++ {
+func (n *ENode) Delete() {
+	for i := 0; i < ELevels; i++ {
 		n.prev[i].next[i] = n.next[i]
 		n.next[i].prev[i] = n.prev[i] 
 		n.prev[i], n.next[i] = nil, nil
 	}
 }
 
-func (n *ESkipNode) Init(key Key) *ESkipNode {
+func (n *ENode) Init(key Key) *ENode {
 	n.key = key
 
-	for i := 0; i < ESkipLevels; i++ {
+	for i := 0; i < ELevels; i++ {
 		n.next[i], n.prev[i] = n, n
 	}
 
 	return n
 }
 
-func (n *ESkipNode) InsertAfter(node *ESkipNode, i int) *ESkipNode {
+func (n *ENode) InsertAfter(node *ENode, i int) *ENode {
 	node.prev[i] = n
 	node.next[i] = n.next[i]
 	n.next[i].prev[i] = node
@@ -284,28 +284,28 @@ func (n *ESkipNode) InsertAfter(node *ESkipNode, i int) *ESkipNode {
 	return node
 }
 
-func (n *ESkipNode) Key() Key {
+func (n *ENode) Key() Key {
 	return n.key
 }
 
-func (n *ESkipNode) Next() Iter {
-	return n.next[ESkipLevels-1]
+func (n *ENode) Next() Iter {
+	return n.next[ELevels-1]
 }
 
-func (n *ESkipNode) Prev() Iter {
-	return n.prev[ESkipLevels-1]
+func (n *ENode) Prev() Iter {
+	return n.prev[ELevels-1]
 }
 
-func (n *ESkipNode) Val() interface{} {
+func (n *ENode) Val() interface{} {
 	return n
 }
 
-func (n *ESkipNode) Valid() bool {
+func (n *ENode) Valid() bool {
 	return n.key != nil
 }
 
-func (m *ESkip) While(fn TestFn) bool {
-	for n := m.root.next[ESkipLevels-1]; n != &m.root; n = n.next[ESkipLevels-1] {
+func (m *ESort) While(fn TestFn) bool {
+	for n := m.root.next[ELevels-1]; n != &m.root; n = n.next[ELevels-1] {
 		if !fn(n.key, n) {
 			return false
 		}

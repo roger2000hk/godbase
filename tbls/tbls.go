@@ -32,7 +32,7 @@ type Any interface {
 
 type Basic struct {
 	defs.Basic
-	cols maps.Skip
+	cols maps.Sort
 	recIdHash recs.IdHash
 	recs maps.Hash
 	revision cols.Int64Col
@@ -42,7 +42,7 @@ type Basic struct {
 type ColIter maps.Iter
 type RecNotFound recs.Id
 
-func New(n string, rsc int, ra *maps.SkipAlloc, rls int) Any {
+func New(n string, rsc int, ra *maps.SlabAlloc, rls int) Any {
 	return new(Basic).Init(n, rsc, ra, rls)
 }
 
@@ -102,7 +102,7 @@ func (t *Basic) Get(id recs.Id) (recs.Any, error) {
 	return rr.(recs.Any).Clone(), nil
 }
 
-func (t *Basic) Init(n string, rsc int, ra *maps.SkipAlloc, rls int) *Basic {
+func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
 	t.recIdHash.Init()
@@ -112,7 +112,7 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SkipAlloc, rls int) *Basic {
 		return t.recIdHash.Hash(id)
 	}
 
-	t.recs.Init(maps.NewSkipSlots(rsc, hashRecId, ra, rls))
+	t.recs.Init(maps.NewSlabSlots(rsc, hashRecId, ra, rls))
 	t.Add(cols.CreatedAt())
 	t.Add(cols.RecId())
 	t.Add(t.revision.Init(fmt.Sprintf("%v/revision", n)))

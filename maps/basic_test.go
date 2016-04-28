@@ -9,16 +9,16 @@ func runCutTests(t *testing.T, m Any) {
 	its := sortedItems(100)
 
 	for i, it := range its {
-		k := it.skipNode.key
-		m.Insert(nil, k, &its[i].skipNode, false)
+		k := it.node.key
+		m.Insert(nil, k, &its[i].node, false)
 	}
 
-	start, _ := m.Find(nil, its[90].skipNode.key, nil)
+	start, _ := m.Find(nil, its[90].node.key, nil)
 	if k := start.Key(); int(k.(testKey)) != 90 {
 		t.Errorf("invalid start: %v", start)
 	}
 
-	end, _ := m.Find(nil, its[10].skipNode.key, nil)
+	end, _ := m.Find(nil, its[10].node.key, nil)
 	if k := end.Key(); int(k.(testKey)) != 10 {
 		t.Errorf("invalid end: %v", end)
 	}
@@ -40,24 +40,24 @@ func runCutTests(t *testing.T, m Any) {
 
 
 func TestCut(t *testing.T) {
-	runCutTests(t, NewSkip(nil, 3))
-	runCutTests(t, NewESkip())
+	runCutTests(t, NewSort(3))
+	runCutTests(t, NewESort())
 }
 
 func TestEmbedded(t *testing.T) {
-	m := NewESkip()
+	m := NewESort()
 	
 	const n = 100
 	its := make([]testItem, n)
 
 	for i := 0; i < n; i++ {
 		k := testKey(i)
-		m.Insert(nil, k, &its[i].skipNode, false)
+		m.Insert(nil, k, &its[i].node, false)
 
 		res, ok := m.Find(nil, k, nil)
-		if !ok || res.Key() != k || res.Val().(*ESkipNode) != &its[i].skipNode {
+		if !ok || res.Key() != k || res.Val().(*ENode) != &its[i].node {
 			t.Errorf("invalid find res: %v/%v/%v", i, res.Key(), res.Val())
-		} else if toTestItem(res.Val().(*ESkipNode)) != &its[i] {
+		} else if toTestItem(res.Val().(*ENode)) != &its[i] {
 			t.Errorf("invalid find res: %v/%v", res.Key(), res.Val())
 		}
 	}
@@ -70,17 +70,17 @@ func TestConstructors(t *testing.T) {
 	
 	NewMap()
 	
-	// 10 level skip map with separately allocated nodes
-	NewSkip(nil, 10)
+	// 10 level map
+	NewSort(10)
 
 	// slab allocator with 50 nodes per slab
-	a := NewSkipAlloc(50)
+	a := NewSlabAlloc(50)
 
-	// 20 level skip map with slab allocated nodes
-	NewSkip(a, 20)
+	// 20 level sorted map with slab allocated nodes
+	NewSlab(a, 20)
 
-	// skip map with embedded nodes
-	NewESkip()
+	// sorted map with embedded nodes
+	NewESort()
 
 	// 1000 slots backed by a native array and generic slot allocator
 	// could be used in any of the following examples,
@@ -89,8 +89,8 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	skipAlloc := func (_ Key) Any { return NewSkip(nil, 2) }
-	as := NewSlots(1000, genHash, skipAlloc)
+	sortAlloc := func (_ Key) Any { return NewSort(2) }
+	as := NewSlots(1000, genHash, sortAlloc)
 	NewHash(as)
 
 	// 1000 slots backed by a native map and generic slot allocator
@@ -100,19 +100,19 @@ func TestConstructors(t *testing.T) {
 	// value except slices as hash keys; which is useful when
 	// mapping your keys to an integer is problematic.
 
-	ms := NewMapSlots(1000, genMapHash, skipAlloc)
+	ms := NewMapSlots(1000, genMapHash, sortAlloc)
 	NewHash(ms)
 
-	// 1000 skip slots backed by 2 level skip maps with slab allocated nodes
-	ss := NewSkipSlots(1000, genHash, a, 2)
+	// 1000 slots backed by 2 level maps with slab allocated nodes
+	ss := NewSlabSlots(1000, genHash, a, 2)
 	NewHash(ss)
 
-	// 1000 hash slots backed by embedded skip maps
-	ess := NewESkipSlots(1000, genHash)
+	// 1000 hash slots backed by maps with embedded nodes
+	ess := NewESortSlots(1000, genHash)
 	NewHash(ess)
 
-	// 1000 hash slots backed by hash maps with 100 embedded skip slots
-	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESkipSlots(100, genHash) })
+	// 1000 hash slots backed by hash maps with 100 embedded node slots
+	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESortSlots(100, genHash) })
 	NewHash(hs)
 }
 
@@ -120,7 +120,7 @@ var basicIts = randItems(testReps)
 
 func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	for i, it := range its {
-		if res, ok := m.Insert(nil, it.skipNode.key, &its[i].skipNode, false); !ok {
+		if res, ok := m.Insert(nil, it.node.key, &its[i].node, false); !ok {
 			t.Errorf("invalid insert res: %v", res)
 		}
 	}
@@ -130,13 +130,13 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	}
 
 	for i, it := range its {
-		k := it.skipNode.key
-		v := &its[i].skipNode
+		k := it.node.key
+		v := &its[i].node
 
 		res, ok := m.Find(nil, k, nil)
 
 		if !ok || (res != nil && (res.Key() != k || res.Val() != v)) {
-			t.Errorf("%v invalid find(%v) res: %v/%v/%v/%v", label, k, ok, res.Key() == k, res.Val().(*ESkipNode).key, v.key)
+			t.Errorf("%v invalid find(%v) res: %v/%v/%v/%v", label, k, ok, res.Key() == k, res.Val().(*ENode).key, v.key)
 		}
 
 		res, ok = m.Find(nil, k, v); 
@@ -147,7 +147,7 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	}
 
 	for i := 0; i < len(its) / 2; i++ {
-		k := its[i].skipNode.key
+		k := its[i].node.key
 
 		res, cnt := m.Delete(nil, nil, k, nil);
 		if cnt != 1 || (res != nil && res.Key() != nil && !k.Less(res.Key())) {
@@ -156,10 +156,10 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	}
 
 	for i, it := range its {
-		k := it.skipNode.key
-		v := &its[i].skipNode
+		k := it.node.key
+		v := &its[i].node
 
-		res, ok := m.Insert(nil, it.skipNode.key, v, false)
+		res, ok := m.Insert(nil, it.node.key, v, false)
 		if (((i < len(its) / 2) && !ok) || ((i >= len(its) / 2) && ok)) &&
 			(res != nil && (res.Key() != k || res.Val() != v)) {
 			t.Errorf("%v invalid insert(%v) res: %v", label, k, res)		
@@ -167,7 +167,7 @@ func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
 	}
 
 	for _, it := range its {
-		if res, cnt := m.Delete(nil, nil, it.skipNode.key, nil); cnt != 1 {
+		if res, cnt := m.Delete(nil, nil, it.node.key, nil); cnt != 1 {
 			t.Errorf("invalid delete res: %v", res)
 		}
 	}
@@ -177,44 +177,44 @@ func BenchmarkBasicMap(t *testing.B) {
 	runBasicTests(t, "Map", NewMap(), basicIts) 
 }
 
-func BenchmarkBasicSkip(t *testing.B) {
-	runBasicTests(t, "Skip", NewSkip(nil, testLevels), basicIts) 
+func BenchmarkBasicSort(t *testing.B) {
+	runBasicTests(t, "Sort", NewSort(testLevels), basicIts) 
 }
 
-func BenchmarkBasicSkipSlab(t *testing.B) {
-	runBasicTests(t, "Skip/Slab", NewSkip(testSkipAlloc, testLevels), basicIts) 
+func BenchmarkBasicSlab(t *testing.B) {
+	runBasicTests(t, "Slab", NewSlab(testAlloc, testLevels), basicIts) 
 }
 
-func BenchmarkBasicESkip(t *testing.B) {
-	runBasicTests(t, "ESkip", NewESkip(), basicIts) 
+func BenchmarkBasicESort(t *testing.B) {
+	runBasicTests(t, "ESort", NewESort(), basicIts) 
 }
 
-func BenchmarkBasicSkipHash(t *testing.B) {
-	runBasicTests(t, "SkipHash", 
-		NewHash(NewSkipSlots(testSlots, genHash, testSkipAlloc, testHashLevels)), 
+func BenchmarkBasicSlabHash(t *testing.B) {
+	runBasicTests(t, "SlabHash", 
+		NewHash(NewSlabSlots(testSlots, genHash, testAlloc, testHashLevels)), 
 		basicIts) 
 }
 
-func BenchmarkBasicESkipHash(t *testing.B) {
-	runBasicTests(t, "ESkipHash", NewHash(NewESkipSlots(testESlots, genHash)), basicIts) 
+func BenchmarkBasicESortHash(t *testing.B) {
+	runBasicTests(t, "ESortHash", NewHash(NewESortSlots(testESlots, genHash)), basicIts) 
 }
 
-func BenchmarkBasicSkipAnyHash(t *testing.B) {
-	runBasicTests(t, "SkipAnyHash", NewHash(NewSlots(testSlots, genHash, allocSkip)), 
+func BenchmarkBasicSortAnyHash(t *testing.B) {
+	runBasicTests(t, "SortAnyHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
 		basicIts) 
 }
 
-func BenchmarkBasicESkipAnyHash(t *testing.B) {
-	runBasicTests(t, "ESkipAnyHash", NewHash(NewSlots(testESlots, genHash, allocESkip)), 
+func BenchmarkBasicESortAnyHash(t *testing.B) {
+	runBasicTests(t, "ESortAnyHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
 		basicIts) 
 }
 
-func BenchmarkBasicSkipMapHash(t *testing.B) {
-	runBasicTests(t, "SkipMapHash", NewHash(NewMapSlots(testSlots, genMapHash, allocSkip)), 
+func BenchmarkBasicSortMapHash(t *testing.B) {
+	runBasicTests(t, "SortMapHash", NewHash(NewMapSlots(testSlots, genMapHash, allocSlab)), 
 		basicIts) 
 }
 
-func BenchmarkBasicESkipMapHash(t *testing.B) {
-	runBasicTests(t, "ESkipMapHash", NewHash(NewMapSlots(testESlots, genMapHash, allocESkip)), 
+func BenchmarkBasicESortMapHash(t *testing.B) {
+	runBasicTests(t, "ESortMapHash", NewHash(NewMapSlots(testESlots, genMapHash, allocESort)), 
 		basicIts) 
 }

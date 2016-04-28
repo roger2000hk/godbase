@@ -10,7 +10,7 @@ func TestSuffix(t *testing.T) {
 	// iters only work within slots for hash maps; therefore, the obvious 
 	// combination is with one of the ordered maps.
 
-	m := NewSuffix(NewSkip(nil, 4))
+	m := NewSuffix(NewSort(4))
 
 	// keys must be of type StringKey
 	// per key dup check control is inherited from the map api

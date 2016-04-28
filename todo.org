@@ -1,13 +1,3 @@
-* add Tbl.UpsertedAt(Rec) time.Time
-** add Basic.upsertedAt
-** add to cols
-** init incoming to time.Now() in Upsert()
-
-* add Tbl.Revision(Rec) recs.Revision
-** add Basic.revision
-** add to cols
-** init to 1 in Upsert if not exists, otherwise inc
-
 * add cols.Bool
 ** add rec methods
 ** add to tests
@@ -86,4 +76,4 @@
 
 * add hash resizing
 
-* add skip resizing
+* add sort resizing

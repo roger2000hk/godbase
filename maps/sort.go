@@ -7,42 +7,46 @@ import (
 	"unsafe"
 )
 
-type Skip struct {
-	alloc *SkipAlloc
-	bottom *SkipNode
+type Sort struct {
+	alloc *SlabAlloc
+	bottom *Node
 	isInit bool
 	len int64
-	top SkipNode
+	top Node
 }
 
-type SkipAlloc struct {
+type SlabAlloc struct {
 	freeList lists.EDouble
 	idx int
-	slab SkipSlab
+	slab Slab
 	slabSize int
 }
 
-type SkipSlab []SkipNode
+type Slab []Node
 
-func NewSkip(alloc *SkipAlloc, levels int) *Skip {
-	return new(Skip).Init(alloc, levels)
+func NewSlab(a *SlabAlloc, ls int) *Sort {
+	return new(Sort).Init(a, ls)
 }
 
-func (m *Skip) AllocNode(key Key, val interface{}, prev *SkipNode) *SkipNode{
+func NewSort(ls int) *Sort {
+	return NewSlab(nil, ls)
+}
+
+func (m *Sort) SlabAllocNode(key Key, val interface{}, prev *Node) *Node{
 	if m.alloc == nil {
-		 return new(SkipNode).Init(key, val, prev)
+		 return new(Node).Init(key, val, prev)
 	} 
 	
 	return m.alloc.New(key, val, prev)
 }
 
-func (n *SkipNode) Bottom() *SkipNode {
-	var res *SkipNode
+func (n *Node) Bottom() *Node {
+	var res *Node
 	for res = n; res.down != res; res = res.down { }
 	return res
 }
 
-func (m *Skip) Clear() {
+func (m *Sort) Clear() {
 	if m.alloc != nil {
 		for n := m.bottom.next; n != m.bottom; n = n.next {
 			m.alloc.Free(n)
@@ -60,7 +64,7 @@ func (m *Skip) Clear() {
 	m.len = 0
 }
 
-func (m *Skip) Cut(start, end Iter, fn MapFn) Any {
+func (m *Sort) Cut(start, end Iter, fn MapFn) Any {
 	if start == nil {
 		start = m.bottom.next
 	} else
@@ -69,10 +73,10 @@ func (m *Skip) Cut(start, end Iter, fn MapFn) Any {
 		end = m.bottom.prev
 	}
 
-	res := NewSkip(m.alloc, m.Levels())
+	res := NewSlab(m.alloc, m.Levels())
 	nn := res.bottom
 
-	n := start.(*SkipNode); 
+	n := start.(*Node); 
 	for Iter(n) != end {
 		next := n.next
 		
@@ -115,19 +119,19 @@ func (m *Skip) Cut(start, end Iter, fn MapFn) Any {
 	return res
 }
 
-func (m *Skip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+func (m *Sort) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	n := m.bottom.next
 
 	if start == nil {
 		start = m.top.next
 	} else {
-		n = start.(*SkipNode).Top()
+		n = start.(*Node).Top()
 	}
 
 	if end == nil {
 		end = m.bottom
 	} else {
-		end = end.(*SkipNode).Bottom()
+		end = end.(*Node).Bottom()
 	}
 
 	if key != nil {
@@ -160,8 +164,8 @@ func (m *Skip) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	return n, cnt
 }
 
-func (n *SkipNode) Delete() {
-	var pn *SkipNode
+func (n *Node) Delete() {
+	var pn *Node
 
 	for n != pn {
 		n.prev.next, n.next.prev = n.next, n.prev
@@ -170,7 +174,7 @@ func (n *SkipNode) Delete() {
 	}
 }
 
-func (m *Skip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m *Sort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if !ok {
@@ -184,7 +188,7 @@ func (m *Skip) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return n, n.key == key && (val == nil || n.val == val)
 }
 
-func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
+func (m *Sort) FindNode(start Iter, key Key) (*Node, bool) {
 	if start == nil {
 		start = m.top.next
 	}
@@ -197,8 +201,8 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 		return prev, false
 	}
 
-	var pn *SkipNode
-	n := start.(*SkipNode)
+	var pn *Node
+	n := start.(*Node)
 	maxSteps, steps := 1, 1
 	
 	for true {
@@ -213,8 +217,8 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 
 		for isless {
 			if steps == maxSteps && pn != nil {
-				var nn *SkipNode
-				nn = m.AllocNode(n.key, n.val, pn)
+				var nn *Node
+				nn = m.SlabAllocNode(n.key, n.val, pn)
 				nn.down = n
 				n.up, pn = nn, nn
 				steps = 0
@@ -250,12 +254,12 @@ func (m *Skip) FindNode(start Iter, key Key) (*SkipNode, bool) {
 	return n.prev, false
 }
 
-func (m *Skip) First() Iter {
+func (m *Sort) First() Iter {
 	return m.bottom.next
 }
 
 
-func (m *Skip) Get(key Key) (interface{}, bool) {
+func (m *Sort) Get(key Key) (interface{}, bool) {
 	n, ok := m.FindNode(nil, key)
 	
 	if ok {
@@ -265,18 +269,18 @@ func (m *Skip) Get(key Key) (interface{}, bool) {
 	return nil, false
 }
 
-func (a *SkipAlloc) Free(n *SkipNode) {
+func (a *SlabAlloc) Free(n *Node) {
 	a.freeList.InsAfter(&n.freeNode)
 }
 
-func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
+func (m *Sort) Init(alloc *SlabAlloc, levels int) *Sort {
 	m.isInit = true
 	m.alloc = alloc
 	m.top.Init(nil, nil, nil)
 	n := &m.top
 
 	for i := 0; i < levels-1; i++ {
-		n.down = m.AllocNode(nil, nil, nil)
+		n.down = m.SlabAllocNode(nil, nil, nil)
 		n.down.up = n
 		n = n.down
 	}
@@ -286,25 +290,25 @@ func (m *Skip) Init(alloc *SkipAlloc, levels int) *Skip {
 	return m
 }
 
-func (m *Skip) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *Sort) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
 		return n, false
 	}
 	
-	nn := m.AllocNode(key, val, n) 
+	nn := m.SlabAllocNode(key, val, n) 
 	nn.down = nn
 	m.len++
 
 	return nn, true
 }
 
-func (m *Skip) Len() int64 {
+func (m *Sort) Len() int64 {
 	return m.len
 }
 
-func (m *Skip) Levels() int {
+func (m *Sort) Levels() int {
 	res := 1
 
 	for n := &m.top; n.down != n; n = n.down { 
@@ -314,21 +318,21 @@ func (m *Skip) Levels() int {
 	return res
 }
 
-func (m *Skip) New() Any {
-	return NewSkip(m.alloc, m.Levels())
+func (m *Sort) New() Any {
+	return NewSlab(m.alloc, m.Levels())
 }
 
-func (m *Skip) Set(key Key, val interface{}) bool {
+func (m *Sort) Set(key Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok {
-		i.(*SkipNode).val = val
+		i.(*Node).val = val
 	}
 
 	return ok
 }
 
-func (m *Skip) String() string {
+func (m *Sort) String() string {
 	var buf bytes.Buffer
 	start := &m.top
 
@@ -356,16 +360,16 @@ func (m *Skip) String() string {
 	return buf.String()
 }
 
-type SkipNode struct {
+type Node struct {
 	freeNode lists.EDouble
-	down, next, prev, up *SkipNode
+	down, next, prev, up *Node
 	key Key
 	val interface{}
 }
 
-var freeNodeOffs = unsafe.Offsetof(new(SkipNode).freeNode)
+var freeNodeOffs = unsafe.Offsetof(new(Node).freeNode)
 
-func (n *SkipNode) Init(key Key, val interface{}, prev *SkipNode) *SkipNode {
+func (n *Node) Init(key Key, val interface{}, prev *Node) *Node {
 	n.key, n.val = key, val
 	n.up = n
 
@@ -379,52 +383,52 @@ func (n *SkipNode) Init(key Key, val interface{}, prev *SkipNode) *SkipNode {
 	return n
 }
 
-func (n *SkipNode) Key() Key {
+func (n *Node) Key() Key {
 	return n.key
 }
 
-func (n *SkipNode) Next() Iter {
+func (n *Node) Next() Iter {
 	return n.next
 }
 
-func (n *SkipNode) Prev() Iter {
+func (n *Node) Prev() Iter {
 	return n.prev
 }
 
-func (n *SkipNode) Top() *SkipNode {
-	var res *SkipNode
+func (n *Node) Top() *Node {
+	var res *Node
 	for res = n; res.up != res; res = res.up { }
 	return res
 }
 
-func (n *SkipNode) Val() interface{} {
+func (n *Node) Val() interface{} {
 	return n.val
 }
 
-func (n *SkipNode) Valid() bool {
+func (n *Node) Valid() bool {
 	return n.key != nil
 }
 
-func NewSkipAlloc(slabSize int) *SkipAlloc {
-	return new(SkipAlloc).Init(slabSize)
+func NewSlabAlloc(slabSize int) *SlabAlloc {
+	return new(SlabAlloc).Init(slabSize)
 }
 
-func (a *SkipAlloc) Init(slabSize int) *SkipAlloc {
+func (a *SlabAlloc) Init(slabSize int) *SlabAlloc {
 	a.freeList.Init()
-	a.slab = make(SkipSlab, slabSize)
+	a.slab = make(Slab, slabSize)
 	a.slabSize = slabSize
 	return a
 }
 
-func (a *SkipAlloc) New(key Key, val interface{}, prev *SkipNode) *SkipNode {
-	var res *SkipNode
+func (a *SlabAlloc) New(key Key, val interface{}, prev *Node) *Node {
+	var res *Node
 
 	if n := a.freeList.Next(); n != n {
 		n.Del()
-		res = (*SkipNode)(n.Ptr(freeNodeOffs))
+		res = (*Node)(n.Ptr(freeNodeOffs))
 	} else {
 		if a.idx == a.slabSize {
-			a.slab = make([]SkipNode, a.slabSize)
+			a.slab = make(Slab, a.slabSize)
 			a.idx = 0
 		}
 
@@ -435,7 +439,7 @@ func (a *SkipAlloc) New(key Key, val interface{}, prev *SkipNode) *SkipNode {
 	return res.Init(key, val, prev)
 }
 
-func (m *Skip) While(fn TestFn) bool {
+func (m *Sort) While(fn TestFn) bool {
 	for n := m.bottom.next; n != m.bottom; n = n.next {
 		if !fn(n.key, n.val) {
 			return false

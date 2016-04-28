@@ -139,17 +139,17 @@ func TestConstructors(t *testing.T) {
 	
 	NewMap()
 	
-	// 10 level skip map with separately allocated nodes
-	NewSkip(nil, 10)
+	// 10 level map
+	NewSort(10)
 
 	// slab allocator with 50 nodes per slab
-	a := NewSkipAlloc(50)
+	a := NewSlabAlloc(50)
 
-	// 20 level skip map with slab allocated nodes
-	NewSkip(a, 20)
+	// 20 level map with slab allocated nodes
+	NewSlab(a, 20)
 
-	// skip map with embedded nodes
-	NewESkip()
+	// map with embedded nodes
+	NewESort()
 
 	// 1000 slots backed by a native array and generic slot allocator
 	// could be used in any of the following examples,
@@ -158,8 +158,8 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	skipAlloc := func (_ Key) Any { return NewSkip(nil, 2) }
-	as := NewSlots(1000, genHash, skipAlloc)
+	sortAlloc := func (_ Key) Any { return NewSort(2) }
+	as := NewSlots(1000, genHash, sortAlloc)
 	NewHash(as)
 
 	// 1000 slots backed by a native map and generic slot allocator
@@ -171,19 +171,19 @@ func TestConstructors(t *testing.T) {
 	// share the same limitations as native maps, no slice keys and relatively
 	// expensive to create.
 
-	ms := NewMapSlots(1000, genMapHash, skipAlloc)
+	ms := NewMapSlots(1000, genMapHash, sortAlloc)
 	NewHash(ms)
 
-	// 1000 skip slots backed by 2 level skip maps with slab allocated nodes
-	ss := NewSkipSlots(1000, genHash, a, 2)
+	// 1000 slots backed by 2 level maps with slab allocated nodes
+	ss := NewSlabSlots(1000, genHash, a, 2)
 	NewHash(ss)
 
-	// 1000 hash slots backed by embedded skip maps
-	ess := NewESkipSlots(1000, genHash)
+	// 1000 hash slots backed by maps with embedded nodes
+	ess := NewESortSlots(1000, genHash)
 	NewHash(ess)
 
-	// 1000 hash slots backed by hash maps with 100 embedded skip slots
-	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESkipSlots(100, genHash) })
+	// 1000 hash slots backed by hash maps with 100 embedded slots
+	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESortSlots(100, genHash) })
 	NewHash(hs)
 }
 
@@ -196,21 +196,21 @@ I picked up the idea of embedding node infrastructure into elems from the Linux 
 
 // pretend this is your value type
 type testItem struct {
-	skipNode ESkipNode
+	node ENode
 
 	// additional fields...
 }
 
 // calculate offset of node within struct
-var testItemOffs = unsafe.Offsetof(new(testItem).skipNode)
+var testItemOffs = unsafe.Offsetof(new(testItem).node)
 
 // helper to get pointer to item from node
-func toTestItem(node *ESkipNode) *testItem {
+func toTestItem(node *ENode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
 }
 
 func TestEmbedded(t *testing.T) {
-	m := NewESkip()
+	m := NewESort()
 	
 	const n = 100
 	its := make([]testItem, n)
@@ -220,14 +220,14 @@ func TestEmbedded(t *testing.T) {
 
 		// the map only deals with nodes,
 		// translation to/from values is left to client code
-		m.Insert(nil, k, &its[i].skipNode, false)
+		m.Insert(nil, k, &its[i].node, false)
 
 		res, ok := m.Find(nil, k, nil)
 		res = res.Next()
 
-		if !ok || res.Key() != k || res.Val().(*ESkipNode) != &its[i].skipNode {
+		if !ok || res.Key() != k || res.Val().(*ENode) != &its[i].node {
 			t.Errorf("invalid iter: %v/%v/%v", i, res.Key(), res.Val())
-		} else if toTestItem(res.Val().(*ESkipNode)) != &its[i] {
+		} else if toTestItem(res.Val().(*ENode)) != &its[i] {
 			t.Errorf("invalid value: %v", i)
 		}
 	}
@@ -288,7 +288,7 @@ func TestSuffix(t *testing.T) {
 	// iters only work within slots for hash maps; therefore, the obvious 
 	// combination is with one of the ordered maps.
 
-	m := NewSuffix(NewSkip(nil, 4))
+	m := NewSuffix(NewSort(4))
 
 	// keys must be of type StringKey
 	// per key dup check control is inherited from the map api

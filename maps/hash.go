@@ -17,9 +17,9 @@ type AnySlots struct {
 	slots []Any
 }
 
-type ESkipSlots struct {
+type ESortSlots struct {
 	fn HashFn
-	slots []ESkip
+	slots []ESort
 }
 
 type MapSlots struct {
@@ -40,11 +40,11 @@ type HashSlots struct {
 	slots []Hash
 }
 
-type SkipSlots struct {
-	alloc *SkipAlloc
+type SortSlots struct {
+	alloc *SlabAlloc
 	fn HashFn
 	levels int
-	slots []Skip
+	slots []Sort
 }
 
 type HashFn func (Key) uint64
@@ -52,10 +52,10 @@ type MapHashFn func (Key) interface{}
 type SlotAlloc func (key Key) Any
 type SlotsAlloc func (key Key) Slots
 
-func NewESkipSlots(sc int, fn HashFn) *ESkipSlots {
-	ss := new(ESkipSlots)
+func NewESortSlots(sc int, fn HashFn) *ESortSlots {
+	ss := new(ESortSlots)
 	ss.fn = fn
-	ss.slots = make([]ESkip, sc)
+	ss.slots = make([]ESort, sc)
 	return ss
 }
 
@@ -79,13 +79,17 @@ func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
 	return ss
 }
 
-func NewSkipSlots(sc int, fn HashFn, a *SkipAlloc, ls int) *SkipSlots {
-	ss := new(SkipSlots)
+func NewSlabSlots(sc int, fn HashFn, a *SlabAlloc, ls int) *SortSlots {
+	ss := new(SortSlots)
 	ss.alloc = a
 	ss.fn = fn
 	ss.levels = ls
-	ss.slots = make([]Skip, sc)
+	ss.slots = make([]Sort, sc)
 	return ss
+}
+
+func NewSortSlots(sc int, fn HashFn, ls int) *SortSlots {
+	return NewSlabSlots(sc, fn, nil, ls)
 }
 
 func NewSlots(sc int, fn HashFn, a SlotAlloc) *AnySlots {
@@ -102,7 +106,7 @@ func (ss *AnySlots) Clear() {
 	}
 }
 
-func (ss *ESkipSlots) Clear() {
+func (ss *ESortSlots) Clear() {
 	for i := range ss.slots {
 		ss.slots[i].Clear()
 	}
@@ -125,7 +129,7 @@ func (ss *MapSlots) Clear() {
 	}
 }
 
-func (ss *SkipSlots) Clear() {
+func (ss *SortSlots) Clear() {
 	for i := range ss.slots {
 		ss.slots[i].Clear()
 	}
@@ -170,7 +174,7 @@ func (ss *AnySlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *ESkipSlots) Get(key Key, create bool) Any {
+func (ss *ESortSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -217,7 +221,7 @@ func (ss *MapSlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *SkipSlots) Get(key Key, create bool) Any {
+func (ss *SortSlots) Get(key Key, create bool) Any {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -256,8 +260,8 @@ func (ss *AnySlots) New() Slots {
 	return NewSlots(len(ss.slots), ss.fn, ss.alloc)
 }
 
-func (ss *ESkipSlots) New() Slots {
-	return NewESkipSlots(len(ss.slots), ss.fn)
+func (ss *ESortSlots) New() Slots {
+	return NewESortSlots(len(ss.slots), ss.fn)
 }
 
 func (m *Hash) New() Any {
@@ -272,8 +276,8 @@ func (ss *MapSlots) New() Slots {
 	return NewMapSlots(len(ss.slots), ss.fn, ss.alloc)
 }
 
-func (ss *SkipSlots) New() Slots {
-	return NewSkipSlots(len(ss.slots), ss.fn, ss.alloc, ss.levels)
+func (ss *SortSlots) New() Slots {
+	return NewSlabSlots(len(ss.slots), ss.fn, ss.alloc, ss.levels)
 }
 
 func (m *Hash) Set(key Key, val interface{}) bool {
@@ -299,7 +303,7 @@ func (ss *AnySlots) While(fn TestFn) bool {
 	return true
 }
 
-func (ss *ESkipSlots) While(fn TestFn) bool {
+func (ss *ESortSlots) While(fn TestFn) bool {
 	for _, s := range ss.slots {
 		if s.isInit && !s.While(fn) {
 			return false
@@ -333,7 +337,7 @@ func (ss *MapSlots) While(fn TestFn) bool {
 	return true
 }
 
-func (ss *SkipSlots) While(fn TestFn) bool {
+func (ss *SortSlots) While(fn TestFn) bool {
 	for _, s := range ss.slots {
 		if s.isInit && !s.While(fn) {
 			return false

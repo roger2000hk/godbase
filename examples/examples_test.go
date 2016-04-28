@@ -11,7 +11,7 @@ import (
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
-	// create tmp tbl named "foos" backed by a hashed 1-level skip map without allocator 
+	// create tmp tbl named "foos" backed by a hashed 1-level map without allocator 
 
 	foos := tbls.New("foos", 100, nil, 1)
 	bar := cols.NewInt64("bar")

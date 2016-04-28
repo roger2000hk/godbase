@@ -37,23 +37,23 @@ type IdHash struct {
 	imp hash.Hash64
 }
 
-type Basic maps.Skip
+type Basic maps.Sort
 type Id godbase.UId
 type Iter maps.Iter
 type Size uint32
 type TestFn func(Any) bool
 
-func BasicNew(a *maps.SkipAlloc) Any {
+func BasicNew(a *maps.SlabAlloc) Any {
 	return new(Basic).BasicInit(a)
 }
 
-func Init(id Id, a *maps.SkipAlloc) Any {
+func Init(id Id, a *maps.SlabAlloc) Any {
 	r := new(Basic).BasicInit(a)
 	r.SetUId(cols.RecId(), godbase.UId(id))
 	return r
 }
 
-func New(a *maps.SkipAlloc) Any {
+func New(a *maps.SlabAlloc) Any {
 	return new(Basic).Init(a)
 }
 
@@ -65,7 +65,7 @@ func NewIdHash() *IdHash {
 	return new(IdHash).Init()
 }
 
-func (r *Basic) BasicInit(a *maps.SkipAlloc) *Basic {
+func (r *Basic) BasicInit(a *maps.SlabAlloc) *Basic {
 	r.asMap().Init(a, 1)
 	return r
 }
@@ -131,7 +131,7 @@ func (r *Basic) Id() Id {
 	return Id(r.UId(cols.RecId()))
 }
 
-func (r *Basic) Init(a *maps.SkipAlloc) *Basic {
+func (r *Basic) Init(a *maps.SlabAlloc) *Basic {
 	r.BasicInit(a)
 	r.SetTime(cols.CreatedAt(), time.Now())
 	r.SetUId(cols.RecId(), godbase.NewUId())
@@ -161,7 +161,7 @@ func (id Id) Less(other maps.Key) bool {
 }
 
 func (r *Basic) New() Any {
-	return (*Basic)(r.asMap().New().(*maps.Skip))
+	return (*Basic)(r.asMap().New().(*maps.Sort))
 }
 
 func (r *Basic) Set(c cols.Any, v interface{}) Any {
@@ -201,6 +201,6 @@ func (r *Basic) UId(c *cols.UIdCol) godbase.UId {
 	return r.Get(c).(godbase.UId)
 }
 
-func (r *Basic) asMap() *maps.Skip {
-	return (*maps.Skip)(r)
+func (r *Basic) asMap() *maps.Sort {
+	return (*maps.Sort)(r)
 }
