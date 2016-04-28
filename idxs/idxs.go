@@ -11,7 +11,7 @@ import (
 
 type Any interface {
 	Insert(recs.Any) (recs.Any, error)
-	Key(r recs.Any) interface{}
+	Key(r recs.Any) maps.Key
 	Delete(recs.Any) error
 }
 

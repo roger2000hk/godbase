@@ -7,9 +7,16 @@
 ** start & id are optional
 ** forward to map Find
  
+* add Tbl.Delete()
+
+* add idx.Dump/Load like Tbl
+
 * add README.md to idxs
 
-* add Tbl.Delete()
+* add reverse idx for offsets
+** Idx.Basic/Reverse
+** extend Any
+** use id as key & store val for col
 
 * run rw lock test with race tool
 

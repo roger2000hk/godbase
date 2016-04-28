@@ -12,6 +12,7 @@ type Key interface {
 	Less(Key) bool
 }
 
+type BoolKey bool
 type Int64Key int64
 type StringKey string
 type TimeKey time.Time
@@ -100,6 +101,10 @@ type Alloc func () Any
 
 type MapFn func (Key, interface{}) (Key, interface{})
 type TestFn func (Key, interface{}) bool
+
+func (k BoolKey) Less(other Key) bool {
+	return !bool(k) && bool(other.(BoolKey))
+}
 
 func (k Int64Key) Less(other Key) bool {
 	return k < other.(Int64Key)

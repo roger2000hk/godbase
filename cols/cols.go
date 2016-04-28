@@ -44,6 +44,14 @@ type BasicType struct {
 	name string
 }
 
+type BoolCol struct {
+	Basic
+}
+
+type BoolType struct {
+	BasicType
+}
+
 type Int64Col struct {
 	Basic
 }
@@ -79,6 +87,7 @@ type UIdType struct {
 }
 
 var (
+	boolType BoolType
 	int64Type Int64Type
 	stringType StringType
 	timeType TimeType
@@ -89,6 +98,7 @@ var (
 )
 
 func init() {
+	boolType.Init("Bool")
 	int64Type.Init("Int64")
 	stringType.Init("String")
 	timeType.Init("Time")
@@ -96,6 +106,10 @@ func init() {
 
 	recId.Init("godbase/id")
 	createdAt.Init("godbase/createdAt")
+}
+
+func Bool() Type {
+	return &boolType
 }
 
 func CreatedAt() *TimeCol {
@@ -122,6 +136,10 @@ func UId() Type {
 	return &uidType
 }
 
+func NewBool(n string) *BoolCol {
+	return new(BoolCol).Init(n)
+}
+
 func NewInt64(n string) *Int64Col {
 	return new(Int64Col).Init(n)
 }
@@ -144,6 +162,10 @@ func (c *Basic) AsKey(v interface{}) maps.Key {
 	
 func (_ *BasicType) AsKey(c Any, _ interface{}) maps.Key {
 	panic(fmt.Sprintf("AsKey() not supported for %v!", c))
+}
+
+func (_ *BoolType) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.BoolKey(v.(bool))
 }
 
 func (_ *Int64Type) AsKey(_ Any, v interface{}) maps.Key {
@@ -182,6 +204,11 @@ func (c *Basic) Hash(v interface{}, h hash.Hash64) {
 	c.colType.Hash(c, v, h)
 }
 
+func (_ *BoolType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+	v := _v.(maps.BoolKey)
+	godbase.Write(&v, h)
+}
+
 func (_ *Int64Type) Hash(_ Any, _v interface{}, h hash.Hash64) {
 	v := _v.(maps.Int64Key)
 	godbase.Write(&v, h)
@@ -212,6 +239,11 @@ func (t *BasicType) Init(n string) *BasicType {
 	return t
 }
 
+func (c *BoolCol) Init(n string) *BoolCol {
+	c.Basic.Init(n, Bool())
+	return c
+}
+
 func (c *Int64Col) Init(n string) *Int64Col {
 	c.Basic.Init(n, Int64())
 	return c
@@ -240,7 +272,17 @@ func (c *Basic) Read(s ValSize, r io.Reader) (interface{}, error) {
 	return c.colType.Read(c, s, r)
 }
 
-func (_ *Int64Type) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+func (_ *BoolType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
+	var v byte
+
+	if err := godbase.Read(&v, r); err != nil {
+		return nil, err
+	}
+
+	return v == 1, nil
+}
+
+func (_ *Int64Type) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -276,7 +318,7 @@ func (_ *TimeType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *UIdType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+func (_ *UIdType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 	var v godbase.UId
 
 	if _, err := io.ReadFull(r, v[:]); err != nil {
@@ -288,6 +330,15 @@ func (_ *UIdType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 
 func (c *Basic) Write(v interface{}, w io.Writer) error {
 	return c.colType.Write(c, v, w)
+}
+
+func (_ *BoolType) Write(_ Any, _v interface{}, w io.Writer) error {
+	v := byte(0)
+	if _v.(bool) {
+		v = 1
+	} 
+
+	return WriteBinVal(1, &v, w)
 }
 
 func (_ *Int64Type) Write(_ Any, _v interface{}, w io.Writer) error {

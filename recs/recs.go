@@ -12,6 +12,7 @@ import (
 )
 
 type Any interface {
+	Bool(*cols.BoolCol) bool
 	Clear()
 	Clone() Any
 	Delete(cols.Any) bool
@@ -24,6 +25,7 @@ type Any interface {
 	Len() int
 	New() Any
 	Set(cols.Any, interface{}) Any
+	SetBool(*cols.BoolCol, bool) Any
 	SetInt64(*cols.Int64Col, int64) Any
 	SetString(*cols.StringCol, string) Any
 	SetTime(*cols.TimeCol, time.Time) Any
@@ -63,6 +65,10 @@ func NewId() Id {
 
 func NewIdHash() *IdHash {
 	return new(IdHash).Init()
+}
+
+func (r *Basic) Bool(c *cols.BoolCol) bool {
+	return r.Get(c).(bool)
 }
 
 func (r *Basic) BasicInit(a *maps.SlabAlloc) *Basic {
@@ -167,6 +173,10 @@ func (r *Basic) New() Any {
 func (r *Basic) Set(c cols.Any, v interface{}) Any {
 	r.asMap().Set(c, v)
 	return r
+}
+
+func (r *Basic) SetBool(c *cols.BoolCol, v bool) Any {
+	return r.Set(c, v)
 }
 
 func (r *Basic) SetInt64(c *cols.Int64Col, v int64) Any {

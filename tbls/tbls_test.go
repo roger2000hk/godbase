@@ -12,6 +12,7 @@ import (
 func TestCreate(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
+	foos.Add(cols.NewBool("bool"))
 	foos.Add(cols.NewInt64("int64"))
 	foos.Add(cols.NewString("string"))
 	foos.Add(cols.NewUId("uid"))
@@ -22,6 +23,11 @@ func TestCreate(t *testing.T) {
 
 	i := foos.Cols()
 
+	if c := i.Val().(cols.Any); c.Name() != "bool" {
+		t.Errorf("invalid col: %v", c)
+	}
+
+	i = i.Next()
 	if c := i.Val().(cols.Any); c.Name() != "foos/revision" {
 		t.Errorf("invalid col: %v", c)
 	}
@@ -51,12 +57,14 @@ func TestCreate(t *testing.T) {
 func TestReadWriteRec(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
+	boolCol := foos.Add(cols.NewBool("bool")).(*cols.BoolCol)
 	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64Col)
 	stringCol := foos.Add(cols.NewString("string")).(*cols.StringCol)
 	timeCol := foos.Add(cols.NewTime("time")).(*cols.TimeCol)
 	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UIdCol)
 	
 	r := recs.New(nil)
+	r.SetBool(boolCol, true)
 	r.SetInt64(int64Col, 1)
 	r.SetString(stringCol, "abc")
 	r.SetTime(timeCol, time.Now())
