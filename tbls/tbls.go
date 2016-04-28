@@ -8,6 +8,7 @@ import (
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
 	"io"
+	"log"
 )
 
 type Any interface {
@@ -147,6 +148,8 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 
 			rec.Set(c, v)
 		} else {
+			log.Printf("col '%v' missing in tbl '%v'", n, t.Name())
+ 
 			var s cols.ValSize
 
 			if s, err = cols.ReadSize(r); err != nil {

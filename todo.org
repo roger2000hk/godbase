@@ -1,5 +1,3 @@
-* skip forward if col not found in tbl.Read
-
 * add Tbl.UpsertedAt(Rec) time.Time
 ** add Basic.upsertedAt
 ** add to cols
