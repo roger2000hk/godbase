@@ -137,13 +137,27 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 			return nil, err
 		}
 
-		c := t.Col(n)
-		var v interface{}
-		if v, err = cols.Read(c, r); err != nil {
-			return nil, err
-		}
+		if i, ok := t.cols.Find(nil, maps.StringKey(n), nil); ok {
+			c := i.Val().(cols.Any)
+			var v interface{}
+			
+			if v, err = cols.Read(c, r); err != nil {
+				return nil, err
+			}
 
-		rec.Set(c, v)
+			rec.Set(c, v)
+		} else {
+			var s cols.ValSize
+
+			if s, err = cols.ReadSize(r); err != nil {
+				return nil, err
+			}
+
+			bs := make([]byte, s)
+			if _, err = io.ReadFull(r, bs); err != nil {
+				return nil, err
+			}
+		}
 	}
 
 	return rec, nil
