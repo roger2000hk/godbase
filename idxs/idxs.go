@@ -22,9 +22,19 @@ type Basic struct {
 	unique bool
 }
 
-type Key1 [1]maps.Key
-type Key2 [2]maps.Key
-type Key3 [3]maps.Key
+type Key1 struct {
+	key1 maps.Key
+}
+
+type Key2 struct {
+	Key1
+	key2 maps.Key
+}
+
+type Key3 struct {
+	Key2
+	key3 maps.Key
+}
 
 type DupKey struct {
 	key maps.Key
@@ -61,46 +71,34 @@ func (i *Basic) Init(rs maps.Any, cs []cols.Any, u bool) *Basic {
 }
 
 func (i *Basic) Key(r recs.Any) maps.Key {
-	switch l := len(i.cols); l {
-	case 1: 
-		var k maps.Key
-
-		if v, ok := r.Find(i.cols[0]); ok {
-			k = i.cols[0].AsKey(v)
-		}
-
-		return Key1{k}
-	case 2: 
-		var k1, k2 maps.Key
-
-		if v, ok := r.Find(i.cols[0]); ok {
-			k1 = i.cols[0].AsKey(v)
-		}
-
-		if v, ok := r.Find(i.cols[1]); ok {
-			k2 = i.cols[1].AsKey(v)
-		}
-
-		return Key2{k1, k2}
+	l := len(i.cols)
+	var k1, k2, k3 maps.Key
+	
+	switch l {
 	case 3: 
-		var k1, k2, k3 maps.Key
-
-		if v, ok := r.Find(i.cols[0]); ok {
-			k1 = i.cols[0].AsKey(v)
-		}
-
-		if v, ok := r.Find(i.cols[1]); ok {
-			k2 = i.cols[1].AsKey(v)
-		}
-
 		if v, ok := r.Find(i.cols[2]); ok {
 			k3 = i.cols[2].AsKey(v)
 		}
-
-		return Key3{k1, k2, k3}
+		fallthrough
+	case 2: 
+		if v, ok := r.Find(i.cols[1]); ok {
+			k2 = i.cols[1].AsKey(v)
+		}
+		fallthrough
+	case 1: 
+		if v, ok := r.Find(i.cols[0]); ok {
+			k1 = i.cols[0].AsKey(v)
+		}
 	default:
 		panic(fmt.Sprintf("invalid idx key len: %v", l))
 	}
+
+	switch l {
+	case 1: return Key1{key1: k1}
+	case 2: return Key2{key2: k2, Key1: Key1{key1: k1}}
+	}
+	
+	return Key3{key3: k3, Key2: Key2{Key1: Key1{key1: k1}, key2: k2}}
 }
 
 func (i *Basic) Insert(r recs.Any) (recs.Any, error) {
@@ -114,17 +112,17 @@ func (i *Basic) Insert(r recs.Any) (recs.Any, error) {
 }
 
 func (k Key1) Less(other maps.Key) bool {
-	return k[0].Less(other.(Key1)[0])
+	return k.key1.Less(other.(Key1).key1)
 }
 
 func (k Key2) Less(_other maps.Key) bool {
 	other := _other.(Key2)
-	return k[0].Less(other[0]) || k[1].Less(other[1])
+	return k.key1.Less(other.key1) || k.key2.Less(other.key2)
 }
 
 func (k Key3) Less(_other maps.Key) bool {
 	other := _other.(Key3)
-	return k[0].Less(other[0]) || k[1].Less(other[1]) || k[2].Less(other[2])
+	return k.key1.Less(other.key1) || k.key2.Less(other.key2) || k.key3.Less(other.key3)
 }
 
 func NewHash(cs []cols.Any, u bool, sc int, a *maps.SkipAlloc, ls int) *Basic {
@@ -143,16 +141,16 @@ func genHashFn(i *Basic) func(maps.Key) uint64 {
 
 		switch l {
 		case 1: 
-			i.cols[0].Hash(_key.(Key1)[0], i.hash)
+			i.cols[0].Hash(_key.(Key1).key1, i.hash)
 		case 2: 
 			key := _key.(Key2)
-			i.cols[0].Hash(key[0], i.hash)
-			i.cols[1].Hash(key[1], i.hash)
+			i.cols[0].Hash(key.key1, i.hash)
+			i.cols[1].Hash(key.key2, i.hash)
 		case 3: 
 			key := _key.(Key3)
-			i.cols[0].Hash(key[0], i.hash)
-			i.cols[1].Hash(key[1], i.hash)
-			i.cols[2].Hash(key[2], i.hash)
+			i.cols[0].Hash(key.key1, i.hash)
+			i.cols[1].Hash(key.key2, i.hash)
+			i.cols[2].Hash(key.key3, i.hash)
 		default:
 			panic(fmt.Sprintf("invalid idx key len: %v", l))
 		}
