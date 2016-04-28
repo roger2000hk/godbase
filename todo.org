@@ -14,6 +14,7 @@
 
 * add cols.Bool
 ** add rec methods
+** add to tests
 
 * add Tbl.Delete()
 
@@ -40,6 +41,8 @@
 * add testfn to Delete
 ** only delete if testfn nil / returns true
 ** add DeleteAll(key) int
+
+* add RecCol
 
 * add ListCol
 ** base on std list
