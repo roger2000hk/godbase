@@ -61,6 +61,11 @@ func (t *Basic) Add(c cols.Any) cols.Any {
 }
 
 func (t *Basic) Clear() {
+	t.recs.While(func (_ maps.Key, v interface{}) bool {
+		v.(recs.Any).Clear()
+		return true
+	})
+
 	t.recs.Clear()
 }
 

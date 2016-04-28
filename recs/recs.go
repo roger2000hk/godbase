@@ -12,6 +12,7 @@ import (
 )
 
 type Any interface {
+	Clear()
 	Clone() Any
 	Delete(cols.Any) bool
 	Eq(Any) bool
@@ -67,6 +68,10 @@ func NewIdHash() *IdHash {
 func (r *Basic) BasicInit(a *maps.SkipAlloc) *Basic {
 	r.asMap().Init(a, 1)
 	return r
+}
+
+func (r *Basic) Clear() {
+	r.asMap().Clear()
 }
 
 func (r *Basic) CreatedAt() time.Time {
