@@ -2,14 +2,14 @@
 ** add rec methods
 ** add to tests
 
-* add Tbl.Delete()
-
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
 ** start & id are optional
 ** forward to map Find
  
 * add README.md to idxs
+
+* add Tbl.Delete()
 
 * run rw lock test with race tool
 
@@ -36,24 +36,12 @@
 
 * ---
 
-* add maps.Any.Clone(start, end, MapFn)
-** like Cut, but clone elems
-
 * add find loop in both maps in runCutTests
 
 * add maps.RWHash
 ** keep one RWMutex per slot
 
-* rename multi_test to full_test
-
 * ---
-
-* add idx support
-** Idx interface
-** BasicIdx wraps maps.Any
-** provide range ops
-*** runs within slot for hash types
-
 
 * add Any.Clone(MapFn)
 ** panic for embedded imps
