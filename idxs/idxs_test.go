@@ -68,11 +68,23 @@ func TestUniqueInsertDelete(t *testing.T) {
 		t.Errorf("insert failed: %v", err)
 	}
 
+	if _, err := foobarIdx.Insert(r); err != nil {
+		t.Errorf("dup insert of same rec not allowed")
+	}
+
 	rr := recs.New(nil)
 	rr.SetInt64(foo, 1)
 	rr.SetString(bar, "abc")
 
 	if _, err := foobarIdx.Insert(rr); err == nil {
 		t.Errorf("dup insert allowed")
+	}
+
+	if err := foobarIdx.Delete(r); err != nil {
+		t.Errorf("del failed: %v", err)
+	}
+
+	if err := foobarIdx.Delete(rr); err == nil {
+		t.Errorf("dup del allowed")
 	}
 }

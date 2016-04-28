@@ -104,7 +104,7 @@ func (i *Basic) Key(r recs.Any) maps.Key {
 func (i *Basic) Insert(r recs.Any) (recs.Any, error) {
 	k := i.Key(r)
 
-	if _, ok := i.recs.Insert(nil, k, r.Id(), !i.unique); !ok {
+	if res, ok := i.recs.Insert(nil, k, r.Id(), !i.unique); !ok && res.Val() != r.Id() {
 		return nil, &DupKey{key: k}
 	}
 

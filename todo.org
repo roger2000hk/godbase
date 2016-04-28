@@ -1,7 +1,3 @@
-** convert keys to structs
-** add delete to test
-** commit idxs
-
 * add Rec.Clear()
 
 * loop and call Clear() on all recs in Tbl.Clear() before clearing map
