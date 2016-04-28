@@ -115,13 +115,18 @@ func (k Key3) Less(_other maps.Key) bool {
 	return k[0].Less(other[0]) || k[1].Less(other[1]) || k[2].Less(other[2])
 }
 
+func New(cs []cols.Any, u bool, recs maps.Any) *Basic {
+	i := new(Basic)
+	return i.Init(recs, cs, u)
+}
+
 func NewHash(cs []cols.Any, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
 	i := new(Basic)
 	return i.Init(maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)), cs, u)
 }
 
 func NewSorted(cs []cols.Any, u bool, a *maps.SlabAlloc, ls int) *Basic {
-	return new(Basic).Init(maps.NewSlab(a, ls), cs, u)
+	return New(cs, u, maps.NewSlab(a, ls))
 }
 
 func genHashFn(i *Basic) func(maps.Key) uint64 {
