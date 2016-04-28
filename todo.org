@@ -17,6 +17,13 @@
 
 * add Tbl.Delete()
 
+* add multi ordered idx test
+** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
+** start & id are optional
+** forward to map Find
+  
+* add README.md to idxs
+
 * run rw lock test with race tool
 
 * update poorslab
@@ -37,10 +44,6 @@
 * add ListCol
 ** base on std list
 ** take col type as param
-
-* add MapCol
-** base on maps.Any
-** take two col types, key & val
 
 * ---
 
