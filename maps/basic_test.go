@@ -70,7 +70,7 @@ func TestConstructors(t *testing.T) {
 	
 	NewMap()
 	
-	// 10 level map
+	// 10 level sorted map
 	NewSort(10)
 
 	// slab allocator with 50 nodes per slab

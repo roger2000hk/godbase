@@ -9,12 +9,6 @@
 ** start & id are optional
 ** forward to map Find
  
-* rename Skip to Sort
-** grep all mentions of skip in project
-** NewSort, NewESort, NewHash, NewEHash
-** rename SkipAlloc to Alloc
-** update readme & changes
-
 * add README.md to idxs
 
 * run rw lock test with race tool

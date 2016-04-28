@@ -8,7 +8,7 @@ import (
 func TestSuffix(t *testing.T) {
 	// NewSuffix wraps any map
 	// iters only work within slots for hash maps; therefore, the obvious 
-	// combination is with one of the ordered maps.
+	// combination is with one of the sorted maps.
 
 	m := NewSuffix(NewSort(4))
 

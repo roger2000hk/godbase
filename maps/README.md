@@ -139,16 +139,16 @@ func TestConstructors(t *testing.T) {
 	
 	NewMap()
 	
-	// 10 level map
+	// 10 level sorted map
 	NewSort(10)
 
 	// slab allocator with 50 nodes per slab
 	a := NewSlabAlloc(50)
 
-	// 20 level map with slab allocated nodes
+	// 20 level sorted map with slab allocated nodes
 	NewSlab(a, 20)
 
-	// map with embedded nodes
+	// sorted map with embedded nodes
 	NewESort()
 
 	// 1000 slots backed by a native array and generic slot allocator
@@ -286,7 +286,7 @@ maps.Suffix, like all wraps, can be used wherever maps.Any is expected; with the
 func TestSuffix(t *testing.T) {
 	// NewSuffix wraps any map
 	// iters only work within slots for hash maps; therefore, the obvious 
-	// combination is with one of the ordered maps.
+	// combination is with one of the sorted maps.
 
 	m := NewSuffix(NewSort(4))
 
