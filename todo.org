@@ -1,3 +1,7 @@
+* add Rec.Clear()
+
+* loop and call Clear() on all recs in Tbl.Clear() before clearing map
+
 * add Tbl.UpsertedAt(Rec) time.Time
 ** add Basic.upsertedAt
 ** add to cols
