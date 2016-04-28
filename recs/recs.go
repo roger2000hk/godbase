@@ -36,29 +36,24 @@ type IdHash struct {
 	imp hash.Hash64
 }
 
-type Alloc *maps.SkipAlloc
 type Basic maps.Skip
 type Id godbase.UId
 type Iter maps.Iter
 type Size uint32
 type TestFn func(Any) bool
 
-func BasicNew(alloc Alloc) Any {
-	return new(Basic).BasicInit(alloc)
+func BasicNew(a *maps.SkipAlloc) Any {
+	return new(Basic).BasicInit(a)
 }
 
-func Init(id Id, alloc Alloc) Any {
-	r := new(Basic).BasicInit(alloc)
+func Init(id Id, a *maps.SkipAlloc) Any {
+	r := new(Basic).BasicInit(a)
 	r.SetUId(cols.RecId(), godbase.UId(id))
 	return r
 }
 
-func New(alloc Alloc) Any {
-	return new(Basic).Init(alloc)
-}
-
-func NewAlloc(s int) Alloc {
-	return Alloc(maps.NewSkipAlloc(s))
+func New(a *maps.SkipAlloc) Any {
+	return new(Basic).Init(a)
 }
 
 func NewId() Id {
@@ -69,8 +64,8 @@ func NewIdHash() *IdHash {
 	return new(IdHash).Init()
 }
 
-func (r *Basic) BasicInit(alloc Alloc) *Basic {
-	r.asMap().Init((*maps.SkipAlloc)(alloc), 1)
+func (r *Basic) BasicInit(a *maps.SkipAlloc) *Basic {
+	r.asMap().Init(a, 1)
 	return r
 }
 
@@ -131,8 +126,8 @@ func (r *Basic) Id() Id {
 	return Id(r.UId(cols.RecId()))
 }
 
-func (r *Basic) Init(alloc Alloc) *Basic {
-	r.BasicInit(alloc)
+func (r *Basic) Init(a *maps.SkipAlloc) *Basic {
+	r.BasicInit(a)
 	r.SetTime(cols.CreatedAt(), time.Now())
 	r.SetUId(cols.RecId(), godbase.NewUId())
 	return r

@@ -33,11 +33,10 @@ type Basic struct {
 	recs maps.Hash
 }
 
-type RecAlloc *maps.SkipAlloc
 type ColIter maps.Iter
 type RecNotFound recs.Id
 
-func New(n string, rsc int, ra RecAlloc, rls int) Any {
+func New(n string, rsc int, ra *maps.SkipAlloc, rls int) Any {
 	return new(Basic).Init(n, rsc, ra, rls)
 }
 
@@ -86,7 +85,7 @@ func (t *Basic) Dump(w io.Writer) error {
 }
 
 func (e RecNotFound) Error() string {
-	return fmt.Sprintf("rec not found: %v", recs.Id(e).String())
+	return fmt.Sprintf("rec not found: %v", e)
 }
 
 func (t *Basic) Get(id recs.Id) (recs.Any, error) {
@@ -98,7 +97,7 @@ func (t *Basic) Get(id recs.Id) (recs.Any, error) {
 	return rr.(recs.Any).Clone(), nil
 }
 
-func (t *Basic) Init(n string, rsc int, ra RecAlloc, rls int) *Basic {
+func (t *Basic) Init(n string, rsc int, ra *maps.SkipAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
 	t.recIdHash.Init()

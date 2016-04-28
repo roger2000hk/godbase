@@ -1,6 +1,8 @@
 package idxs
 
 import (
+	"github.com/fncodr/godbase/cols"
+	"github.com/fncodr/godbase/recs"
 	"testing"
 )
 
@@ -50,5 +52,27 @@ func TestKeyEq(t *testing.T) {
 
 	if v := m[k3]; v != "any value" {
 		t.Errorf("not equal")
+	}
+}
+
+func TestUniqueInsertDelete(t *testing.T) {
+	foo := cols.NewInt64("foo")
+	bar := cols.NewString("bar")
+	foobarIdx := NewHash([]cols.Any{foo, bar}, true, 100, nil, 1)
+
+	r := recs.New(nil)
+	r.SetInt64(foo, 1)
+	r.SetString(bar, "abc")
+
+	if _, err := foobarIdx.Insert(r); err != nil {
+		t.Errorf("insert failed: %v", err)
+	}
+
+	rr := recs.New(nil)
+	rr.SetInt64(foo, 1)
+	rr.SetString(bar, "abc")
+
+	if _, err := foobarIdx.Insert(rr); err == nil {
+		t.Errorf("dup insert allowed")
 	}
 }

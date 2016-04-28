@@ -2,8 +2,11 @@ package cols
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/defs"
+	"github.com/fncodr/godbase/maps"
+	"hash"
 	"io"
 	"time"
 )
@@ -11,18 +14,23 @@ import (
 type NameSize uint8
 type ValSize uint32
 
+
 type Any interface {
 	defs.Any
+	AsKey(interface{}) maps.Key
 	CloneVal(interface{}) interface{}
 	Eq(interface{}, interface{}) bool
+	Hash(interface{}, hash.Hash64)
 	Read(ValSize, io.Reader) (interface{}, error)
 	Write(interface{}, io.Writer) error
 }
 
 type Type interface {
 	Name() string
+	AsKey(Any, interface{}) maps.Key
 	CloneVal(Any, interface{}) interface{}
 	Eq(Any, interface{}, interface{}) bool
+	Hash(Any, interface{}, hash.Hash64)
 	Read(Any, ValSize, io.Reader) (interface{}, error)
 	Write(Any, interface{}, io.Writer) error	
 }
@@ -50,6 +58,7 @@ type StringCol struct {
 
 type StringType struct {
 	BasicType
+	hash hash.Hash64
 }
 
 type TimeCol struct {
@@ -62,6 +71,7 @@ type TimeType struct {
 
 type UIdCol struct {
 	Basic
+	hash hash.Hash64
 }
 
 type UIdType struct {
@@ -128,6 +138,30 @@ func NewUId(n string) *UIdCol {
 	return new(UIdCol).Init(n)
 }
 
+func (c *Basic) AsKey(v interface{}) maps.Key {
+	return c.colType.AsKey(c, v)
+}
+	
+func (_ *BasicType) AsKey(c Any, _ interface{}) maps.Key {
+	panic(fmt.Sprintf("AsKey() not supported for %v!", c))
+}
+
+func (_ *Int64Type) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.Int64Key(v.(int64))
+}
+
+func (_ *StringType) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.StringKey(v.(string))
+}
+
+func (_ *TimeType) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.TimeKey(v.(time.Time))
+}
+
+func (_ *UIdType) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.UIdKey(v.(godbase.UId))
+}
+		
 func (c *Basic) CloneVal(v interface{}) interface{} {
 	return c.colType.CloneVal(c, v)
 }
@@ -142,6 +176,29 @@ func (_ *BasicType) Eq(_ Any, l, r interface{}) bool {
 
 func (c *Basic) Eq(l, r interface{}) bool {
 	return c.colType.Eq(c, l, r)
+}
+
+func (c *Basic) Hash(v interface{}, h hash.Hash64) {
+	c.colType.Hash(c, v, h)
+}
+
+func (_ *Int64Type) Hash(_ Any, _v interface{}, h hash.Hash64) {
+	v := _v.(maps.Int64Key)
+	godbase.Write(&v, h)
+}
+
+func (_ *StringType) Hash(_ Any, v interface{}, h hash.Hash64) {
+	h.Write([]byte(v.(maps.StringKey)))
+}
+
+func (_ *TimeType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+	v := time.Time(_v.(maps.TimeKey)).Unix()
+	godbase.Write(&v, h)
+}
+
+func (_ *UIdType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+	v := _v.(maps.UIdKey)
+	h.Write(v[:])
 }
 
 func (c *Basic) Init(n string, ct Type) *Basic {

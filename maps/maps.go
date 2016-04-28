@@ -1,7 +1,10 @@
 package maps
 
 import (
+	"bytes"
+	"github.com/fncodr/godbase"
 	"strings"
+	"time"
 )
 
 // All map keys are requred to support Key
@@ -9,8 +12,10 @@ type Key interface {
 	Less(Key) bool
 }
 
-type IntKey int
+type Int64Key int64
 type StringKey string
+type TimeKey time.Time
+type UIdKey godbase.UId
 
 // Iters are circular and cheap, since they are nothing but a common 
 // interface on top of actual nodes. 
@@ -96,10 +101,19 @@ type Alloc func () Any
 type MapFn func (Key, interface{}) (Key, interface{})
 type TestFn func (Key, interface{}) bool
 
-func (k IntKey) Less(other Key) bool {
-	return k < other.(IntKey)
+func (k Int64Key) Less(other Key) bool {
+	return k < other.(Int64Key)
 }
 
 func (k StringKey) Less(other Key) bool {
 	return strings.Compare(string(k), string(other.(StringKey))) < 0
+}
+
+func (k TimeKey) Less(other Key) bool {
+	return time.Time(k).Before(time.Time(other.(TimeKey)))
+}
+
+func (k UIdKey) Less(_other Key) bool {
+	other := _other.(UIdKey)
+	return bytes.Compare(k[:], other[:]) < 0
 }

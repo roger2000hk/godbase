@@ -1,3 +1,7 @@
+** convert keys to structs
+** add delete to test
+** commit idxs
+
 * add Rec.Clear()
 
 * loop and call Clear() on all recs in Tbl.Clear() before clearing map
@@ -33,6 +37,14 @@
 * add testfn to Delete
 ** only delete if testfn nil / returns true
 ** add DeleteAll(key) int
+
+* add ListCol
+** base on std list
+** take col type as param
+
+* add MapCol
+** base on maps.Any
+** take two col types, key & val
 
 * ---
 
