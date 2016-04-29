@@ -1,18 +1,18 @@
-* simplify idx switch
-
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
 ** start & id are optional
 ** forward to map Find
- 
-* add Tbl.Delete()
-
-* add idx.Dump/Load like Tbl
 
 * add reverse idx for offsets
 ** Idx.Basic/Reverse
 ** extend Any
-** use id as key & store val for col
+** use id as key & store val for col 
+
+* add Tbl.Delete()
+
+* add idx.Dump/Load like Tbl
+
+* add events
 
 * add README.md to idxs
 
