@@ -102,7 +102,8 @@ func (r *Basic) Clone() Any {
 func (r *Basic) Decimal(c *cols.DecimalCol) (res decimal.Value) {
 	var m big.Int
 	m.SetInt64(c.Mult())
-	res.Init(r.Get(c).(big.Int), m)
+	v := r.Get(c).(big.Int)
+	res.Init(&v, &m)
 	return res
 }
 

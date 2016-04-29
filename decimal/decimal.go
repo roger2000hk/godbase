@@ -10,16 +10,17 @@ type Value struct {
 	mult big.Int
 }
 
-func Cons(d, m big.Int) *Value {
+func Cons(d, m *big.Int) *Value {
 	return new(Value).Init(d, m)
 }
 
-func New(dv, mv int64) (res Value) {
+func New(dv, mv int64) *Value {
 	var d, m big.Int
 	d.SetInt64(dv)
 	m.SetInt64(mv)
-	res.Init(d, m)
-	return res
+	var res Value
+	res.Init(&d, &m)
+	return &res
 }
 
 func (v *Value) AddFloat64(l *Value, r float64) *Value {
@@ -93,9 +94,9 @@ func (v *Value) Frac() int64 {
 	return (&res).Mod(&v.data, &v.mult).Int64()
 }
 
-func (v *Value) Init(d, m big.Int) *Value {
-	v.data = d
-	v.mult = m
+func (v *Value) Init(d, m *big.Int) *Value {
+	v.data = *d
+	v.mult = *m
 	return v
 }
 

@@ -51,7 +51,7 @@ func TestReadWriteRec(t *testing.T) {
 	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UIdCol)
 	
 	r := recs.New(nil)
-	r.SetDecimal(decimalCol, decimal.New(123, 10))
+	r.SetDecimal(decimalCol, *decimal.New(123, 10))
 	r.SetBool(boolCol, true)
 	r.SetInt64(int64Col, 1)
 	r.SetString(stringCol, "abc")
