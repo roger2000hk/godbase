@@ -83,7 +83,7 @@ func (i *Basic) Key(r recs.Any) maps.Key {
 	if v, ok := r.Find(i.cols[2]); ok {
 		k3 = i.cols[2].AsKey(v)
 	}
-
+	
 	return Key3{k1, k2, k3}
 }
 

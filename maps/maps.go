@@ -3,6 +3,7 @@ package maps
 import (
 	"bytes"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/decimal"
 	"strings"
 	"time"
 )
@@ -13,6 +14,7 @@ type Key interface {
 }
 
 type BoolKey bool
+type DecimalKey decimal.Value
 type Int64Key int64
 type StringKey string
 type TimeKey time.Time
@@ -104,6 +106,12 @@ type TestFn func (Key, interface{}) bool
 
 func (k BoolKey) Less(other Key) bool {
 	return !bool(k) && bool(other.(BoolKey))
+}
+
+func (_k DecimalKey) Less(_other Key) bool {
+	k := decimal.Value(_k)
+	other := decimal.Value(_other.(DecimalKey))
+	return k.Cmp(&other) < 0
 }
 
 func (k Int64Key) Less(other Key) bool {

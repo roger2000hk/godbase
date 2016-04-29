@@ -1,3 +1,9 @@
+* change decimal repr to big.Rat
+
+* rescale value in decimalcol.encode
+
+* ---
+
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
 ** start & id are optional
@@ -9,6 +15,9 @@
 ** use id as key & store val for col 
 
 * consolidate decimal.AddInt64 & SubInt64
+** scale both up to max scale, do op & scale down again
+** add Scale(int64 mult)
+*** scale up/down depending on sign
 
 * add Tbl.Delete()
 

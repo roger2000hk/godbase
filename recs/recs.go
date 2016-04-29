@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
+	"github.com/fncodr/godbase/decimal"
 	"github.com/fncodr/godbase/maps"
 	"hash"
 	"hash/fnv"
+	"math/big"
 	"time"
 )
 
@@ -15,6 +17,7 @@ type Any interface {
 	Bool(*cols.BoolCol) bool
 	Clear()
 	Clone() Any
+	Decimal(*cols.DecimalCol) decimal.Value
 	Delete(cols.Any) bool
 	Eq(Any) bool
 	Find(cols.Any) (interface{}, bool)
@@ -26,6 +29,7 @@ type Any interface {
 	New() Any
 	Set(cols.Any, interface{}) Any
 	SetBool(*cols.BoolCol, bool) Any
+	SetDecimal(*cols.DecimalCol, decimal.Value) Any
 	SetInt64(*cols.Int64Col, int64) Any
 	SetString(*cols.StringCol, string) Any
 	SetTime(*cols.TimeCol, time.Time) Any
@@ -92,6 +96,13 @@ func (r *Basic) Clone() Any {
 		res.Set(c, c.CloneVal(i.Val()))
 	}
 	
+	return res
+}
+
+func (r *Basic) Decimal(c *cols.DecimalCol) (res decimal.Value) {
+	var m big.Int
+	m.SetInt64(c.Mult())
+	res.Init(r.Get(c).(big.Int), m)
 	return res
 }
 
@@ -171,11 +182,15 @@ func (r *Basic) New() Any {
 }
 
 func (r *Basic) Set(c cols.Any, v interface{}) Any {
-	r.asMap().Set(c, v)
+	r.asMap().Set(c, c.Encode(v))
 	return r
 }
 
 func (r *Basic) SetBool(c *cols.BoolCol, v bool) Any {
+	return r.Set(c, v)
+}
+
+func (r *Basic) SetDecimal(c *cols.DecimalCol, v decimal.Value) Any {
 	return r.Set(c, v)
 }
 

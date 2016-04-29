@@ -4,10 +4,12 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/decimal"
 	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 	"hash"
 	"io"
+	"math/big"
 	"time"
 )
 
@@ -19,6 +21,7 @@ type Any interface {
 	defs.Any
 	AsKey(interface{}) maps.Key
 	CloneVal(interface{}) interface{}
+	Encode(interface{}) interface{}
 	Eq(interface{}, interface{}) bool
 	Hash(interface{}, hash.Hash64)
 	Read(ValSize, io.Reader) (interface{}, error)
@@ -29,6 +32,7 @@ type Type interface {
 	Name() string
 	AsKey(Any, interface{}) maps.Key
 	CloneVal(Any, interface{}) interface{}
+	Encode(Any, interface{}) interface{}
 	Eq(Any, interface{}, interface{}) bool
 	Hash(Any, interface{}, hash.Hash64)
 	Read(Any, ValSize, io.Reader) (interface{}, error)
@@ -52,6 +56,15 @@ type BoolType struct {
 	BasicType
 }
 
+type DecimalCol struct {
+	Basic
+	mult int64
+}
+
+type DecimalType struct {
+	BasicType
+}
+
 type Int64Col struct {
 	Basic
 }
@@ -66,7 +79,6 @@ type StringCol struct {
 
 type StringType struct {
 	BasicType
-	hash hash.Hash64
 }
 
 type TimeCol struct {
@@ -79,7 +91,6 @@ type TimeType struct {
 
 type UIdCol struct {
 	Basic
-	hash hash.Hash64
 }
 
 type UIdType struct {
@@ -88,6 +99,7 @@ type UIdType struct {
 
 var (
 	boolType BoolType
+	decimalType DecimalType
 	int64Type Int64Type
 	stringType StringType
 	timeType TimeType
@@ -99,6 +111,7 @@ var (
 
 func init() {
 	boolType.Init("Bool")
+	decimalType.Init("Decimal")
 	int64Type.Init("Int64")
 	stringType.Init("String")
 	timeType.Init("Time")
@@ -110,6 +123,10 @@ func init() {
 
 func Bool() Type {
 	return &boolType
+}
+
+func Decimal() Type {
+	return &decimalType
 }
 
 func CreatedAt() *TimeCol {
@@ -140,6 +157,10 @@ func NewBool(n string) *BoolCol {
 	return new(BoolCol).Init(n)
 }
 
+func NewDecimal(n string, m int64) *DecimalCol {
+	return new(DecimalCol).Init(n, m)
+}
+
 func NewInt64(n string) *Int64Col {
 	return new(Int64Col).Init(n)
 }
@@ -168,6 +189,10 @@ func (_ *BoolType) AsKey(_ Any, v interface{}) maps.Key {
 	return maps.BoolKey(v.(bool))
 }
 
+func (_ *DecimalType) AsKey(_ Any, v interface{}) maps.Key {
+	return maps.DecimalKey(v.(decimal.Value))
+}
+
 func (_ *Int64Type) AsKey(_ Any, v interface{}) maps.Key {
 	return maps.Int64Key(v.(int64))
 }
@@ -192,8 +217,29 @@ func (_ *BasicType) CloneVal(_ Any, v interface{}) interface{} {
 	return v
 }
 
+func (c *Basic) Encode(v interface{}) interface{} {
+	return c.colType.Encode(c, v)
+}
+
+func (_ *BasicType) Encode(_ Any, v interface{}) interface{} {
+	return v
+}
+
+func (_ *DecimalType) Encode(_ Any, _v interface{}) interface{} {
+	if v, ok := _v.(decimal.Value); ok {
+		return v.Data()
+	}
+
+	return _v
+}
+
 func (_ *BasicType) Eq(_ Any, l, r interface{}) bool {
 	return l == r
+}
+
+func (_ *DecimalType) Eq(_ Any, _l, _r interface{}) bool {
+	l, r := _l.(big.Int), _r.(big.Int)
+	return l.Cmp(&r) == 0
 }
 
 func (c *Basic) Eq(l, r interface{}) bool {
@@ -207,6 +253,12 @@ func (c *Basic) Hash(v interface{}, h hash.Hash64) {
 func (_ *BoolType) Hash(_ Any, _v interface{}, h hash.Hash64) {
 	v := _v.(maps.BoolKey)
 	godbase.Write(&v, h)
+}
+
+func (_ *DecimalType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+	v := decimal.Value(_v.(maps.DecimalKey))
+	d := v.Data()
+	h.Write(d.Bytes())
 }
 
 func (_ *Int64Type) Hash(_ Any, _v interface{}, h hash.Hash64) {
@@ -244,6 +296,12 @@ func (c *BoolCol) Init(n string) *BoolCol {
 	return c
 }
 
+func (c *DecimalCol) Init(n string, m int64) *DecimalCol {
+	c.Basic.Init(n, Decimal())
+	c.mult = m
+	return c
+}
+
 func (c *Int64Col) Init(n string) *Int64Col {
 	c.Basic.Init(n, Int64())
 	return c
@@ -264,6 +322,10 @@ func (c *UIdCol) Init(n string) *UIdCol {
 	return c
 }
 
+func (c *DecimalCol) Mult() int64 {
+	return c.mult
+}
+
 func (t *BasicType) Name() string {
 	return t.name
 }
@@ -280,6 +342,18 @@ func (_ *BoolType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 	}
 
 	return v == 1, nil
+}
+
+func (_ *DecimalType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+	bs := make([]byte, s)
+
+	if _, err := io.ReadFull(r, bs); err != nil {
+		return nil, err
+	}
+	
+	var v big.Int
+	v.SetBytes(bs)
+	return v, nil
 }
 
 func (_ *Int64Type) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
@@ -339,6 +413,11 @@ func (_ *BoolType) Write(_ Any, _v interface{}, w io.Writer) error {
 	} 
 
 	return WriteBinVal(1, &v, w)
+}
+
+func (_ *DecimalType) Write(_ Any, _v interface{}, w io.Writer) error {
+	v := _v.(big.Int)
+	return WriteBytes(v.Bytes(), w)
 }
 
 func (_ *Int64Type) Write(_ Any, _v interface{}, w io.Writer) error {

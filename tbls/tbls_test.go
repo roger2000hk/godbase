@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
+	"github.com/fncodr/godbase/decimal"
 	"github.com/fncodr/godbase/recs"
 	"testing"
 	"time"
@@ -13,6 +14,7 @@ func TestCreate(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
 	foos.Add(cols.NewBool("bool"))
+	foos.Add(cols.NewDecimal("decimal", 10))
 	foos.Add(cols.NewInt64("int64"))
 	foos.Add(cols.NewString("string"))
 	foos.Add(cols.NewUId("uid"))
@@ -28,28 +30,12 @@ func TestCreate(t *testing.T) {
 	}
 
 	i = i.Next()
+	if c := i.Val().(cols.Any); c.Name() != "decimal" {
+		t.Errorf("invalid col: %v", c)
+	}
+
+	i = i.Next()
 	if c := i.Val().(cols.Any); c.Name() != "foos/revision" {
-		t.Errorf("invalid col: %v", c)
-	}
-
-	i = i.Next()
-	if c := i.Val().(cols.Any); c.Name() != "foos/upsertedAt" {
-		t.Errorf("invalid col: %v", c)
-	}
-
-	i = i.Next()
-	if c := i.Val().(cols.Any); c != cols.CreatedAt() {
-		t.Errorf("invalid col: %v", c)
-	}
-
-	i = i.Next()
-	if c := i.Val().(cols.Any); c != cols.RecId() {
-		t.Errorf("invalid col: %v", c)
-	}
-
-
-	i = i.Next()
-	if c := i.Val().(cols.Any); c.Name() != "int64" {
 		t.Errorf("invalid col: %v", c)
 	}
 }
@@ -58,12 +44,14 @@ func TestReadWriteRec(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
 	boolCol := foos.Add(cols.NewBool("bool")).(*cols.BoolCol)
+	decimalCol := foos.Add(cols.NewDecimal("decimal", 10)).(*cols.DecimalCol)
 	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64Col)
 	stringCol := foos.Add(cols.NewString("string")).(*cols.StringCol)
 	timeCol := foos.Add(cols.NewTime("time")).(*cols.TimeCol)
 	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UIdCol)
 	
 	r := recs.New(nil)
+	r.SetDecimal(decimalCol, decimal.New(123, 10))
 	r.SetBool(boolCol, true)
 	r.SetInt64(int64Col, 1)
 	r.SetString(stringCol, "abc")

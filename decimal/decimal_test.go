@@ -30,11 +30,30 @@ func TestSub(t *testing.T) {
 		t.Errorf("invalid trunc: %v", tv)
 	}
 
-	if fv := res.Frac(); fv != 1 {
+	if fv := res.Frac(); fv != 0 {
 		t.Errorf("invalid frac: %v", fv)
 	}
 
-	if s := res.String(); s != "111.1" {
+	if s := res.String(); s != "111.0" {
 		t.Errorf("invalid str: %v", s)
+	}
+}
+
+func TestCmp(t *testing.T) {
+	if res := New(1234, 10).Cmp(New(12340, 100)); res != 0 {
+		t.Errorf("invalid cmp res: %v", res)
+	}
+
+	if res := New(12340, 1000).Cmp(New(1234, 100)); res != 0 {
+		t.Errorf("invalid cmp res: %v", res)
+	}
+}
+
+func TestFloat64(t *testing.T) {
+	var v Value
+	v.AddFloat64(New(1234, 100), 12.34)
+
+	if res := v.Float64(); res != 24.68 {
+		t.Errorf("invalid float64 res: %v", res)
 	}
 }
