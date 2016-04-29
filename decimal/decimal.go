@@ -104,6 +104,24 @@ func (v *Value) Mult() big.Int {
 	return v.mult
 }
 
+func (v *Value) Scale(m int64) *Value {
+	vm := v.mult.Int64()
+
+	if m != vm {
+		var mi big.Int
+
+		if vm < m {
+			mi.SetInt64(m / vm)
+			v.data.Mul(&v.data, &mi)
+		} else {
+			mi.SetInt64(vm / m)
+			v.data.Div(&v.data, &mi)
+ 		}
+	}
+	
+	return v
+}
+
 func (v *Value) String() string {
 	var res big.Int
 	d, m := res.DivMod(&v.data, &v.mult, &v.mult)

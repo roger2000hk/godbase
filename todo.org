@@ -1,5 +1,3 @@
-* change decimal repr to big.Rat
-
 * rescale value in decimalcol.encode
 
 * ---
