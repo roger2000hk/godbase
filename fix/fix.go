@@ -28,9 +28,9 @@ func (v *Val) AddInt64(l Val, d, m int64) *Val {
 	var dv big.Int
 	dv.SetInt64(d)
 	lm := l.denom.Int64()
+	lv := &l.num
 
 	if m != lm {
-		lv := &l.num
 		var mv big.Int
 
 		if lm > m {
@@ -43,12 +43,12 @@ func (v *Val) AddInt64(l Val, d, m int64) *Val {
 	}
 
 	v.denom.SetInt64(lm)
-	v.num.Add(&l.num, &dv)
+	v.num.Add(lv, &dv)
 
 	if lm < m {
 		var mv big.Int
 		mv.SetInt64(m / lm)
-		v.num.Mul(&v.num, &mv)
+		v.num.Div(&v.num, &mv)
 	}
 
 	return v
