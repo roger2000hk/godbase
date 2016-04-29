@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"github.com/fncodr/godbase"
-	"github.com/fncodr/godbase/decimal"
+	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 	"hash"
@@ -56,11 +56,11 @@ type BoolType struct {
 	BasicType
 }
 
-type DecimalCol struct {
+type FixCol struct {
 	Basic
 }
 
-type DecimalType struct {
+type FixType struct {
 	BasicType
 	denom big.Int
 }
@@ -99,7 +99,7 @@ type UIdType struct {
 
 var (
 	boolType BoolType
-	decimalType DecimalType
+	fixType FixType
 	int64Type Int64Type
 	stringType StringType
 	timeType TimeType
@@ -124,8 +124,8 @@ func Bool() Type {
 	return &boolType
 }
 
-func Decimal(d int64) Type {
-	return new(DecimalType).Init(d)
+func Fix(d int64) Type {
+	return new(FixType).Init(d)
 }
 
 func CreatedAt() *TimeCol {
@@ -156,8 +156,8 @@ func NewBool(n string) *BoolCol {
 	return new(BoolCol).Init(n)
 }
 
-func NewDecimal(n string, m int64) *DecimalCol {
-	return new(DecimalCol).Init(n, m)
+func NewFix(n string, m int64) *FixCol {
+	return new(FixCol).Init(n, m)
 }
 
 func NewInt64(n string) *Int64Col {
@@ -188,15 +188,15 @@ func (_ *BoolType) AsKey(v interface{}) maps.Key {
 	return maps.BoolKey(v.(bool))
 }
 
-func (t *DecimalType) AsKey(_v interface{}) maps.Key {
-	if v, ok := _v.(decimal.Value); ok {
-		return maps.DecimalKey(v)
+func (t *FixType) AsKey(_v interface{}) maps.Key {
+	if v, ok := _v.(fix.Val); ok {
+		return maps.FixKey(v)
 	}
 
 	v := _v.(big.Int)
-	var kv decimal.Value
+	var kv fix.Val
 	kv.Init(&v, &t.denom)
-	return maps.DecimalKey(kv)
+	return maps.FixKey(kv)
 }
 
 func (_ *Int64Type) AsKey(v interface{}) maps.Key {
@@ -223,8 +223,8 @@ func (_ *BasicType) CloneVal(v interface{}) interface{} {
 	return v
 }
 
-func (c *DecimalCol) Denom() big.Int {
-	return c.colType.(*DecimalType).denom
+func (c *FixCol) Denom() big.Int {
+	return c.colType.(*FixType).denom
 }
 
 func (c *Basic) Encode(v interface{}) interface{} {
@@ -235,8 +235,8 @@ func (_ *BasicType) Encode(v interface{}) interface{} {
 	return v
 }
 
-func (t *DecimalType) Encode(_v interface{}) interface{} {
-	if v, ok := _v.(decimal.Value); ok {
+func (t *FixType) Encode(_v interface{}) interface{} {
+	if v, ok := _v.(fix.Val); ok {
 		return v.Scale(t.denom.Int64()).Num()
 	}
 
@@ -247,7 +247,7 @@ func (_ *BasicType) Eq(l, r interface{}) bool {
 	return l == r
 }
 
-func (_ *DecimalType) Eq(_l, _r interface{}) bool {
+func (_ *FixType) Eq(_l, _r interface{}) bool {
 	l, r := _l.(big.Int), _r.(big.Int)
 	return l.Cmp(&r) == 0
 }
@@ -265,8 +265,8 @@ func (_ *BoolType) Hash(_v interface{}, h hash.Hash64) {
 	godbase.Write(&v, h)
 }
 
-func (_ *DecimalType) Hash(_v interface{}, h hash.Hash64) {
-	v := decimal.Value(_v.(maps.DecimalKey))
+func (_ *FixType) Hash(_v interface{}, h hash.Hash64) {
+	v := fix.Val(_v.(maps.FixKey))
 	d := v.Num()
 	h.Write(d.Bytes())
 }
@@ -306,13 +306,13 @@ func (c *BoolCol) Init(n string) *BoolCol {
 	return c
 }
 
-func (c *DecimalCol) Init(n string, d int64) *DecimalCol {
-	c.Basic.Init(n, new(DecimalType).Init(d))
+func (c *FixCol) Init(n string, d int64) *FixCol {
+	c.Basic.Init(n, new(FixType).Init(d))
 	return c
 }
 
-func (t *DecimalType) Init(d int64) *DecimalType {
-	t.BasicType.Init(fmt.Sprintf("Decimal(%v)", d))
+func (t *FixType) Init(d int64) *FixType {
+	t.BasicType.Init(fmt.Sprintf("Fix(%v)", d))
 	t.denom.SetInt64(d)
 	return t
 }
@@ -355,7 +355,7 @@ func (_ *BoolType) Read(_ ValSize, r io.Reader) (interface{}, error) {
 	return v == 1, nil
 }
 
-func (_ *DecimalType) Read(s ValSize, r io.Reader) (interface{}, error) {
+func (_ *FixType) Read(s ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -426,7 +426,7 @@ func (_ *BoolType) Write(_v interface{}, w io.Writer) error {
 	return WriteBinVal(1, &v, w)
 }
 
-func (_ *DecimalType) Write(_v interface{}, w io.Writer) error {
+func (_ *FixType) Write(_v interface{}, w io.Writer) error {
 	v := _v.(big.Int)
 	return WriteBytes(v.Bytes(), w)
 }

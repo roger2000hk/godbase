@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
-	"github.com/fncodr/godbase/decimal"
+	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/maps"
 	"hash"
 	"hash/fnv"
@@ -17,7 +17,7 @@ type Any interface {
 	Bool(*cols.BoolCol) bool
 	Clear()
 	Clone() Any
-	Decimal(*cols.DecimalCol) decimal.Value
+	Fix(*cols.FixCol) fix.Val
 	Delete(cols.Any) bool
 	Eq(Any) bool
 	Find(cols.Any) (interface{}, bool)
@@ -29,7 +29,7 @@ type Any interface {
 	New() Any
 	Set(cols.Any, interface{}) Any
 	SetBool(*cols.BoolCol, bool) Any
-	SetDecimal(*cols.DecimalCol, decimal.Value) Any
+	SetFix(*cols.FixCol, fix.Val) Any
 	SetInt64(*cols.Int64Col, int64) Any
 	SetString(*cols.StringCol, string) Any
 	SetTime(*cols.TimeCol, time.Time) Any
@@ -99,7 +99,7 @@ func (r *Basic) Clone() Any {
 	return res
 }
 
-func (r *Basic) Decimal(c *cols.DecimalCol) (res decimal.Value) {
+func (r *Basic) Fix(c *cols.FixCol) (res fix.Val) {
 	v := r.Get(c).(big.Int)
 	m := c.Denom()
 	res.Init(&v, &m)
@@ -190,7 +190,7 @@ func (r *Basic) SetBool(c *cols.BoolCol, v bool) Any {
 	return r.Set(c, v)
 }
 
-func (r *Basic) SetDecimal(c *cols.DecimalCol, v decimal.Value) Any {
+func (r *Basic) SetFix(c *cols.FixCol, v fix.Val) Any {
 	return r.Set(c, v)
 }
 

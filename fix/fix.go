@@ -1,30 +1,30 @@
-package decimal
+package fix
 
 import (
 	"fmt"
 	"math/big"
 )
 
-type Value struct {
+type Val struct {
 	num big.Int
 	denom big.Int
 }
 
-func New(dv, mv int64) *Value {
+func New(dv, mv int64) *Val {
 	var d, m big.Int
 	d.SetInt64(dv)
 	m.SetInt64(mv)
-	var res Value
+	var res Val
 	res.Init(&d, &m)
 	return &res
 }
 
-func (v *Value) AddFloat64(l Value, r float64) *Value {
+func (v *Val) AddFloat64(l Val, r float64) *Val {
 	im := l.denom.Int64()
 	return v.AddInt64(l, int64(r*float64(im)), im)
 }
 
-func (v *Value) AddInt64(l Value, d, m int64) *Value {
+func (v *Val) AddInt64(l Val, d, m int64) *Val {
 	var dv big.Int
 	dv.SetInt64(d)
 	lm := l.denom.Int64()
@@ -54,7 +54,7 @@ func (v *Value) AddInt64(l Value, d, m int64) *Value {
 	return v
 }
 
-func (l *Value) Cmp(r Value) int {
+func (l *Val) Cmp(r Val) int {
 	lm, lv := l.denom.Int64(), l.num
 	rm, rv := r.denom.Int64(), r.num
 
@@ -73,11 +73,11 @@ func (l *Value) Cmp(r Value) int {
 	return lv.Cmp(&rv)
 }
 
-func (v *Value) Denom() big.Int {
+func (v *Val) Denom() big.Int {
 	return v.denom
 }
 
-func (v *Value) Float64() float64 {
+func (v *Val) Float64() float64 {
 	var res big.Int
 	res.Div(&v.num, &v.denom)
 	iv := float64(res.Int64())
@@ -85,22 +85,22 @@ func (v *Value) Float64() float64 {
 	return iv + float64(v.num.Int64() - res.Int64()) / float64(v.denom.Int64())
 }
 
-func (v *Value) Frac() int64 {
+func (v *Val) Frac() int64 {
 	var res big.Int
 	return (&res).Mod(&v.num, &v.denom).Int64()
 }
 
-func (v *Value) Init(d, m *big.Int) *Value {
+func (v *Val) Init(d, m *big.Int) *Val {
 	v.num = *d
 	v.denom = *m
 	return v
 }
 
-func (v *Value) Num() big.Int {
+func (v *Val) Num() big.Int {
 	return v.num
 }
 
-func (v *Value) Scale(m int64) *Value {
+func (v *Val) Scale(m int64) *Val {
 	vm := v.denom.Int64()
 
 	if m != vm {
@@ -118,18 +118,18 @@ func (v *Value) Scale(m int64) *Value {
 	return v
 }
 
-func (v *Value) String() string {
+func (v *Val) String() string {
 	var res big.Int
 	d, m := res.DivMod(&v.num, &v.denom, &v.denom)
 	return fmt.Sprintf("%v.%v", d.Int64(), m.Int64())
 }
 
-func (v *Value) SubFloat64(l Value, r float64) *Value {
+func (v *Val) SubFloat64(l Val, r float64) *Val {
 	im := l.denom.Int64()
 	return v.SubInt64(l, int64(r*float64(im)), im)
 }
 
-func (v *Value) SubInt64(l Value, d, m int64) *Value {
+func (v *Val) SubInt64(l Val, d, m int64) *Val {
 	var dv big.Int
 	dv.SetInt64(d)
 	lm := l.denom.Int64()
@@ -159,7 +159,7 @@ func (v *Value) SubInt64(l Value, d, m int64) *Value {
 	return v
 }
 
-func (v *Value) Trunc() int64 {
+func (v *Val) Trunc() int64 {
 	var res big.Int
 	return (&res).Div(&v.num, &v.denom).Int64()	
 }
