@@ -10,10 +10,6 @@ type Value struct {
 	denom big.Int
 }
 
-func Cons(d, m *big.Int) *Value {
-	return new(Value).Init(d, m)
-}
-
 func New(dv, mv int64) *Value {
 	var d, m big.Int
 	d.SetInt64(dv)
@@ -23,12 +19,12 @@ func New(dv, mv int64) *Value {
 	return &res
 }
 
-func (v *Value) AddFloat64(l *Value, r float64) *Value {
+func (v *Value) AddFloat64(l Value, r float64) *Value {
 	im := l.denom.Int64()
 	return v.AddInt64(l, int64(r*float64(im)), im)
 }
 
-func (v *Value) AddInt64(l *Value, d, m int64) *Value {
+func (v *Value) AddInt64(l Value, d, m int64) *Value {
 	var dv big.Int
 	dv.SetInt64(d)
 	lm := l.denom.Int64()
@@ -58,7 +54,7 @@ func (v *Value) AddInt64(l *Value, d, m int64) *Value {
 	return v
 }
 
-func (l *Value) Cmp(r *Value) int {
+func (l *Value) Cmp(r Value) int {
 	lm, lv := l.denom.Int64(), l.num
 	rm, rv := r.denom.Int64(), r.num
 
@@ -128,12 +124,12 @@ func (v *Value) String() string {
 	return fmt.Sprintf("%v.%v", d.Int64(), m.Int64())
 }
 
-func (v *Value) SubFloat64(l *Value, r float64) *Value {
+func (v *Value) SubFloat64(l Value, r float64) *Value {
 	im := l.denom.Int64()
 	return v.SubInt64(l, int64(r*float64(im)), im)
 }
 
-func (v *Value) SubInt64(l *Value, d, m int64) *Value {
+func (v *Value) SubInt64(l Value, d, m int64) *Value {
 	var dv big.Int
 	dv.SetInt64(d)
 	lm := l.denom.Int64()

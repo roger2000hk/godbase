@@ -111,7 +111,7 @@ func (k BoolKey) Less(other Key) bool {
 func (_k DecimalKey) Less(_other Key) bool {
 	k := decimal.Value(_k)
 	other := decimal.Value(_other.(DecimalKey))
-	return k.Cmp(&other) < 0
+	return k.Cmp(other) < 0
 }
 
 func (k Int64Key) Less(other Key) bool {
