@@ -58,7 +58,7 @@ type BoolType struct {
 
 type DecimalCol struct {
 	Basic
-	mult int64
+	denom int64
 }
 
 type DecimalType struct {
@@ -217,6 +217,10 @@ func (_ *BasicType) CloneVal(_ Any, v interface{}) interface{} {
 	return v
 }
 
+func (c *DecimalCol) Denom() int64 {
+	return c.denom
+}
+
 func (c *Basic) Encode(v interface{}) interface{} {
 	return c.colType.Encode(c, v)
 }
@@ -225,9 +229,13 @@ func (_ *BasicType) Encode(_ Any, v interface{}) interface{} {
 	return v
 }
 
-func (_ *DecimalType) Encode(_ Any, _v interface{}) interface{} {
+func (c *DecimalCol) Encode(v interface{}) interface{} {
+	return c.colType.Encode(c, v)
+}
+
+func (_ *DecimalType) Encode(c Any, _v interface{}) interface{} {
 	if v, ok := _v.(decimal.Value); ok {
-		return v.Data()
+		return v.Scale(c.(*DecimalCol).denom).Num()
 	}
 
 	return _v
@@ -257,7 +265,7 @@ func (_ *BoolType) Hash(_ Any, _v interface{}, h hash.Hash64) {
 
 func (_ *DecimalType) Hash(_ Any, _v interface{}, h hash.Hash64) {
 	v := decimal.Value(_v.(maps.DecimalKey))
-	d := v.Data()
+	d := v.Num()
 	h.Write(d.Bytes())
 }
 
@@ -296,9 +304,9 @@ func (c *BoolCol) Init(n string) *BoolCol {
 	return c
 }
 
-func (c *DecimalCol) Init(n string, m int64) *DecimalCol {
+func (c *DecimalCol) Init(n string, d int64) *DecimalCol {
 	c.Basic.Init(n, Decimal())
-	c.mult = m
+	c.denom = d
 	return c
 }
 
@@ -320,10 +328,6 @@ func (c *TimeCol) Init(n string) *TimeCol {
 func (c *UIdCol) Init(n string) *UIdCol {
 	c.Basic.Init(n, UId())
 	return c
-}
-
-func (c *DecimalCol) Mult() int64 {
-	return c.mult
 }
 
 func (t *BasicType) Name() string {
