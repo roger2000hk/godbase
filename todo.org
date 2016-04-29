@@ -8,6 +8,8 @@
 ** extend Any
 ** use id as key & store val for col 
 
+* consolidate decimal.AddInt64 & SubInt64
+
 * add Tbl.Delete()
 
 * add idx.Dump/Load like Tbl
