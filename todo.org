@@ -1,7 +1,6 @@
-* add multi ordered idx test
-** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
-** start & id are optional
-** forward to map Find
+* finish idxs.TestMultiSort
+** investigate why 300 is placed last in idx
+** commit
 
 * add reverse idx for offsets
 ** Idx.Basic/Reverse

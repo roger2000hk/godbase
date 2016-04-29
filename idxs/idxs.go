@@ -10,9 +10,10 @@ import (
 )
 
 type Any interface {
+	Delete(recs.Any) error
+	Find(start maps.Iter, key maps.Key, val interface{}) (maps.Iter, bool)
 	Insert(recs.Any) (recs.Any, error)
 	Key(r recs.Any) maps.Key
-	Delete(recs.Any) error
 }
 
 type Basic struct {
@@ -35,7 +36,7 @@ type KeyNotFound struct {
 }
 
 func (i *Basic) Delete(r recs.Any) error {
-	k := i.Key(r)
+	k := i.RecKey(r)
 
 	if _, cnt := i.recs.Delete(nil, nil, k, r.Id()); cnt == 0 {
 		return &KeyNotFound{key: k}
@@ -52,6 +53,10 @@ func (e *KeyNotFound) Error() string {
 	return fmt.Sprintf("key not found: %v", e)
 }
 
+func (i *Basic) Find(start maps.Iter, key maps.Key, val interface{}) (maps.Iter, bool) {
+	return i.recs.Find(start, key, val)
+}
+
 func (i *Basic) Init(rs maps.Any, cs []cols.Any, u bool) *Basic {
 	i.cols = cs
 	i.hash = fnv.New64()
@@ -60,7 +65,42 @@ func (i *Basic) Init(rs maps.Any, cs []cols.Any, u bool) *Basic {
 	return i
 }
 
-func (i *Basic) Key(r recs.Any) maps.Key {
+func (i *Basic) Insert(r recs.Any) (recs.Any, error) {
+	k := i.RecKey(r)
+
+	if res, ok := i.recs.Insert(nil, k, r.Id(), !i.unique); !ok && res.Val() != r.Id() {
+		return nil, &DupKey{key: k}
+	}
+
+	return r, nil
+}
+
+func (i *Basic) Key(ks...interface{}) maps.Key {
+	il, kl := len(i.cols), len(ks)
+	var k1, k2, k3 maps.Key
+	
+	k1 = i.cols[0].AsKey(ks[0])
+	
+	if kl > 1 {
+		k2 = i.cols[1].AsKey(ks[1])
+	}
+
+	if kl > 2 {
+		k3 = i.cols[2].AsKey(ks[2])
+	}	
+
+	if il == 1 {
+		return Key1{k1}
+	}	
+
+	if il == 2 {
+		return Key2{k1, k2}
+	}
+
+	return Key3{k1, k2, k3}
+}
+
+func (i *Basic) RecKey(r recs.Any) maps.Key {
 	l := len(i.cols)
 	var k1, k2, k3 maps.Key
 	
@@ -87,28 +127,23 @@ func (i *Basic) Key(r recs.Any) maps.Key {
 	return Key3{k1, k2, k3}
 }
 
-func (i *Basic) Insert(r recs.Any) (recs.Any, error) {
-	k := i.Key(r)
-
-	if res, ok := i.recs.Insert(nil, k, r.Id(), !i.unique); !ok && res.Val() != r.Id() {
-		return nil, &DupKey{key: k}
-	}
-
-	return r, nil
-}
-
-func (k Key1) Less(other maps.Key) bool {
-	return k[0].Less(other.(Key1)[0])
+func (k Key1) Less(_other maps.Key) bool {
+	other := _other.(Key1)
+	return k[0] != nil && other[0] != nil && k[0].Less(other[0])
 }
 
 func (k Key2) Less(_other maps.Key) bool {
 	other := _other.(Key2)
-	return k[0].Less(other[0]) || k[1].Less(other[1])
+	return (k[0] != nil && other[0] != nil && k[0].Less(other[0])) || 
+		(k[1] != nil && other[1] != nil && k[0] == other[0] && k[1].Less(other[1]))
 }
 
 func (k Key3) Less(_other maps.Key) bool {
 	other := _other.(Key3)
-	return k[0].Less(other[0]) || k[1].Less(other[1]) || k[2].Less(other[2])
+	return (k[0] != nil && other[0] != nil && k[0].Less(other[0])) || 
+		(k[1] != nil && other[1] != nil && k[0] == other[0] && k[1].Less(other[1])) || 
+		(k[2] != nil && other[2] != nil && k[0] == other[0] && k[1] == other[1] && 
+		k[2].Less(other[2]))
 }
 
 func New(cs []cols.Any, u bool, recs maps.Any) *Basic {

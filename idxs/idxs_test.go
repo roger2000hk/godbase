@@ -99,11 +99,22 @@ func TestMultiSort(t *testing.T) {
 
 	o1 := recs.New(nil)
 	o1.SetTime(date, d)
-	o1.SetDecimal(amount, *decimal.New(100, 1))
+	o1.SetDecimal(amount, *decimal.New(200, 1))
 	orderIdx.Insert(o1)
 
 	o2 := recs.New(nil)
 	o2.SetTime(date, d)
-	o2.SetDecimal(amount, *decimal.New(200, 1))
+	o2.SetDecimal(amount, *decimal.New(300, 1))
 	orderIdx.Insert(o2)
+
+	o3 := recs.New(nil)
+	o3.SetTime(date, d.AddDate(0, 0, 1))
+	o3.SetDecimal(amount, *decimal.New(100, 1))
+	orderIdx.Insert(o3)
+
+	i, _ := orderIdx.Find(nil, orderIdx.Key(o3.Time(date)), nil)
+	i = i.Next()
+	if i.Val() != o3.Id() {
+		t.Errorf("invalid find res: %v", i.Key())
+	}
 }
