@@ -64,30 +64,26 @@ func (i *Basic) Key(r recs.Any) maps.Key {
 	l := len(i.cols)
 	var k1, k2, k3 maps.Key
 	
-	switch l {
-	case 3: 
-		if v, ok := r.Find(i.cols[2]); ok {
-			k3 = i.cols[2].AsKey(v)
-		}
-		fallthrough
-	case 2: 
-		if v, ok := r.Find(i.cols[1]); ok {
-			k2 = i.cols[1].AsKey(v)
-		}
-		fallthrough
-	case 1: 
-		if v, ok := r.Find(i.cols[0]); ok {
-			k1 = i.cols[0].AsKey(v)
-		}
-	default:
-		panic(fmt.Sprintf("invalid idx key len: %v", l))
-	}
-
-	switch l {
-	case 1: return Key1{k1}
-	case 2: return Key2{k1, k2}
+	if v, ok := r.Find(i.cols[0]); ok {
+		k1 = i.cols[0].AsKey(v)
 	}
 	
+	if l == 1 {
+		return Key1{k1}
+	}	
+
+	if v, ok := r.Find(i.cols[1]); ok {
+		k2 = i.cols[1].AsKey(v)
+	}
+
+	if l == 2 {
+		return Key2{k1, k2}
+	}
+
+	if v, ok := r.Find(i.cols[2]); ok {
+		k3 = i.cols[2].AsKey(v)
+	}
+
 	return Key3{k1, k2, k3}
 }
 

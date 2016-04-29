@@ -1,3 +1,5 @@
+* simplify idx switch
+
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
 ** start & id are optional
