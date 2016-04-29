@@ -1,6 +1,13 @@
 * work on fix perf
 ** any way to make rescaling faster?
 
+* add code to trigger fpd rescale bug
+** (5, -1).add(50, -2)
+
+* add mul/div
+
+* add variants that take Val's
+
 * change cols to not always write size
 ** only read/write size where needed
 ** remove size param from Any.Read
