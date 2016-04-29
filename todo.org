@@ -5,6 +5,8 @@
 ** change col find to Col()
 ** run tests
 
+* compare fix perf to fpv etc
+
 * add reverse idx for offsets
 ** Idx.Basic/Reverse
 ** extend Any
