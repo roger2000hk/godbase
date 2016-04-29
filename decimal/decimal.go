@@ -6,8 +6,8 @@ import (
 )
 
 type Value struct {
-	data big.Int
-	mult big.Int
+	num big.Int
+	denom big.Int
 }
 
 func Cons(d, m *big.Int) *Value {
@@ -24,17 +24,17 @@ func New(dv, mv int64) *Value {
 }
 
 func (v *Value) AddFloat64(l *Value, r float64) *Value {
-	im := l.mult.Int64()
+	im := l.denom.Int64()
 	return v.AddInt64(l, int64(r*float64(im)), im)
 }
 
 func (v *Value) AddInt64(l *Value, d, m int64) *Value {
 	var dv big.Int
 	dv.SetInt64(d)
-	lm := l.mult.Int64()
+	lm := l.denom.Int64()
 
 	if m != lm {
-		lv := &l.data
+		lv := &l.num
 		var mv big.Int
 
 		if lm > m {
@@ -46,25 +46,21 @@ func (v *Value) AddInt64(l *Value, d, m int64) *Value {
 		}
 	}
 
-	v.mult.SetInt64(lm)
-	v.data.Add(&l.data, &dv)
+	v.denom.SetInt64(lm)
+	v.num.Add(&l.num, &dv)
 
 	if lm < m {
 		var mv big.Int
 		mv.SetInt64(m / lm)
-		v.data.Mul(&v.data, &mv)
+		v.num.Mul(&v.num, &mv)
 	}
 
 	return v
 }
 
-func (v *Value) Data() big.Int {
-	return v.data
-}
-
 func (l *Value) Cmp(r *Value) int {
-	lm, lv := l.mult.Int64(), l.data
-	rm, rv := r.mult.Int64(), r.data
+	lm, lv := l.denom.Int64(), l.num
+	rm, rv := r.denom.Int64(), r.num
 
 	if lm != rm {
 		var m big.Int
@@ -81,41 +77,45 @@ func (l *Value) Cmp(r *Value) int {
 	return lv.Cmp(&rv)
 }
 
+func (v *Value) Denom() big.Int {
+	return v.denom
+}
+
 func (v *Value) Float64() float64 {
 	var res big.Int
-	res.Div(&v.data, &v.mult)
+	res.Div(&v.num, &v.denom)
 	iv := float64(res.Int64())
-	res.Mul(&res, &v.mult)
-	return iv + float64(v.data.Int64() - res.Int64()) / float64(v.mult.Int64())
+	res.Mul(&res, &v.denom)
+	return iv + float64(v.num.Int64() - res.Int64()) / float64(v.denom.Int64())
 }
 
 func (v *Value) Frac() int64 {
 	var res big.Int
-	return (&res).Mod(&v.data, &v.mult).Int64()
+	return (&res).Mod(&v.num, &v.denom).Int64()
 }
 
 func (v *Value) Init(d, m *big.Int) *Value {
-	v.data = *d
-	v.mult = *m
+	v.num = *d
+	v.denom = *m
 	return v
 }
 
-func (v *Value) Mult() big.Int {
-	return v.mult
+func (v *Value) Num() big.Int {
+	return v.num
 }
 
 func (v *Value) Scale(m int64) *Value {
-	vm := v.mult.Int64()
+	vm := v.denom.Int64()
 
 	if m != vm {
 		var mi big.Int
 
 		if vm < m {
 			mi.SetInt64(m / vm)
-			v.data.Mul(&v.data, &mi)
+			v.num.Mul(&v.num, &mi)
 		} else {
 			mi.SetInt64(vm / m)
-			v.data.Div(&v.data, &mi)
+			v.num.Div(&v.num, &mi)
  		}
 	}
 	
@@ -124,20 +124,20 @@ func (v *Value) Scale(m int64) *Value {
 
 func (v *Value) String() string {
 	var res big.Int
-	d, m := res.DivMod(&v.data, &v.mult, &v.mult)
+	d, m := res.DivMod(&v.num, &v.denom, &v.denom)
 	return fmt.Sprintf("%v.%v", d.Int64(), m.Int64())
 }
 
 func (v *Value) SubFloat64(l *Value, r float64) *Value {
-	im := l.mult.Int64()
+	im := l.denom.Int64()
 	return v.SubInt64(l, int64(r*float64(im)), im)
 }
 
 func (v *Value) SubInt64(l *Value, d, m int64) *Value {
 	var dv big.Int
 	dv.SetInt64(d)
-	lm := l.mult.Int64()
-	lv := l.data
+	lm := l.denom.Int64()
+	lv := l.num
 	
 	if m != lm {
 		var mv big.Int
@@ -151,13 +151,13 @@ func (v *Value) SubInt64(l *Value, d, m int64) *Value {
  		}
 	}
 
-	v.mult.SetInt64(lm)
-	v.data.Sub(&lv, &dv)
+	v.denom.SetInt64(lm)
+	v.num.Sub(&lv, &dv)
 
 	if lm < m {
 		var mv big.Int
 		mv.SetInt64(m / lm)
-		v.data.Div(&v.data, &mv)
+		v.num.Div(&v.num, &mv)
 	}
 
 	return v
@@ -165,5 +165,5 @@ func (v *Value) SubInt64(l *Value, d, m int64) *Value {
 
 func (v *Value) Trunc() int64 {
 	var res big.Int
-	return (&res).Div(&v.data, &v.mult).Int64()	
+	return (&res).Div(&v.num, &v.denom).Int64()	
 }

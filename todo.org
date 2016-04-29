@@ -1,6 +1,6 @@
 * rescale value in decimalcol.encode
 
-* ---
+* convert mult to int64
 
 * add multi ordered idx test
 ** add Find(start Iter, key Key, id RecId) (maps.Iter, bool)
