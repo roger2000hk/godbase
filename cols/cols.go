@@ -30,13 +30,13 @@ type Any interface {
 
 type Type interface {
 	Name() string
-	AsKey(Any, interface{}) maps.Key
-	CloneVal(Any, interface{}) interface{}
-	Encode(Any, interface{}) interface{}
-	Eq(Any, interface{}, interface{}) bool
-	Hash(Any, interface{}, hash.Hash64)
-	Read(Any, ValSize, io.Reader) (interface{}, error)
-	Write(Any, interface{}, io.Writer) error	
+	AsKey(interface{}) maps.Key
+	CloneVal(interface{}) interface{}
+	Encode(interface{}) interface{}
+	Eq(interface{}, interface{}) bool
+	Hash(interface{}, hash.Hash64)
+	Read(ValSize, io.Reader) (interface{}, error)
+	Write(interface{}, io.Writer) error	
 }
 
 type Basic struct {
@@ -58,11 +58,11 @@ type BoolType struct {
 
 type DecimalCol struct {
 	Basic
-	denom int64
 }
 
 type DecimalType struct {
 	BasicType
+	denom big.Int
 }
 
 type Int64Col struct {
@@ -111,7 +111,6 @@ var (
 
 func init() {
 	boolType.Init("Bool")
-	decimalType.Init("Decimal")
 	int64Type.Init("Int64")
 	stringType.Init("String")
 	timeType.Init("Time")
@@ -125,8 +124,8 @@ func Bool() Type {
 	return &boolType
 }
 
-func Decimal() Type {
-	return &decimalType
+func Decimal(d int64) Type {
+	return new(DecimalType).Init(d)
 }
 
 func CreatedAt() *TimeCol {
@@ -178,112 +177,115 @@ func NewUId(n string) *UIdCol {
 }
 
 func (c *Basic) AsKey(v interface{}) maps.Key {
-	return c.colType.AsKey(c, v)
+	return c.colType.AsKey(v)
 }
 	
-func (_ *BasicType) AsKey(c Any, _ interface{}) maps.Key {
-	panic(fmt.Sprintf("AsKey() not supported for %v!", c))
+func (t *BasicType) AsKey(_ interface{}) maps.Key {
+	panic(fmt.Sprintf("AsKey() not supported for %v!", t))
 }
 
-func (_ *BoolType) AsKey(_ Any, v interface{}) maps.Key {
+func (_ *BoolType) AsKey(v interface{}) maps.Key {
 	return maps.BoolKey(v.(bool))
 }
 
-func (_ *DecimalType) AsKey(_ Any, v interface{}) maps.Key {
-	return maps.DecimalKey(v.(decimal.Value))
+func (t *DecimalType) AsKey(_v interface{}) maps.Key {
+	if v, ok := _v.(decimal.Value); ok {
+		return maps.DecimalKey(v)
+	}
+
+	v := _v.(big.Int)
+	var kv decimal.Value
+	kv.Init(&v, &t.denom)
+	return maps.DecimalKey(kv)
 }
 
-func (_ *Int64Type) AsKey(_ Any, v interface{}) maps.Key {
+func (_ *Int64Type) AsKey(v interface{}) maps.Key {
 	return maps.Int64Key(v.(int64))
 }
 
-func (_ *StringType) AsKey(_ Any, v interface{}) maps.Key {
+func (_ *StringType) AsKey(v interface{}) maps.Key {
 	return maps.StringKey(v.(string))
 }
 
-func (_ *TimeType) AsKey(_ Any, v interface{}) maps.Key {
+func (_ *TimeType) AsKey(v interface{}) maps.Key {
 	return maps.TimeKey(v.(time.Time))
 }
 
-func (_ *UIdType) AsKey(_ Any, v interface{}) maps.Key {
+func (_ *UIdType) AsKey(v interface{}) maps.Key {
 	return maps.UIdKey(v.(godbase.UId))
 }
 		
 func (c *Basic) CloneVal(v interface{}) interface{} {
-	return c.colType.CloneVal(c, v)
+	return c.colType.CloneVal(v)
 }
 
-func (_ *BasicType) CloneVal(_ Any, v interface{}) interface{} {
+func (_ *BasicType) CloneVal(v interface{}) interface{} {
 	return v
 }
 
-func (c *DecimalCol) Denom() int64 {
-	return c.denom
+func (c *DecimalCol) Denom() big.Int {
+	return c.colType.(*DecimalType).denom
 }
 
 func (c *Basic) Encode(v interface{}) interface{} {
-	return c.colType.Encode(c, v)
+	return c.colType.Encode(v)
 }
 
-func (_ *BasicType) Encode(_ Any, v interface{}) interface{} {
+func (_ *BasicType) Encode(v interface{}) interface{} {
 	return v
 }
 
-func (c *DecimalCol) Encode(v interface{}) interface{} {
-	return c.colType.Encode(c, v)
-}
-
-func (_ *DecimalType) Encode(c Any, _v interface{}) interface{} {
+func (t *DecimalType) Encode(_v interface{}) interface{} {
 	if v, ok := _v.(decimal.Value); ok {
-		return v.Scale(c.(*DecimalCol).denom).Num()
+		return v.Scale(t.denom.Int64()).Num()
 	}
 
 	return _v
 }
 
-func (_ *BasicType) Eq(_ Any, l, r interface{}) bool {
+func (_ *BasicType) Eq(l, r interface{}) bool {
 	return l == r
 }
 
-func (_ *DecimalType) Eq(_ Any, _l, _r interface{}) bool {
+func (_ *DecimalType) Eq(_l, _r interface{}) bool {
 	l, r := _l.(big.Int), _r.(big.Int)
 	return l.Cmp(&r) == 0
 }
 
 func (c *Basic) Eq(l, r interface{}) bool {
-	return c.colType.Eq(c, l, r)
+	return c.colType.Eq(l, r)
 }
 
 func (c *Basic) Hash(v interface{}, h hash.Hash64) {
-	c.colType.Hash(c, v, h)
+	c.colType.Hash(v, h)
 }
 
-func (_ *BoolType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+func (_ *BoolType) Hash(_v interface{}, h hash.Hash64) {
 	v := _v.(maps.BoolKey)
 	godbase.Write(&v, h)
 }
 
-func (_ *DecimalType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+func (_ *DecimalType) Hash(_v interface{}, h hash.Hash64) {
 	v := decimal.Value(_v.(maps.DecimalKey))
 	d := v.Num()
 	h.Write(d.Bytes())
 }
 
-func (_ *Int64Type) Hash(_ Any, _v interface{}, h hash.Hash64) {
+func (_ *Int64Type) Hash(_v interface{}, h hash.Hash64) {
 	v := _v.(maps.Int64Key)
 	godbase.Write(&v, h)
 }
 
-func (_ *StringType) Hash(_ Any, v interface{}, h hash.Hash64) {
+func (_ *StringType) Hash(v interface{}, h hash.Hash64) {
 	h.Write([]byte(v.(maps.StringKey)))
 }
 
-func (_ *TimeType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+func (_ *TimeType) Hash(_v interface{}, h hash.Hash64) {
 	v := time.Time(_v.(maps.TimeKey)).Unix()
 	godbase.Write(&v, h)
 }
 
-func (_ *UIdType) Hash(_ Any, _v interface{}, h hash.Hash64) {
+func (_ *UIdType) Hash(_v interface{}, h hash.Hash64) {
 	v := _v.(maps.UIdKey)
 	h.Write(v[:])
 }
@@ -305,9 +307,14 @@ func (c *BoolCol) Init(n string) *BoolCol {
 }
 
 func (c *DecimalCol) Init(n string, d int64) *DecimalCol {
-	c.Basic.Init(n, Decimal())
-	c.denom = d
+	c.Basic.Init(n, new(DecimalType).Init(d))
 	return c
+}
+
+func (t *DecimalType) Init(d int64) *DecimalType {
+	t.BasicType.Init(fmt.Sprintf("Decimal(%v)", d))
+	t.denom.SetInt64(d)
+	return t
 }
 
 func (c *Int64Col) Init(n string) *Int64Col {
@@ -335,10 +342,10 @@ func (t *BasicType) Name() string {
 }
 
 func (c *Basic) Read(s ValSize, r io.Reader) (interface{}, error) {
-	return c.colType.Read(c, s, r)
+	return c.colType.Read(s, r)
 }
 
-func (_ *BoolType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
+func (_ *BoolType) Read(_ ValSize, r io.Reader) (interface{}, error) {
 	var v byte
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -348,7 +355,7 @@ func (_ *BoolType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 	return v == 1, nil
 }
 
-func (_ *DecimalType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+func (_ *DecimalType) Read(s ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -360,7 +367,7 @@ func (_ *DecimalType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *Int64Type) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
+func (_ *Int64Type) Read(_ ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -370,7 +377,7 @@ func (_ *Int64Type) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *StringType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+func (_ *StringType) Read(s ValSize, r io.Reader) (interface{}, error) {
 	v := make([]byte, s)
 
 	if _, err := io.ReadFull(r, v); err != nil {
@@ -380,7 +387,7 @@ func (_ *StringType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	return string(v), nil
 }
 
-func (_ *TimeType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
+func (_ *TimeType) Read(s ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -396,7 +403,7 @@ func (_ *TimeType) Read(_ Any, s ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *UIdType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
+func (_ *UIdType) Read(_ ValSize, r io.Reader) (interface{}, error) {
 	var v godbase.UId
 
 	if _, err := io.ReadFull(r, v[:]); err != nil {
@@ -407,10 +414,10 @@ func (_ *UIdType) Read(_ Any, _ ValSize, r io.Reader) (interface{}, error) {
 }
 
 func (c *Basic) Write(v interface{}, w io.Writer) error {
-	return c.colType.Write(c, v, w)
+	return c.colType.Write(v, w)
 }
 
-func (_ *BoolType) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *BoolType) Write(_v interface{}, w io.Writer) error {
 	v := byte(0)
 	if _v.(bool) {
 		v = 1
@@ -419,21 +426,21 @@ func (_ *BoolType) Write(_ Any, _v interface{}, w io.Writer) error {
 	return WriteBinVal(1, &v, w)
 }
 
-func (_ *DecimalType) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *DecimalType) Write(_v interface{}, w io.Writer) error {
 	v := _v.(big.Int)
 	return WriteBytes(v.Bytes(), w)
 }
 
-func (_ *Int64Type) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *Int64Type) Write(_v interface{}, w io.Writer) error {
 	v := _v.(int64)
 	return WriteBinVal(8, &v, w)
 }
 
-func (_ *StringType) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *StringType) Write(_v interface{}, w io.Writer) error {
 	return WriteBytes([]byte(_v.(string)), w)
 }
 
-func (_ *TimeType) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *TimeType) Write(_v interface{}, w io.Writer) error {
 	bs, err := _v.(time.Time).MarshalBinary()
 
 	if err != nil {
@@ -443,7 +450,7 @@ func (_ *TimeType) Write(_ Any, _v interface{}, w io.Writer) error {
 	return WriteBytes(bs, w)
 }
 
-func (_ *UIdType) Write(_ Any, _v interface{}, w io.Writer) error {
+func (_ *UIdType) Write(_v interface{}, w io.Writer) error {
 	v := _v.(godbase.UId)
 	return WriteBytes(v[:], w)
 }

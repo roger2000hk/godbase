@@ -121,7 +121,7 @@ func NewHash(cs []cols.Any, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
 	return i.Init(maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)), cs, u)
 }
 
-func NewSorted(cs []cols.Any, u bool, a *maps.SlabAlloc, ls int) *Basic {
+func NewSort(cs []cols.Any, u bool, a *maps.SlabAlloc, ls int) *Basic {
 	return New(cs, u, maps.NewSlab(a, ls))
 }
 

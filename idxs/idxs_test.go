@@ -2,8 +2,10 @@ package idxs
 
 import (
 	"github.com/fncodr/godbase/cols"
+	"github.com/fncodr/godbase/decimal"
 	"github.com/fncodr/godbase/recs"
 	"testing"
+	"time"
 )
 
 // array equality is pretty cool
@@ -87,4 +89,21 @@ func TestUniqueInsertDelete(t *testing.T) {
 	if err := foobarIdx.Delete(rr); err == nil {
 		t.Errorf("dup del allowed")
 	}
+}
+
+func TestMultiSort(t *testing.T) {
+	date := cols.NewTime("date")
+	amount := cols.NewDecimal("amount", 1000)
+	orderIdx := NewSort([]cols.Any{date, amount}, false, nil, 1)
+	d := time.Now().Truncate(time.Hour * 24)
+
+	o1 := recs.New(nil)
+	o1.SetTime(date, d)
+	o1.SetDecimal(amount, *decimal.New(100, 1))
+	orderIdx.Insert(o1)
+
+	o2 := recs.New(nil)
+	o2.SetTime(date, d)
+	o2.SetDecimal(amount, *decimal.New(200, 1))
+	orderIdx.Insert(o2)
 }
