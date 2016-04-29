@@ -1,5 +1,5 @@
 * work on fix perf
-** add cmp with second lib
+** any way to make rescaling faster?
 
 * change cols to not always write size
 ** only read/write size where needed

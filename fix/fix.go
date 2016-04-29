@@ -10,67 +10,68 @@ type Val struct {
 	denom big.Int
 }
 
-func New(dv, mv int64) *Val {
-	var d, m big.Int
+func New(nv, dv int64) *Val {
+	var n, d big.Int
+	n.SetInt64(nv)
 	d.SetInt64(dv)
-	m.SetInt64(mv)
 	var res Val
-	res.Init(&d, &m)
+	res.Init(&n, &d)
 	return &res
 }
 
 func (v *Val) AddFloat64(l Val, r float64) *Val {
-	im := l.denom.Int64()
-	return v.AddInt64(l, int64(r*float64(im)), im)
+	id := l.denom.Int64()
+	return v.AddInt64(l, int64(r*float64(id)), id)
 }
 
-func (v *Val) AddInt64(l Val, d, m int64) *Val {
-	var dv big.Int
-	dv.SetInt64(d)
-	lm := l.denom.Int64()
-	lv := &l.num
+func (v *Val) AddInt64(l Val, rnv, rdv int64) *Val {
+	var rn big.Int
+	rn.SetInt64(rnv)
 
-	if m != lm {
-		var mv big.Int
+	ldv := l.denom.Int64()
+	ln := &l.num
 
-		if lm > m {
-			mv.SetInt64(lm / m)
-			dv.Mul(&dv, &mv)
+	if rdv != ldv {
+		var f big.Int
+
+		if ldv > rdv {
+			f.SetInt64(ldv / rdv)
+			rn.Mul(&rn, &f)
 		} else {
-			mv.SetInt64(m / lm)
-			lv.Mul(lv, &mv)
+			f.SetInt64(rdv / ldv)
+			ln.Mul(ln, &f)
 		}
 	}
 
-	v.denom.SetInt64(lm)
-	v.num.Add(lv, &dv)
+	v.denom.SetInt64(ldv)
+	v.num.Add(ln, &rn)
 
-	if lm < m {
-		var mv big.Int
-		mv.SetInt64(m / lm)
-		v.num.Div(&v.num, &mv)
+	if ldv < rdv {
+		var f big.Int
+		f.SetInt64(rdv / ldv)
+		v.num.Div(&v.num, &f)
 	}
 
 	return v
 }
 
 func (l *Val) Cmp(r Val) int {
-	lm, lv := l.denom.Int64(), l.num
-	rm, rv := r.denom.Int64(), r.num
+	ln, ld := l.num, l.denom.Int64()
+	rn, rd := r.num, r.denom.Int64()
 
-	if lm != rm {
-		var m big.Int
+	if ld != rd {
+		var f big.Int
 
-		if lm > rm {
-			m.SetInt64(lm / rm)
-			rv.Mul(&rv, &m)
+		if ld > rd {
+			f.SetInt64(ld / rd)
+			rn.Mul(&rn, &f)
 		} else {
-			m.SetInt64(rm / lm)
-			lv.Mul(&lv, &m)
+			f.SetInt64(rd / ld)
+			ln.Mul(&ln, &f)
  		}
 	}
 
-	return lv.Cmp(&rv)
+	return ln.Cmp(&rn)
 }
 
 func (v *Val) Denom() big.Int {
@@ -90,9 +91,9 @@ func (v *Val) Frac() int64 {
 	return (&res).Mod(&v.num, &v.denom).Int64()
 }
 
-func (v *Val) Init(d, m *big.Int) *Val {
-	v.num = *d
-	v.denom = *m
+func (v *Val) Init(n, d *big.Int) *Val {
+	v.num = *n
+	v.denom = *d
 	return v
 }
 
@@ -100,18 +101,18 @@ func (v *Val) Num() big.Int {
 	return v.num
 }
 
-func (v *Val) Scale(m int64) *Val {
-	vm := v.denom.Int64()
+func (v *Val) Scale(d int64) *Val {
+	vd := v.denom.Int64()
 
-	if m != vm {
-		var mi big.Int
+	if d != vd {
+		var f big.Int
 
-		if vm < m {
-			mi.SetInt64(m / vm)
-			v.num.Mul(&v.num, &mi)
+		if vd < d {
+			f.SetInt64(d / vd)
+			v.num.Mul(&v.num, &f)
 		} else {
-			mi.SetInt64(vm / m)
-			v.num.Div(&v.num, &mi)
+			f.SetInt64(vd / d)
+			v.num.Div(&v.num, &f)
  		}
 	}
 	
@@ -125,8 +126,8 @@ func (v *Val) String() string {
 }
 
 func (v *Val) SubFloat64(l Val, r float64) *Val {
-	im := l.denom.Int64()
-	return v.SubInt64(l, int64(r*float64(im)), im)
+	ld := l.denom.Int64()
+	return v.SubInt64(l, int64(r*float64(ld)), ld)
 }
 
 func (v *Val) SubInt64(l Val, d, m int64) *Val {
