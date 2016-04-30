@@ -19,6 +19,7 @@ func rndSlice(n int) []int {
 }
 
 const testReps = 40000
+
 var addNums = rndSlice(testReps)
 var divNums = rndSlice(testReps)
 var mulNums = rndSlice(testReps)
@@ -34,7 +35,7 @@ func BenchmarkFix(t *testing.B) {
 		fv.SubInt64(fv, int64(subNums[i]), 100)
 	}
 
- 	//fmt.Printf("fix: %v\n", &fv)
+	//fmt.Printf("fix: %v\n", &fv)
 }
 
 func BenchmarkFixScale(t *testing.B) {
@@ -58,7 +59,7 @@ func BenchmarkFpd(t *testing.B) {
 		fv = fv.Sub(fpd.New(int64(subNums[i]), -2))
 	}
 
- 	//fmt.Printf("fpd: %v\n", fv)
+	//fmt.Printf("fpd: %v\n", fv)
 }
 
 func BenchmarkFpdScale(t *testing.B) {
@@ -66,8 +67,8 @@ func BenchmarkFpdScale(t *testing.B) {
 
 	for i := 0; i < testReps; i++ {
 		fv = fv.Add(fpd.New(int64(addNums[i]), -3))
-		fv = fv.Div(fpd.New(int64(divNums[i]), -3))		
-		fv = fv.Mul(fpd.New(int64(mulNums[i]), -3))		
+		fv = fv.Div(fpd.New(int64(divNums[i]), -3))
+		fv = fv.Mul(fpd.New(int64(mulNums[i]), -3))
 		fv = fv.Sub(fpd.New(int64(subNums[i]), -3))
 	}
 }
@@ -82,7 +83,7 @@ func BenchmarkDecimal(t *testing.B) {
 		fv = fv.Sub(decimal.New(int64(subNums[i]), -2))
 	}
 
- 	//fmt.Printf("decimal: %v\n", fv)
+	//fmt.Printf("decimal: %v\n", fv)
 }
 
 func BenchmarkDecimalScale(t *testing.B) {

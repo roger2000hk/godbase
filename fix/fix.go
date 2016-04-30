@@ -42,7 +42,7 @@ func (v *Val) AddInt64(l Val, rnv, rdv int64) *Val {
 	v.num.Add(&ln, &rn)
 
 	if ldv < rdv {
-		scaleDown(&v.num, rdv / ldv)
+		scaleDown(&v.num, rdv/ldv)
 	}
 
 	return v
@@ -91,7 +91,7 @@ func (v *Val) Float64() float64 {
 	res.Div(&v.num, &v.denom)
 	iv := float64(res.Int64())
 	res.Mul(&res, &v.denom)
-	return iv + float64(v.num.Int64() - res.Int64()) / float64(v.denom.Int64())
+	return iv + float64(v.num.Int64()-res.Int64())/float64(v.denom.Int64())
 }
 
 func (v *Val) Frac() int64 {
@@ -144,9 +144,9 @@ func (v *Val) Scale(d int64) *Val {
 		} else {
 			f.SetInt64(vd / d)
 			v.num.Div(&v.num, &f)
- 		}
+		}
 	}
-	
+
 	return v
 }
 
@@ -168,7 +168,7 @@ func (v *Val) SubFloat64(l Val, r float64) *Val {
 func (v *Val) SubInt64(l Val, rnv, rdv int64) *Val {
 	var rn big.Int
 	rn.SetInt64(rnv)
-	
+
 	ldv := l.denom.Int64()
 	ln := l.num
 
@@ -180,7 +180,7 @@ func (v *Val) SubInt64(l Val, rnv, rdv int64) *Val {
 	v.num.Sub(&ln, &rn)
 
 	if ldv < rdv {
-		scaleDown(&v.num, rdv / ldv)
+		scaleDown(&v.num, rdv/ldv)
 	}
 
 	return v
@@ -188,7 +188,7 @@ func (v *Val) SubInt64(l Val, rnv, rdv int64) *Val {
 
 func (v *Val) Trunc() int64 {
 	var res big.Int
-	return (&res).Div(&v.num, &v.denom).Int64()	
+	return (&res).Div(&v.num, &v.denom).Int64()
 }
 
 func scaleDown(n *big.Int, fv int64) {
@@ -199,7 +199,7 @@ func scaleDown(n *big.Int, fv int64) {
 
 func scaleUp(ln *big.Int, ldv int64, rn *big.Int, rdv int64) {
 	var f big.Int
-	
+
 	if ldv < rdv {
 		f.SetInt64(rdv / ldv)
 		ln.Mul(ln, &f)
