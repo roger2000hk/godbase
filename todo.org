@@ -14,18 +14,14 @@
 * add remento project
 ** check old
 
-* run rw lock test with race tool
-
-* update poorslab
-
-* add cols.Bytes
-* add cols.Float64
-
 * add tbls.Wrap
 
+* add Cx
+** take cx param in tbl.Insert/Delete
+** take cx param in idx.Insert/Delete
+
 * add tbls.Log wrap
-** keep []Rec queue
-** insert DeleteRec on delete
+* log delete/insert to disk
 
 * add testfn to Delete
 ** only delete if testfn nil / returns true
@@ -46,3 +42,5 @@
 * add hash slot resizing
 
 * add sort level resizing
+
+* update poorslab
