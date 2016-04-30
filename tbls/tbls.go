@@ -42,6 +42,26 @@ type Basic struct {
 type ColIter maps.Iter
 type RecNotFound recs.Id
 
+func AddBool(t Any, n string) *cols.BoolCol {
+	return t.Add(cols.NewBool(n)).(*cols.BoolCol)
+}
+
+func AddInt64(t Any, n string) *cols.Int64Col {
+	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
+}
+
+func AddString(t Any, n string) *cols.StringCol {
+	return t.Add(cols.NewString(n)).(*cols.StringCol)
+}
+
+func AddTime(t Any, n string) *cols.TimeCol {
+	return t.Add(cols.NewTime(n)).(*cols.TimeCol)
+}
+
+func AddUId(t Any, n string) *cols.UIdCol {
+	return t.Add(cols.NewUId(n)).(*cols.UIdCol)
+}
+
 func New(n string, rsc int, ra *maps.SlabAlloc, rls int) Any {
 	return new(Basic).Init(n, rsc, ra, rls)
 }

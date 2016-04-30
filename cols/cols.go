@@ -193,9 +193,8 @@ func (t *FixType) AsKey(_v interface{}) maps.Key {
 		return maps.FixKey(v)
 	}
 
-	v := _v.(big.Int)
 	var kv fix.Val
-	kv.Init(&v, &t.denom)
+	kv.Init(_v.(big.Int), t.denom)
 	return maps.FixKey(kv)
 }
 

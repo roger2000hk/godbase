@@ -105,9 +105,7 @@ func (r *Basic) Clone() Any {
 }
 
 func (r *Basic) Fix(c *cols.FixCol) (res fix.Val) {
-	v := r.Get(c).(big.Int)
-	m := c.Denom()
-	res.Init(&v, &m)
+	res.Init(r.Get(c).(big.Int), c.Denom())
 	return res
 }
 
