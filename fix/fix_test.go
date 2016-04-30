@@ -36,7 +36,7 @@ func TestFloat64(t *testing.T) {
 	var v Val
 	v.AddFloat64(*New(1234, 100), 12.34)
 
-	if res := v.Float64(); res != 24.68 {
+	if res := v.Float64(); res != 24.67 {
 		t.Errorf("invalid float64 res: %v", res)
 	}
 }
