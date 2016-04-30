@@ -46,18 +46,18 @@ func (i *Basic) Delete(r recs.Any) error {
 }
 
 func (e *DupKey) Error() string {
-	return fmt.Sprintf("dup key: %v", e)
+	return fmt.Sprintf("dup key: %v", e.key)
 }
 
 func (e *KeyNotFound) Error() string {
-	return fmt.Sprintf("key not found: %v", e)
+	return fmt.Sprintf("key not found: %v", e.key)
 }
 
 func (i *Basic) Find(start maps.Iter, key maps.Key, val interface{}) (maps.Iter, bool) {
 	return i.recs.Find(start, key, val)
 }
 
-func (i *Basic) Init(rs maps.Any, cs []cols.Any, u bool) *Basic {
+func (i *Basic) Init(cs []cols.Any, u bool, rs maps.Any) *Basic {
 	i.cols = cs
 	i.hash = fnv.New64()
 	i.recs = rs
@@ -148,12 +148,12 @@ func (k Key3) Less(_other maps.Key) bool {
 
 func New(cs []cols.Any, u bool, recs maps.Any) *Basic {
 	i := new(Basic)
-	return i.Init(recs, cs, u)
+	return i.Init(cs, u, recs)
 }
 
 func NewHash(cs []cols.Any, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
 	i := new(Basic)
-	return i.Init(maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)), cs, u)
+	return i.Init(cs, u, maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)))
 }
 
 func NewSort(cs []cols.Any, u bool, a *maps.SlabAlloc, ls int) *Basic {

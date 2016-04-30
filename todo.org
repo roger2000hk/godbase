@@ -1,7 +1,7 @@
-* add reverse idx for offsets
-** Idx.Basic/Reverse
-** extend Any
+* add idxs.Reverse
+** implement Any
 ** use id as key & store val for col 
+** implement Read/Write like Tbl
 
 * add Tbl.Delete()
 

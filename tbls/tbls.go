@@ -94,7 +94,7 @@ func (e RecNotFound) Error() string {
 }
 
 func (t *Basic) Get(id recs.Id) (recs.Any, error) {
-	rr, ok := t.recs.Get(id)
+	rr, ok := t.recs.Get(maps.UIdKey(id))
 	if !ok {
 		return nil, RecNotFound(id)
 	}
@@ -108,7 +108,7 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 	t.recIdHash.Init()
 
 	hashRecId := func(_id maps.Key) uint64 {
-		id := _id.(recs.Id)
+		id := recs.Id(_id.(maps.UIdKey))
 		return t.recIdHash.Hash(id)
 	}
 
@@ -169,7 +169,7 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 
 func (t *Basic) Reset(rec recs.Any) (recs.Any, error) {
 	id := rec.Id()
-	rr, ok := t.recs.Get(id)
+	rr, ok := t.recs.Get(maps.UIdKey(id))
 	if !ok {
 		return nil, RecNotFound(id)
 	}
@@ -202,7 +202,7 @@ func (t *Basic) Slurp(r io.Reader) error {
 			return err
 		}
 		
-		t.recs.Set(rec.Id(), rec)
+		t.recs.Set(maps.UIdKey(rec.Id()), rec)
 	}
 
 	return nil
@@ -227,7 +227,7 @@ func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
 		}
 	}
 	
-	t.recs.Set(id, rr)
+	t.recs.Set(maps.UIdKey(id), rr)
 	return rec, nil
 }
 
