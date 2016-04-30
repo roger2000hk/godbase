@@ -13,9 +13,12 @@ func New(nv, dv int64) *Val {
 	var n, d big.Int
 	n.SetInt64(nv)
 	d.SetInt64(dv)
-	var res Val
-	res.Init(&n, &d)
-	return &res
+	
+	return new(Val).Init(n, d)
+}
+
+func NewBig(n, d big.Int) *Val {
+	return new(Val).Init(n, d)
 }
 
 func (v *Val) Add(l Val, r Val) *Val {
@@ -122,9 +125,9 @@ func (v *Val) Frac() int64 {
 	return (&res).Mod(&v.num, &v.denom).Int64()
 }
 
-func (v *Val) Init(n, d *big.Int) *Val {
-	v.num = *n
-	v.denom = *d
+func (v *Val) Init(n, d big.Int) *Val {
+	v.num = n
+	v.denom = d
 	return v
 }
 
