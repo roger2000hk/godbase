@@ -3,10 +3,7 @@ package tbls
 import (
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
-	//"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
-	//"hash"
-	//"io"
 )
 
 type RefType struct {

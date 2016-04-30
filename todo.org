@@ -1,3 +1,5 @@
+* add ref rec accessors
+
 * implement Dump/Load for idxs.Reverse
 ** copy tbls
 
@@ -20,8 +22,6 @@
 * add testfn to Delete
 ** only delete if testfn nil / returns true
 ** add DeleteAll(key) int
-
-* add RecCol
 
 * add ListCol
 ** base on std list
