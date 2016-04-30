@@ -1,15 +1,9 @@
-* add idxs.Reverse
-** implement Any
-** use id as key & store val for col 
-** implement Read/Write like Tbl
+* implement Dump/Load for idxs.Reverse
+** copy tbls
 
 * add Tbl.Delete()
 
-* add idx.Dump/Load like Tbl
-
 * add events
-
-* add README.md to idxs
 
 * add remento project
 ** check old
