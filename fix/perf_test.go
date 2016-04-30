@@ -81,6 +81,4 @@ func BenchmarkDecimalScale(t *testing.B) {
 		fv = fv.Add(decimal.New(int64(addNums[i]), -3))
 		fv = fv.Sub(decimal.New(int64(subNums[i]), -3))
 	}
-
-	fmt.Printf("decimal scale: %v", 
 }

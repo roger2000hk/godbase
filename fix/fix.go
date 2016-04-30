@@ -36,22 +36,14 @@ func (v *Val) AddInt64(l Val, rnv, rdv int64) *Val {
 	rn.SetInt64(rnv)
 
 	ldv := l.denom.Int64()
-	ln := &l.num
+	ln := l.num
 
-	if rdv != ldv {
-		var f big.Int
-
-		if ldv > rdv {
-			f.SetInt64(ldv / rdv)
-			rn.Mul(&rn, &f)
-		} else {
-			f.SetInt64(rdv / ldv)
-			ln.Mul(ln, &f)
-		}
+	if ldv != rdv {
+		scaleUp(&ln, ldv, &rn, rdv)
 	}
 
 	v.denom.SetInt64(ldv)
-	v.num.Add(ln, &rn)
+	v.num.Add(&ln, &rn)
 
 	if ldv < rdv {
 		var f big.Int
@@ -63,19 +55,11 @@ func (v *Val) AddInt64(l Val, rnv, rdv int64) *Val {
 }
 
 func (l *Val) Cmp(r Val) int {
-	ln, ld := l.num, l.denom.Int64()
-	rn, rd := r.num, r.denom.Int64()
+	ln, ldv := l.num, l.denom.Int64()
+	rn, rdv := r.num, r.denom.Int64()
 
-	if ld != rd {
-		var f big.Int
-
-		if ld > rd {
-			f.SetInt64(ld / rd)
-			rn.Mul(&rn, &f)
-		} else {
-			f.SetInt64(rd / ld)
-			ln.Mul(&ln, &f)
- 		}
+	if ldv != rdv {
+		scaleUp(&ln, ldv, &rn, rdv)
 	}
 
 	return ln.Cmp(&rn)
@@ -145,31 +129,24 @@ func (v *Val) SubFloat64(l Val, r float64) *Val {
 	return v.SubInt64(l, int64(r*float64(ld)), ld)
 }
 
-func (v *Val) SubInt64(l Val, d, m int64) *Val {
-	var dv big.Int
-	dv.SetInt64(d)
-	lm := l.denom.Int64()
-	lv := l.num
+func (v *Val) SubInt64(l Val, rnv, rdv int64) *Val {
+	var rn big.Int
+	rn.SetInt64(rnv)
 	
-	if m != lm {
-		var mv big.Int
+	ldv := l.denom.Int64()
+	ln := l.num
 
-		if lm > m {
-			mv.SetInt64(lm / m)
-			dv.Mul(&dv, &mv)
-		} else {
-			mv.SetInt64(m / lm)
-			lv.Mul(&lv, &mv)
- 		}
+	if ldv != rdv {
+		scaleUp(&ln, ldv, &rn, rdv)
 	}
 
-	v.denom.SetInt64(lm)
-	v.num.Sub(&lv, &dv)
+	v.denom.SetInt64(ldv)
+	v.num.Sub(&ln, &rn)
 
-	if lm < m {
-		var mv big.Int
-		mv.SetInt64(m / lm)
-		v.num.Div(&v.num, &mv)
+	if ldv < rdv {
+		var f big.Int
+		f.SetInt64(rdv / ldv)
+		v.num.Div(&v.num, &f)
 	}
 
 	return v
@@ -178,4 +155,16 @@ func (v *Val) SubInt64(l Val, d, m int64) *Val {
 func (v *Val) Trunc() int64 {
 	var res big.Int
 	return (&res).Div(&v.num, &v.denom).Int64()	
+}
+
+func scaleUp(ln *big.Int, ldv int64, rn *big.Int, rdv int64) {
+	var f big.Int
+	
+	if ldv < rdv {
+		f.SetInt64(rdv / ldv)
+		ln.Mul(ln, &f)
+	} else {
+		f.SetInt64(ldv / rdv)
+		rn.Mul(rn, &f)
+	}
 }
