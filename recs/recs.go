@@ -9,7 +9,6 @@ import (
 	"github.com/fncodr/godbase/maps"
 	"hash"
 	"hash/fnv"
-	"math/big"
 	"time"
 )
 
@@ -104,8 +103,7 @@ func (r *Basic) Clone() Any {
 }
 
 func (r *Basic) Fix(c *cols.FixCol) (res fix.Val) {
-	res.Init(r.Get(c).(big.Int), c.Denom())
-	return res
+	return r.Get(c).(fix.Val)
 }
 
 func (r *Basic) Delete(c cols.Any) bool {

@@ -237,6 +237,12 @@ func (_ *BasicType) Decode(v interface{}) interface{} {
 	return v
 }
 
+func (t *FixType) Decode(v interface{}) interface{} {
+	var res fix.Val
+	res.Init(v.(big.Int), t.denom)
+	return res
+}
+
 func (_ *BasicType) Encode(v interface{}) interface{} {
 	return v
 }
