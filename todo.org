@@ -37,28 +37,12 @@
 ** base on std list
 ** take col type as param
 
-* ---
-
 * add find loop in both maps in runCutTests
-
-* add maps.RWHash
-** keep one RWMutex per slot
-
-* ---
-
-* add Any.Clone(MapFn)
-** panic for embedded imps
-** only include elems for which fn returns non nil key
 
 * copy maps to sets package
 ** no multi capability
 ** compare perf
 
-* add locks.Locker
-** keep HashMaps of RecId => Lock
-*** one for readers, one for writers
-** protect maps with Lock 
+* add hash slot resizing
 
-* add hash resizing
-
-* add sort resizing
+* add sort level resizing
