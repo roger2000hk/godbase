@@ -1,12 +1,14 @@
-* work on fix perf
-** any way to make rescaling faster?
-
-* add code to trigger fpd rescale bug
-** (5, -1).add(50, -2)
-
 * add mul/div
-
+* extract variants that take bigs
+** call from in64-vers
 * add variants that take Val's
+** call big-vers
+
+* add mul/div to perf tests
+
+* give fix perf one more round
+** cpu profile
+** any way to make rescaling faster?
 
 * change cols to not always write size
 ** only read/write size where needed

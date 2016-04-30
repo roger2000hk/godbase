@@ -6,8 +6,7 @@ import (
 )
 
 type Val struct {
-	num big.Int
-	denom big.Int
+	denom, num big.Int
 }
 
 func New(nv, dv int64) *Val {
@@ -17,6 +16,14 @@ func New(nv, dv int64) *Val {
 	var res Val
 	res.Init(&n, &d)
 	return &res
+}
+
+func (v *Val) Add(l Val, r Val) *Val {
+	return v.AddInt64(l, r.num.Int64(), r.denom.Int64())
+}
+
+func (v *Val) AddBig(l Val, rn big.Int, rd big.Int) *Val {
+	return v.AddInt64(l, rn.Int64(), rd.Int64())
 }
 
 func (v *Val) AddFloat64(l Val, r float64) *Val {
@@ -123,6 +130,14 @@ func (v *Val) String() string {
 	var res big.Int
 	d, m := res.DivMod(&v.num, &v.denom, &v.denom)
 	return fmt.Sprintf("%v.%v", d.Int64(), m.Int64())
+}
+
+func (v *Val) Sub(l Val, r Val) *Val {
+	return v.SubInt64(l, r.num.Int64(), r.denom.Int64())
+}
+
+func (v *Val) SubBig(l Val, rn big.Int, rd big.Int) *Val {
+	return v.SubInt64(l, rn.Int64(), rd.Int64())
 }
 
 func (v *Val) SubFloat64(l Val, r float64) *Val {
