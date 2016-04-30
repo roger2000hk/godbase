@@ -24,7 +24,7 @@ func Ref(tbl Any) cols.Type {
 }
 
 func (rt *RefType) Decode(_v interface{}) interface{} {
-	if v, err := rt.tbl.Get(recs.Id(_v.(godbase.UId))); err != nil {
+	if v, err := rt.tbl.Get(_v.(godbase.UId)); err != nil {
 		return v
 	}
 

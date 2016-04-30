@@ -19,7 +19,7 @@ type Any interface {
 	Col(string) cols.Any
 	Cols() ColIter
 	Dump(io.Writer) error
-	Get(recs.Id) (recs.Any, error)
+	Get(godbase.UId) (recs.Any, error)
 	Len() int64
 	Reset(recs.Any) (recs.Any, error)
 	Read(recs.Any, io.Reader) (recs.Any, error)
@@ -33,14 +33,14 @@ type Any interface {
 type Basic struct {
 	defs.Basic
 	cols maps.Sort
-	recIdHash recs.IdHash
+	recIdHash godbase.UIdHash
 	recs maps.Hash
 	revision cols.Int64Col
 	upsertedAt cols.TimeCol
 }
 
 type ColIter maps.Iter
-type RecNotFound recs.Id
+type RecNotFound godbase.UId
 
 func AddBool(t Any, n string) *cols.BoolCol {
 	return t.Add(cols.NewBool(n)).(*cols.BoolCol)
@@ -121,7 +121,7 @@ func (e RecNotFound) Error() string {
 	return fmt.Sprintf("rec not found: %v", e)
 }
 
-func (t *Basic) Get(id recs.Id) (recs.Any, error) {
+func (t *Basic) Get(id godbase.UId) (recs.Any, error) {
 	rr, ok := t.recs.Get(maps.UIdKey(id))
 	if !ok {
 		return nil, RecNotFound(id)
@@ -136,7 +136,7 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 	t.recIdHash.Init()
 
 	hashRecId := func(_id maps.Key) uint64 {
-		id := recs.Id(_id.(maps.UIdKey))
+		id := godbase.UId(_id.(maps.UIdKey))
 		return t.recIdHash.Hash(id)
 	}
 

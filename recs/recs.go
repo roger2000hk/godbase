@@ -1,14 +1,11 @@
 package recs
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/maps"
-	"hash"
-	"hash/fnv"
 	"time"
 )
 
@@ -21,7 +18,7 @@ type Any interface {
 	Eq(Any) bool
 	Find(cols.Any) (interface{}, bool)
 	Get(cols.Any) interface{}
-	Id() Id
+	Id() godbase.UId
 	Int64(*cols.Int64Col) int64
 	Iter() maps.Iter
 	Len() int
@@ -38,13 +35,9 @@ type Any interface {
 	UId(*cols.UIdCol) godbase.UId
 }
 
-type IdHash struct {
-	imp hash.Hash64
-}
 
 type Basic maps.Sort
-type Id godbase.UId
-type NotFound Id
+type NotFound godbase.UId
 type Size uint32
 type TestFn func(Any) bool
 
@@ -52,22 +45,14 @@ func BasicNew(a *maps.SlabAlloc) Any {
 	return new(Basic).BasicInit(a)
 }
 
-func Init(id Id, a *maps.SlabAlloc) Any {
+func Init(id godbase.UId, a *maps.SlabAlloc) Any {
 	r := new(Basic).BasicInit(a)
-	r.SetUId(cols.RecId(), godbase.UId(id))
+	r.SetUId(cols.RecId(), id)
 	return r
 }
 
 func New(a *maps.SlabAlloc) Any {
 	return new(Basic).Init(a)
-}
-
-func NewId() Id {
-	return Id(godbase.NewUId())
-}
-
-func NewIdHash() *IdHash {
-	return new(IdHash).Init()
 }
 
 func (e NotFound) Error() string {
@@ -138,14 +123,8 @@ func (r *Basic) Eq(other Any) bool {
 	return true
 }
 
-func (h *IdHash) Hash(id Id) uint64 {
-	h.imp.Reset()
-	h.imp.Write(id[:])
-	return h.imp.Sum64()
-}
-
-func (r *Basic) Id() Id {
-	return Id(r.UId(cols.RecId()))
+func (r *Basic) Id() godbase.UId {
+	return r.UId(cols.RecId())
 }
 
 func (r *Basic) Init(a *maps.SlabAlloc) *Basic {
@@ -153,11 +132,6 @@ func (r *Basic) Init(a *maps.SlabAlloc) *Basic {
 	r.SetTime(cols.CreatedAt(), time.Now())
 	r.SetUId(cols.RecId(), godbase.NewUId())
 	return r
-}
-
-func (h *IdHash) Init() *IdHash {
-	h.imp = fnv.New64()
-	return h
 }
 
 func (r *Basic) Iter() maps.Iter {
@@ -170,11 +144,6 @@ func (r *Basic) Int64(c *cols.Int64Col) int64 {
 
 func (r *Basic) Len() int {
 	return int(r.asMap().Len())
-}
-
-func (id Id) Less(other maps.Key) bool {
-	oid := other.(Id)
-	return bytes.Compare(id[:], oid[:]) < 0
 }
 
 func (r *Basic) New() Any {
@@ -212,10 +181,6 @@ func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) Any {
 
 func (r *Basic) String(c *cols.StringCol) string {
 	return r.Get(c).(string)
-}
-
-func (id Id) String() string {
-	return godbase.UId(id).String()
 }
 
 func (r *Basic) Time(c *cols.TimeCol) time.Time {

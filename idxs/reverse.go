@@ -1,6 +1,7 @@
 package idxs
 
 import (
+	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
@@ -11,7 +12,7 @@ import (
 type Reverse struct {
 	col cols.Any
 	hash hash.Hash64
-	recIdHash recs.IdHash
+	recIdHash godbase.UIdHash
 	recs maps.Any
 }
 
@@ -20,7 +21,7 @@ func NewReverse(c cols.Any, sc int, a *maps.SlabAlloc, ls int) *Reverse {
 	i.recIdHash.Init()
 	
 	hashRecId := func(id maps.Key) uint64 {
-		return i.recIdHash.Hash(id.(recs.Id))
+		return i.recIdHash.Hash(godbase.UId(id.(maps.UIdKey)))
 	}
 
 	return i.Init(c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))

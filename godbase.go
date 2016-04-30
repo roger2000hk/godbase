@@ -3,6 +3,8 @@ package godbase
 import (
 	"encoding/binary"
 	"github.com/wayn3h0/go-uuid"
+	"hash"
+	"hash/fnv"
 	"io"
 )
 
@@ -45,4 +47,23 @@ func ReadUId(r io.Reader) (interface{}, error) {
 
 func Write(ptr interface{}, w io.Writer) error {
 	return binary.Write(w, ByteOrder, ptr)
+}
+
+type UIdHash struct {
+	imp hash.Hash64
+}
+
+func NewUIdHash() *UIdHash {
+	return new(UIdHash).Init()
+}
+
+func (h *UIdHash) Hash(id UId) uint64 {
+	h.imp.Reset()
+	h.imp.Write(id[:])
+	return h.imp.Sum64()
+}
+
+func (h *UIdHash) Init() *UIdHash {
+	h.imp = fnv.New64()
+	return h
 }
