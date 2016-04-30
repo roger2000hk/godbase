@@ -24,7 +24,7 @@ type Any interface {
 	Get(cols.Any) interface{}
 	Id() Id
 	Int64(*cols.Int64Col) int64
-	Iter() Iter
+	Iter() maps.Iter
 	Len() int
 	New() Any
 	Set(cols.Any, interface{}) Any
@@ -45,7 +45,6 @@ type IdHash struct {
 
 type Basic maps.Sort
 type Id godbase.UId
-type Iter maps.Iter
 type NotFound Id
 type Size uint32
 type TestFn func(Any) bool
@@ -124,7 +123,7 @@ func (r *Basic) Find(c cols.Any) (interface{}, bool) {
 
 func (r *Basic) Get(c cols.Any) interface{} {
 	if v, ok := r.Find(c); ok {
-		return v
+		return c.Decode(v)
 	}
 
 	panic(fmt.Sprintf("field not found: %v", c.Name()))
@@ -163,8 +162,8 @@ func (h *IdHash) Init() *IdHash {
 	return h
 }
 
-func (r *Basic) Iter() Iter {
-	return Iter(r.asMap().First())
+func (r *Basic) Iter() maps.Iter {
+	return r.asMap().First()
 }
 
 func (r *Basic) Int64(c *cols.Int64Col) int64 {

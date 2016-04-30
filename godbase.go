@@ -33,6 +33,16 @@ func Read(ptr interface{}, r io.Reader) error {
 	return nil
 }
 
+func ReadUId(r io.Reader) (interface{}, error) {
+	var v UId
+
+	if _, err := io.ReadFull(r, v[:]); err != nil {
+		return nil, err
+	}
+
+	return v, nil
+}
+
 func Write(ptr interface{}, w io.Writer) error {
 	return binary.Write(w, ByteOrder, ptr)
 }

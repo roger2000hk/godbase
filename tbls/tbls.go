@@ -50,6 +50,10 @@ func AddInt64(t Any, n string) *cols.Int64Col {
 	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
 }
 
+func AddRef(t Any, n string, rt Any) *RefCol {
+	return t.Add(NewRef(n, rt)).(*RefCol)
+}
+
 func AddString(t Any, n string) *cols.StringCol {
 	return t.Add(cols.NewString(n)).(*cols.StringCol)
 }

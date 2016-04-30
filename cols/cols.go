@@ -17,10 +17,10 @@ type NameSize uint8
 type ValSize uint32
 
 
-type Any interface {
-	defs.Any
+type Conv interface {
 	AsKey(interface{}) maps.Key
 	CloneVal(interface{}) interface{}
+	Decode(interface{}) interface{}
 	Encode(interface{}) interface{}
 	Eq(interface{}, interface{}) bool
 	Hash(interface{}, hash.Hash64)
@@ -28,15 +28,14 @@ type Any interface {
 	Write(interface{}, io.Writer) error
 }
 
+type Any interface {
+	defs.Any
+	Conv
+}
+
 type Type interface {
+	Conv
 	Name() string
-	AsKey(interface{}) maps.Key
-	CloneVal(interface{}) interface{}
-	Encode(interface{}) interface{}
-	Eq(interface{}, interface{}) bool
-	Hash(interface{}, hash.Hash64)
-	Read(ValSize, io.Reader) (interface{}, error)
-	Write(interface{}, io.Writer) error	
 }
 
 type Basic struct {
@@ -226,8 +225,16 @@ func (c *FixCol) Denom() big.Int {
 	return c.colType.(*FixType).denom
 }
 
+func (c *Basic) Decode(v interface{}) interface{} {
+	return c.colType.Decode(v)
+}
+
 func (c *Basic) Encode(v interface{}) interface{} {
 	return c.colType.Encode(v)
+}
+
+func (_ *BasicType) Decode(v interface{}) interface{} {
+	return v
 }
 
 func (_ *BasicType) Encode(v interface{}) interface{} {
@@ -403,13 +410,7 @@ func (_ *TimeType) Read(s ValSize, r io.Reader) (interface{}, error) {
 }
 
 func (_ *UIdType) Read(_ ValSize, r io.Reader) (interface{}, error) {
-	var v godbase.UId
-
-	if _, err := io.ReadFull(r, v[:]); err != nil {
-		return nil, err
-	}
-
-	return godbase.UId(v), nil
+	return godbase.ReadUId(r)
 }
 
 func (c *Basic) Write(v interface{}, w io.Writer) error {
