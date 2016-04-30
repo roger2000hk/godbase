@@ -1,5 +1,14 @@
+* implement decode for fix col
+** replaces code in fix accessor
 * add ref rec accessors
 
+* remove recs.Id type
+** replace with godbase.UId
+** move IdHash to godbase.UIdHash
+* rename fix.New to fix.NewInt64
+* add fix.NewFloat64
+* rename fix.Init to fix.SetBig
+* add SetFloat64 / SetInt64
 * add SliceCol
 ** take col type as param to cols.Slice()
 
