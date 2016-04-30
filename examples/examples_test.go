@@ -2,7 +2,6 @@ package examples
 
 import (
 	"bytes"
-	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/recs"
 	"github.com/fncodr/godbase/tbls"
 	"testing"
@@ -14,8 +13,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	// create tmp tbl named "foos" backed by a hashed 1-level map without allocator 
 
 	foos := tbls.New("foos", 100, nil, 1)
-	bar := cols.NewInt64("bar")
-	foos.Add(bar)
+	bar := tbls.AddInt64(foos, "bar")
 
 	// fill table with recs
 

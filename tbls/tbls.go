@@ -46,6 +46,10 @@ func AddBool(t Any, n string) *cols.BoolCol {
 	return t.Add(cols.NewBool(n)).(*cols.BoolCol)
 }
 
+func AddFix(t Any, n string, d int64) *cols.FixCol {
+	return t.Add(cols.NewFix(n, d)).(*cols.FixCol)
+}
+
 func AddInt64(t Any, n string) *cols.Int64Col {
 	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
 }
