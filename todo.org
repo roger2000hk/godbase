@@ -1,6 +1,18 @@
-* add ref test
+* add cols.Union
+** make remento compile
+** commit Union
+
+* add events
 
 * add tbls.AddSortIdx / AddHashIdx
+
+* load settings table to decide amount scale in remento
+** add SettingNameIdx
+** slurp setting tbl on startup if exists
+*** otherwise init with defaults
+*** create db dir if not exists
+
+* add ref test
 
 * rename fix.New to fix.NewInt64
 * add fix.NewFloat64
@@ -13,6 +25,8 @@
 * go on with remento
 ** add offset idx
 ** add name idxs
+** add Resv
+** add slice col ResvItems
 
 * add MapCol
 ** take two col types as params to cols.Map()
@@ -21,8 +35,6 @@
 ** copy tbls
 
 * add Tbl.Delete()
-
-* add events
 
 * add remento project
 ** check old

@@ -79,7 +79,21 @@ type UIdType struct {
 	BasicType
 }
 
+type UnionCol struct {
+	Basic
+}
+
+type UnionType struct {
+	BasicType
+	typeFn UnionTypeFn
+}
+
+type TypeRegistry map[string]godbase.ColType
+type UnionTypeFn func(godbase.Rec) godbase.ColType
+
 var (
+	typeRegistry TypeRegistry
+
 	boolType BoolType
 	fixType FixType
 	int64Type Int64Type
@@ -92,6 +106,8 @@ var (
 )
 
 func init() {
+	typeRegistry = make(TypeRegistry)
+
 	boolType.Init("Bool")
 	int64Type.Init("Int64")
 	stringType.Init("String")
@@ -112,6 +128,14 @@ func Fix(d int64) godbase.ColType {
 
 func CreatedAt() *TimeCol {
 	return &createdAt
+}
+
+func GetType(n string) godbase.ColType {
+	if t, ok := typeRegistry[n]; ok {
+		return t
+	}
+	
+	panic(fmt.Sprintf("invalid col type: %v", n))
 }
 
 func Int64() godbase.ColType {
@@ -136,6 +160,10 @@ func Time() godbase.ColType {
 
 func UId() godbase.ColType {
 	return &uidType
+}
+
+func Union(n string, fn UnionTypeFn) godbase.ColType {
+	return new(UnionType).Init(n, fn)
 }
 
 func NewBool(n string) *BoolCol {
@@ -166,19 +194,23 @@ func NewUId(n string) *UIdCol {
 	return new(UIdCol).Init(n)
 }
 
-func (c *Basic) AsKey(v interface{}) godbase.Key {
-	return c.colType.AsKey(v)
+func NewUnion(n string, fn UnionTypeFn) *UnionCol {
+	return new(UnionCol).Init(n, fn)
+}
+
+func (c *Basic) AsKey(r godbase.Rec, v interface{}) godbase.Key {
+	return c.colType.AsKey(r, v)
 }
 	
-func (t *BasicType) AsKey(_ interface{}) godbase.Key {
+func (t *BasicType) AsKey(_ godbase.Rec, _ interface{}) godbase.Key {
 	panic(fmt.Sprintf("AsKey() not supported for %v!", t))
 }
 
-func (_ *BoolType) AsKey(v interface{}) godbase.Key {
+func (_ *BoolType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.BoolKey(v.(bool))
 }
 
-func (t *FixType) AsKey(_v interface{}) godbase.Key {
+func (t *FixType) AsKey(_ godbase.Rec, _v interface{}) godbase.Key {
 	if v, ok := _v.(fix.Val); ok {
 		return godbase.FixKey(v)
 	}
@@ -188,20 +220,24 @@ func (t *FixType) AsKey(_v interface{}) godbase.Key {
 	return godbase.FixKey(kv)
 }
 
-func (_ *Int64Type) AsKey(v interface{}) godbase.Key {
+func (_ *Int64Type) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.Int64Key(v.(int64))
 }
 
-func (_ *StringType) AsKey(v interface{}) godbase.Key {
+func (_ *StringType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.StringKey(v.(string))
 }
 
-func (_ *TimeType) AsKey(v interface{}) godbase.Key {
+func (_ *TimeType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.TimeKey(v.(time.Time))
 }
 
-func (_ *UIdType) AsKey(v interface{}) godbase.Key {
+func (_ *UIdType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.UIdKey(v.(godbase.UId))
+}
+
+func (t *UnionType) AsKey(r godbase.Rec, v interface{}) godbase.Key {
+	return t.typeFn(r).AsKey(r, v)
 }
 		
 func (c *Basic) CloneVal(v interface{}) interface{} {
@@ -263,38 +299,42 @@ func (c *Basic) Eq(l, r interface{}) bool {
 	return c.colType.Eq(l, r)
 }
 
-func (c *Basic) Hash(v interface{}, h hash.Hash64) {
-	c.colType.Hash(v, h)
+func (c *Basic) Hash(r godbase.Rec, v interface{}, h hash.Hash64) {
+	c.colType.Hash(r, v, h)
 }
 
-func (_ *BoolType) Hash(_v interface{}, h hash.Hash64) {
+func (_ *BoolType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	v := _v.(godbase.BoolKey)
 	godbase.Write(&v, h)
 }
 
-func (_ *FixType) Hash(_v interface{}, h hash.Hash64) {
+func (_ *FixType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	v := fix.Val(_v.(godbase.FixKey))
 	d := v.Num()
 	h.Write(d.Bytes())
 }
 
-func (_ *Int64Type) Hash(_v interface{}, h hash.Hash64) {
+func (_ *Int64Type) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	v := _v.(godbase.Int64Key)
 	godbase.Write(&v, h)
 }
 
-func (_ *StringType) Hash(v interface{}, h hash.Hash64) {
+func (_ *StringType) Hash(_ godbase.Rec, v interface{}, h hash.Hash64) {
 	h.Write([]byte(v.(godbase.StringKey)))
 }
 
-func (_ *TimeType) Hash(_v interface{}, h hash.Hash64) {
+func (_ *TimeType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	v := time.Time(_v.(godbase.TimeKey)).Unix()
 	godbase.Write(&v, h)
 }
 
-func (_ *UIdType) Hash(_v interface{}, h hash.Hash64) {
+func (_ *UIdType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	v := _v.(godbase.UIdKey)
 	h.Write(v[:])
+}
+
+func (t *UnionType) Hash(r godbase.Rec, v interface{}, h hash.Hash64) {
+	t.typeFn(r).Hash(r, v, h)
 }
 
 func (c *Basic) Init(n string, ct godbase.ColType) *Basic {
@@ -313,6 +353,12 @@ func (c *BoolCol) Init(n string) *BoolCol {
 	return c
 }
 
+func (t *BoolType) Init(n string) *BoolType {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	return t
+}
+
 func (c *FixCol) Init(n string, d int64) *FixCol {
 	c.Basic.Init(n, new(FixType).Init(d))
 	return c
@@ -321,6 +367,7 @@ func (c *FixCol) Init(n string, d int64) *FixCol {
 func (t *FixType) Init(d int64) *FixType {
 	t.BasicType.Init(fmt.Sprintf("Fix(%v)", d))
 	t.denom.SetInt64(d)
+	typeRegistry[t.Name()] = t
 	return t
 }
 
@@ -329,13 +376,21 @@ func (c *Int64Col) Init(n string) *Int64Col {
 	return c
 }
 
+func (t *Int64Type) Init(n string) *Int64Type {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	return t
+}
+
 func (c *RefCol) Init(n string, tbl godbase.Tbl) *RefCol {
 	c.Basic.Init(n, Ref(tbl))
 	return c
 }
 
 func (t *RefType) Init(tbl godbase.Tbl) *RefType {
+	t.BasicType.Init(fmt.Sprintf("Ref/%v", tbl.Name()))
 	t.tbl = tbl
+	typeRegistry[t.Name()] = t
 	return t
 }
 
@@ -344,9 +399,21 @@ func (c *StringCol) Init(n string) *StringCol {
 	return c
 }
 
+func (t *StringType) Init(n string) *StringType {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	return t
+}
+
 func (c *TimeCol) Init(n string) *TimeCol {
 	c.Basic.Init(n, Time())
 	return c
+}
+
+func (t *TimeType) Init(n string) *TimeType {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	return t
 }
 
 func (c *UIdCol) Init(n string) *UIdCol {
@@ -354,15 +421,33 @@ func (c *UIdCol) Init(n string) *UIdCol {
 	return c
 }
 
+func (t *UIdType) Init(n string) *UIdType {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	return t
+}
+
+func (c *UnionCol) Init(n string, fn UnionTypeFn) *UnionCol {
+	c.Basic.Init(n, Union(n, fn))
+	return c
+}
+
+func (t *UnionType) Init(n string, fn UnionTypeFn) *UnionType {
+	t.BasicType.Init(n)
+	typeRegistry[n] = t
+	t.typeFn = fn
+	return t
+}
+
 func (t *BasicType) Name() string {
 	return t.name
 }
 
-func (c *Basic) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
-	return c.colType.Read(s, r)
+func (c *Basic) Read(rec godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
+	return c.colType.Read(rec, s, r)
 }
 
-func (_ *BoolType) Read(_ godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *BoolType) Read(_ godbase.Rec, _ godbase.ValSize, r io.Reader) (interface{}, error) {
 	var v byte
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -372,7 +457,7 @@ func (_ *BoolType) Read(_ godbase.ValSize, r io.Reader) (interface{}, error) {
 	return v == 1, nil
 }
 
-func (_ *FixType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *FixType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -384,7 +469,7 @@ func (_ *FixType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *Int64Type) Read(_ godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *Int64Type) Read(_ godbase.Rec, _ godbase.ValSize, r io.Reader) (interface{}, error) {
 	var v int64
 
 	if err := godbase.Read(&v, r); err != nil {
@@ -394,7 +479,7 @@ func (_ *Int64Type) Read(_ godbase.ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *StringType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *StringType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
 	v := make([]byte, s)
 
 	if _, err := io.ReadFull(r, v); err != nil {
@@ -404,7 +489,7 @@ func (_ *StringType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
 	return string(v), nil
 }
 
-func (_ *TimeType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *TimeType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
 	bs := make([]byte, s)
 
 	if _, err := io.ReadFull(r, bs); err != nil {
@@ -420,8 +505,12 @@ func (_ *TimeType) Read(s godbase.ValSize, r io.Reader) (interface{}, error) {
 	return v, nil
 }
 
-func (_ *UIdType) Read(_ godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *UIdType) Read(_ godbase.Rec, _ godbase.ValSize, r io.Reader) (interface{}, error) {
 	return godbase.ReadUId(r)
+}
+
+func (t *UnionType) Read(rec godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
+	return t.typeFn(rec).Read(rec, s, r)
 }
 
 func (c *RefCol) Tbl() godbase.Tbl {
@@ -432,11 +521,11 @@ func (c *Basic) Type() godbase.ColType {
 	return c.colType
 }
 
-func (c *Basic) Write(v interface{}, w io.Writer) error {
-	return c.colType.Write(v, w)
+func (c *Basic) Write(r godbase.Rec, v interface{}, w io.Writer) error {
+	return c.colType.Write(r, v, w)
 }
 
-func (_ *BoolType) Write(_v interface{}, w io.Writer) error {
+func (_ *BoolType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	v := byte(0)
 	if _v.(bool) {
 		v = 1
@@ -445,21 +534,21 @@ func (_ *BoolType) Write(_v interface{}, w io.Writer) error {
 	return WriteBinVal(1, &v, w)
 }
 
-func (_ *FixType) Write(_v interface{}, w io.Writer) error {
+func (_ *FixType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	v := _v.(big.Int)
 	return WriteBytes(v.Bytes(), w)
 }
 
-func (_ *Int64Type) Write(_v interface{}, w io.Writer) error {
+func (_ *Int64Type) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	v := _v.(int64)
 	return WriteBinVal(8, &v, w)
 }
 
-func (_ *StringType) Write(_v interface{}, w io.Writer) error {
+func (_ *StringType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	return WriteBytes([]byte(_v.(string)), w)
 }
 
-func (_ *TimeType) Write(_v interface{}, w io.Writer) error {
+func (_ *TimeType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	bs, err := _v.(time.Time).MarshalBinary()
 
 	if err != nil {
@@ -469,12 +558,16 @@ func (_ *TimeType) Write(_v interface{}, w io.Writer) error {
 	return WriteBytes(bs, w)
 }
 
-func (_ *UIdType) Write(_v interface{}, w io.Writer) error {
+func (_ *UIdType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	v := _v.(godbase.UId)
 	return WriteBytes(v[:], w)
 }
 
-func Read(c godbase.Col, r io.Reader) (interface{}, error) {
+func (t *UnionType) Write(r godbase.Rec, v interface{}, w io.Writer) error {
+	return t.typeFn(r).Write(r, v, w)
+}
+
+func Read(rec godbase.Rec, c godbase.Col, r io.Reader) (interface{}, error) {
 	var s godbase.ValSize
 	var err error
 
@@ -484,7 +577,7 @@ func Read(c godbase.Col, r io.Reader) (interface{}, error) {
 
 	var v interface{}
 
-	if v, err = c.Read(s, r); err != nil {
+	if v, err = c.Read(rec, s, r); err != nil {
 		return nil, err
 	}
 
@@ -531,7 +624,7 @@ func WriteSize(s godbase.ValSize, w io.Writer) error {
 	return godbase.Write(&s, w)
 }
 
-func Write(c godbase.Col, v interface{}, w io.Writer) error {
+func Write(r godbase.Rec, c godbase.Col, v interface{}, w io.Writer) error {
 	n := []byte(c.Name())
 	s := godbase.NameSize(len(n))
 
@@ -543,5 +636,5 @@ func Write(c godbase.Col, v interface{}, w io.Writer) error {
 		return err
 	}
 
-	return c.Write(v, w)
+	return c.Write(r, v, w)
 }

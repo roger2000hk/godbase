@@ -71,14 +71,14 @@ func (i *Basic) Key(ks...interface{}) godbase.Key {
 	il, kl := len(i.cols), len(ks)
 	var k1, k2, k3 godbase.Key
 	
-	k1 = i.cols[0].AsKey(ks[0])
+	k1 = i.cols[0].AsKey(nil, ks[0])
 	
 	if kl > 1 {
-		k2 = i.cols[1].AsKey(ks[1])
+		k2 = i.cols[1].AsKey(nil, ks[1])
 	}
 
 	if kl > 2 {
-		k3 = i.cols[2].AsKey(ks[2])
+		k3 = i.cols[2].AsKey(nil, ks[2])
 	}	
 
 	if il == 1 {
@@ -97,7 +97,7 @@ func (i *Basic) RecKey(r godbase.Rec) godbase.Key {
 	var k1, k2, k3 godbase.Key
 	
 	if v, ok := r.Find(i.cols[0]); ok {
-		k1 = i.cols[0].AsKey(v)
+		k1 = i.cols[0].AsKey(r, v)
 	}
 	
 	if l == 1 {
@@ -105,7 +105,7 @@ func (i *Basic) RecKey(r godbase.Rec) godbase.Key {
 	}	
 
 	if v, ok := r.Find(i.cols[1]); ok {
-		k2 = i.cols[1].AsKey(v)
+		k2 = i.cols[1].AsKey(r, v)
 	}
 
 	if l == 2 {
@@ -113,7 +113,7 @@ func (i *Basic) RecKey(r godbase.Rec) godbase.Key {
 	}
 
 	if v, ok := r.Find(i.cols[2]); ok {
-		k3 = i.cols[2].AsKey(v)
+		k3 = i.cols[2].AsKey(r, v)
 	}
 	
 	return Key3{k1, k2, k3}
@@ -159,16 +159,16 @@ func genHashFn(i *Basic) func(godbase.Key) uint64 {
 
 		switch l {
 		case 1: 
-			i.cols[0].Hash(_key.(Key1)[0], i.hash)
+			i.cols[0].Hash(nil, _key.(Key1)[0], i.hash)
 		case 2: 
 			key := _key.(Key2)
-			i.cols[0].Hash(key[0], i.hash)
-			i.cols[1].Hash(key[1], i.hash)
+			i.cols[0].Hash(nil, key[0], i.hash)
+			i.cols[1].Hash(nil, key[1], i.hash)
 		case 3: 
 			key := _key.(Key3)
-			i.cols[0].Hash(key[0], i.hash)
-			i.cols[1].Hash(key[1], i.hash)
-			i.cols[2].Hash(key[2], i.hash)
+			i.cols[0].Hash(nil, key[0], i.hash)
+			i.cols[1].Hash(nil, key[1], i.hash)
+			i.cols[2].Hash(nil, key[2], i.hash)
 		default:
 			panic(fmt.Sprintf("invalid idx key len: %v", l))
 		}

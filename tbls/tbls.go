@@ -51,6 +51,10 @@ func AddUId(t godbase.Tbl, n string) *cols.UIdCol {
 	return t.Add(cols.NewUId(n)).(*cols.UIdCol)
 }
 
+func AddUnion(t godbase.Tbl, n string, fn cols.UnionTypeFn) *cols.UnionCol {
+	return t.Add(cols.NewUnion(n, fn)).(*cols.UnionCol)
+}
+
 func New(n string, rsc int, ra *maps.SlabAlloc, rls int) godbase.Tbl {
 	return new(Basic).Init(n, rsc, ra, rls)
 }
@@ -152,7 +156,7 @@ func (t *Basic) Read(rec godbase.Rec, r io.Reader) (godbase.Rec, error) {
 			c := i.Val().(godbase.Col)
 			var v interface{}
 			
-			if v, err = cols.Read(c, r); err != nil {
+			if v, err = cols.Read(rec, c, r); err != nil {
 				return nil, err
 			}
 
@@ -262,7 +266,7 @@ func (t *Basic) Write(rec godbase.Rec, w io.Writer) error {
 	}
 
 	for i := rec.Iter(); i.Valid(); i=i.Next() {
-		if err := cols.Write(i.Key().(godbase.Col), i.Val(), w); err != nil {
+		if err := cols.Write(rec, i.Key().(godbase.Col), i.Val(), w); err != nil {
 			return err
 		}
 	}

@@ -11,27 +11,27 @@ import (
 
 type Col interface {
 	Def
-	AsKey(interface{}) Key
+	AsKey(Rec, interface{}) Key
 	CloneVal(interface{}) interface{}
 	Decode(interface{}) interface{}
 	Encode(interface{}) interface{}
 	Eq(interface{}, interface{}) bool
-	Hash(interface{}, hash.Hash64)
-	Read(ValSize, io.Reader) (interface{}, error)
+	Hash(Rec, interface{}, hash.Hash64)
+	Read(Rec, ValSize, io.Reader) (interface{}, error)
 	Type() ColType
-	Write(interface{}, io.Writer) error
+	Write(Rec, interface{}, io.Writer) error
 }
 
 type ColType interface {
-	AsKey(interface{}) Key
+	AsKey(Rec, interface{}) Key
 	CloneVal(interface{}) interface{}
 	Decode(interface{}) interface{}
 	Encode(interface{}) interface{}
 	Eq(interface{}, interface{}) bool
-	Hash(interface{}, hash.Hash64)
+	Hash(Rec, interface{}, hash.Hash64)
 	Name() string
-	Read(ValSize, io.Reader) (interface{}, error)
-	Write(interface{}, io.Writer) error
+	Read(Rec, ValSize, io.Reader) (interface{}, error)
+	Write(Rec, interface{}, io.Writer) error
 }
 
 type Def interface {
