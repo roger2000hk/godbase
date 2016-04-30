@@ -61,7 +61,7 @@ func TestKeyEq(t *testing.T) {
 func TestUniqueInsertDelete(t *testing.T) {
 	foo := cols.NewInt64("foo")
 	bar := cols.NewString("bar")
-	foobarIdx := NewHash([]godbase.Col{foo, bar}, true, 100, nil, 1)
+	foobarIdx := NewHash("idx", []godbase.Col{foo, bar}, true, 100, nil, 1)
 
 	r := recs.New(nil)
 	recs.SetInt64(r, foo, 1)
@@ -95,7 +95,7 @@ func TestUniqueInsertDelete(t *testing.T) {
 func TestMultiSort(t *testing.T) {
 	date := cols.NewTime("date")
 	amount := cols.NewFix("amount", 1000)
-	orderIdx := NewSort([]godbase.Col{date, amount}, false, nil, 1)
+	orderIdx := NewSort("idx", []godbase.Col{date, amount}, false, nil, 1)
 	d := time.Now().Truncate(time.Hour * 24)
 
 	o1 := recs.New(nil)

@@ -5,10 +5,12 @@ import (
 	"hash"
 	"hash/fnv"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 )
 
 type Basic struct {
+	defs.Basic
 	cols []godbase.Col
 	hash hash.Hash64
 	recs godbase.Map
@@ -49,7 +51,8 @@ func (i *Basic) Find(start godbase.Iter, key godbase.Key, val interface{}) (godb
 	return i.recs.Find(start, key, val)
 }
 
-func (i *Basic) Init(cs []godbase.Col, u bool, rs godbase.Map) *Basic {
+func (i *Basic) Init(n string, cs []godbase.Col, u bool, rs godbase.Map) *Basic {
+	i.Basic.Init(n)
 	i.cols = cs
 	i.hash = fnv.New64()
 	i.recs = rs
@@ -138,18 +141,17 @@ func (k Key3) Less(_other godbase.Key) bool {
 		k[2].Less(other[2]))
 }
 
-func New(cs []godbase.Col, u bool, recs godbase.Map) *Basic {
-	i := new(Basic)
-	return i.Init(cs, u, recs)
+func New(n string, cs []godbase.Col, u bool, recs godbase.Map) *Basic {
+	return new(Basic).Init(n, cs, u, recs)
 }
 
-func NewHash(cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
+func NewHash(n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
 	i := new(Basic)
-	return i.Init(cs, u, maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)))
+	return i.Init(n, cs, u, maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)))
 }
 
-func NewSort(cs []godbase.Col, u bool, a *maps.SlabAlloc, ls int) *Basic {
-	return New(cs, u, maps.NewSlab(a, ls))
+func NewSort(n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, ls int) *Basic {
+	return New(n, cs, u, maps.NewSlab(a, ls))
 }
 
 func genHashFn(i *Basic) func(godbase.Key) uint64 {

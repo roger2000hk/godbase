@@ -1,7 +1,3 @@
-* add cols.Union
-** make remento compile
-** commit Union
-
 * add events
 
 * add tbls.AddSortIdx / AddHashIdx

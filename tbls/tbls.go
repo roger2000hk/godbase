@@ -5,6 +5,7 @@ import (
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/defs"
+	"github.com/fncodr/godbase/idxs"
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
 	"io"
@@ -31,12 +32,24 @@ func AddFix(t godbase.Tbl, n string, d int64) *cols.FixCol {
 	return t.Add(cols.NewFix(n, d)).(*cols.FixCol)
 }
 
+func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, 
+	ls int) godbase.Idx {
+	i := idxs.NewHash(n, cs, u, sc, a, ls)
+	return i
+}
+
 func AddInt64(t godbase.Tbl, n string) *cols.Int64Col {
 	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
 }
 
 func AddRef(t godbase.Tbl, n string, rt godbase.Tbl) *cols.RefCol {
 	return t.Add(cols.NewRef(n, rt)).(*cols.RefCol)
+}
+
+func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, 
+	ls int) godbase.Idx {
+	i := idxs.NewSort(n, cs, u, a, ls)
+	return i
 }
 
 func AddString(t godbase.Tbl, n string) *cols.StringCol {

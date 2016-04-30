@@ -40,10 +40,12 @@ type Def interface {
 }
 
 type Idx interface {
+	Def
 	Delete(Rec) error
 	Find(start Iter, key Key, val interface{}) (Iter, bool)
 	Insert(Rec) (Rec, error)
-	Key(r Rec) Key
+	Key(...interface{}) Key
+	RecKey(r Rec) Key
 }
 
 type Map interface {
