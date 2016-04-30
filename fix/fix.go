@@ -27,8 +27,8 @@ func (v *Val) AddBig(l Val, rn big.Int, rd big.Int) *Val {
 }
 
 func (v *Val) AddFloat64(l Val, r float64) *Val {
-	id := l.denom.Int64()
-	return v.AddInt64(l, int64(r*float64(id)), id)
+	ldv := l.denom.Int64()
+	return v.AddInt64(l, int64(r*float64(ldv)), ldv)
 }
 
 func (v *Val) AddInt64(l Val, rnv, rdv int64) *Val {
@@ -88,6 +88,33 @@ func (v *Val) Init(n, d *big.Int) *Val {
 	return v
 }
 
+func (v *Val) Mul(l Val, r Val) *Val {
+	return v.MulInt64(l, r.num.Int64(), r.denom.Int64())
+}
+
+func (v *Val) MulBig(l Val, rn big.Int, rd big.Int) *Val {
+	return v.MulInt64(l, rn.Int64(), rd.Int64())
+}
+
+func (v *Val) MulFloat64(l Val, r float64) *Val {
+	ldv := l.denom.Int64()
+	return v.MulInt64(l, int64(r*float64(ldv)), ldv)
+}
+
+func (v *Val) MulInt64(l Val, rnv, rdv int64) *Val {
+	ln := l.num
+
+	var rn, rd big.Int
+	rn.SetInt64(rnv)
+	rd.SetInt64(rdv)
+
+	v.denom = l.denom
+	v.num.Mul(&ln, &rn)
+	v.num.Div(&ln, &rd)
+
+	return v
+}
+
 func (v *Val) Num() big.Int {
 	return v.num
 }
@@ -125,8 +152,8 @@ func (v *Val) SubBig(l Val, rn big.Int, rd big.Int) *Val {
 }
 
 func (v *Val) SubFloat64(l Val, r float64) *Val {
-	ld := l.denom.Int64()
-	return v.SubInt64(l, int64(r*float64(ld)), ld)
+	ldv := l.denom.Int64()
+	return v.SubInt64(l, int64(r*float64(ldv)), ldv)
 }
 
 func (v *Val) SubInt64(l Val, rnv, rdv int64) *Val {
