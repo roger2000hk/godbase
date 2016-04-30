@@ -1,22 +1,3 @@
-* add mul/div
-* extract variants that take bigs
-** call from in64-vers
-* add variants that take Val's
-** call big-vers
-
-* add mul/div to perf tests
-
-* give fix perf one more round
-** cpu profile
-** any way to make rescaling faster?
-
-* change cols to not always write size
-** only read/write size where needed
-** remove size param from Any.Read
-** remove size read from Tbl.Read
-** change col find to Col()
-** run tests
-
 * add reverse idx for offsets
 ** Idx.Basic/Reverse
 ** extend Any
