@@ -1,7 +1,3 @@
-** remove recs.Any type
-** update readme & changes
-** commit
-
 * add ref test
 
 * add tbls.AddSortIdx / AddHashIdx
@@ -13,15 +9,6 @@
 
 * add SliceCol
 ** take col type as param to cols.Slice()
-
-
-* move cols.Any to godbase.Col
-
-* move recs.Any to godbase.Rec
-
-* move idxs.Any to godbase.Idx
-
-* move maps.Any to godbase.Map
 
 * go on with remento
 ** add offset idx
