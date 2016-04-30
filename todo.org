@@ -1,6 +1,7 @@
 * add events
 
-* add tbls.AddSortIdx / AddHashIdx
+* finish tbls.AddSortIdx / AddHashIdx
+** hook up events
 
 * load settings table to decide amount scale in remento
 ** add SettingNameIdx
