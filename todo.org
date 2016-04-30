@@ -1,5 +1,11 @@
 * add ref rec accessors
 
+* add SliceCol
+** take col type as param to cols.Slice()
+
+* add MapCol
+** take two col types as params to cols.Map()
+
 * implement Dump/Load for idxs.Reverse
 ** copy tbls
 

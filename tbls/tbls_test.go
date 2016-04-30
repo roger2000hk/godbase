@@ -13,11 +13,11 @@ import (
 func TestCreate(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
-	foos.Add(cols.NewBool("bool"))
-	foos.Add(cols.NewFix("fix", 10))
-	foos.Add(cols.NewInt64("int64"))
-	foos.Add(cols.NewString("string"))
-	foos.Add(cols.NewUId("uid"))
+	AddBool(foos, "bool")
+	AddFix(foos, "fix", 10)
+	AddInt64(foos, "int64")
+	AddString(foos, "string")
+	AddUId(foos, "uid")
 
 	if c := foos.Col("string"); c.Name() != "string" {
 		t.Errorf("invalid col: %v", c)
@@ -43,12 +43,12 @@ func TestCreate(t *testing.T) {
 func TestReadWriteRec(t *testing.T) {
 	foos := New("foos", 100, nil, 1)
 
-	boolCol := foos.Add(cols.NewBool("bool")).(*cols.BoolCol)
-	fixCol := foos.Add(cols.NewFix("fix", 10)).(*cols.FixCol)
-	int64Col := foos.Add(cols.NewInt64("int64")).(*cols.Int64Col)
-	stringCol := foos.Add(cols.NewString("string")).(*cols.StringCol)
-	timeCol := foos.Add(cols.NewTime("time")).(*cols.TimeCol)
-	uidCol := foos.Add(cols.NewUId("uid")).(*cols.UIdCol)
+	boolCol := AddBool(foos, "bool")
+	fixCol := AddFix(foos, "fix", 10)
+	int64Col := AddInt64(foos, "int64")
+	stringCol := AddString(foos, "string")
+	timeCol := AddTime(foos, "time")
+	uidCol := AddUId(foos, "uid")
 	
 	r := recs.New(nil)
 	r.SetFix(fixCol, *fix.New(123, 10))
@@ -112,7 +112,6 @@ func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
 	foos := New("foos", 100, nil, 1)
-
 
 	rs := make([]recs.Any, nrecs)
 
