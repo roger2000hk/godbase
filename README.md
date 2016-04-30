@@ -19,16 +19,15 @@ func TestDumpClearSlurp(t *testing.T) {
 	// create tmp tbl named "foos" backed by a hashed 1-level skip map without allocator 
 
 	foos := tbls.New("foos", 100, nil, 1)
-	bar := cols.NewInt64("bar")
-	foos.Add(bar)
+	bar := tbls.AddInt64(foos, "bar")
 
 	// fill table with recs
 
-	rs := make([]recs.Any, nrecs)
+	rs := make([]Rec, nrecs)
 
 	for i, _ := range rs {
 		r := recs.New(nil)
-		r.SetInt64(bar, int64(i))
+		recs.SetInt64(r, bar, int64(i))
 		
 		var err error
 		if rs[i], err = foos.Upsert(r); err != nil {

@@ -12,24 +12,6 @@ import (
 	"time"
 )
 
-type Any interface {
-	defs.Any
-	Add(cols.Any) cols.Any
-	Clear()
-	Col(string) cols.Any
-	Cols() ColIter
-	Dump(io.Writer) error
-	Get(godbase.UId) (recs.Any, error)
-	Len() int64
-	Reset(recs.Any) (recs.Any, error)
-	Read(recs.Any, io.Reader) (recs.Any, error)
-	Revision(r recs.Any) int64
-	Slurp(io.Reader) error
-	Upsert(recs.Any) (recs.Any, error)
-	UpsertedAt(recs.Any) time.Time
-	Write(recs.Any, io.Writer) error
-}
-
 type Basic struct {
 	defs.Basic
 	cols maps.Sort
@@ -39,55 +21,54 @@ type Basic struct {
 	upsertedAt cols.TimeCol
 }
 
-type ColIter maps.Iter
 type RecNotFound godbase.UId
 
-func AddBool(t Any, n string) *cols.BoolCol {
+func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
 	return t.Add(cols.NewBool(n)).(*cols.BoolCol)
 }
 
-func AddFix(t Any, n string, d int64) *cols.FixCol {
+func AddFix(t godbase.Tbl, n string, d int64) *cols.FixCol {
 	return t.Add(cols.NewFix(n, d)).(*cols.FixCol)
 }
 
-func AddInt64(t Any, n string) *cols.Int64Col {
+func AddInt64(t godbase.Tbl, n string) *cols.Int64Col {
 	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
 }
 
-func AddRef(t Any, n string, rt Any) *RefCol {
-	return t.Add(NewRef(n, rt)).(*RefCol)
+func AddRef(t godbase.Tbl, n string, rt godbase.Tbl) *cols.RefCol {
+	return t.Add(cols.NewRef(n, rt)).(*cols.RefCol)
 }
 
-func AddString(t Any, n string) *cols.StringCol {
+func AddString(t godbase.Tbl, n string) *cols.StringCol {
 	return t.Add(cols.NewString(n)).(*cols.StringCol)
 }
 
-func AddTime(t Any, n string) *cols.TimeCol {
+func AddTime(t godbase.Tbl, n string) *cols.TimeCol {
 	return t.Add(cols.NewTime(n)).(*cols.TimeCol)
 }
 
-func AddUId(t Any, n string) *cols.UIdCol {
+func AddUId(t godbase.Tbl, n string) *cols.UIdCol {
 	return t.Add(cols.NewUId(n)).(*cols.UIdCol)
 }
 
-func New(n string, rsc int, ra *maps.SlabAlloc, rls int) Any {
+func New(n string, rsc int, ra *maps.SlabAlloc, rls int) godbase.Tbl {
 	return new(Basic).Init(n, rsc, ra, rls)
 }
 
-func (t *Basic) Col(n string) cols.Any {
-	if c, ok := t.cols.Get(maps.StringKey(n)); ok {
-		return c.(cols.Any)
+func (t *Basic) Col(n string) godbase.Col {
+	if c, ok := t.cols.Get(godbase.StringKey(n)); ok {
+		return c.(godbase.Col)
 	}
 	
 	panic(fmt.Sprintf("col not found: %v", n))
 }
 
-func (t *Basic) Cols() ColIter {
+func (t *Basic) Cols() godbase.Iter {
 	return t.cols.First()
 }
 
-func (t *Basic) Add(c cols.Any) cols.Any {
-	if _, ok := t.cols.Insert(nil, maps.StringKey(c.Name()), c, false); ok {
+func (t *Basic) Add(c godbase.Col) godbase.Col {
+	if _, ok := t.cols.Insert(nil, godbase.StringKey(c.Name()), c, false); ok {
 		return c
 	}
 
@@ -95,8 +76,8 @@ func (t *Basic) Add(c cols.Any) cols.Any {
 }
 
 func (t *Basic) Clear() {
-	t.recs.While(func (_ maps.Key, v interface{}) bool {
-		v.(recs.Any).Clear()
+	t.recs.While(func (_ godbase.Key, v interface{}) bool {
+		v.(godbase.Rec).Clear()
 		return true
 	})
 
@@ -106,7 +87,7 @@ func (t *Basic) Clear() {
 func (t *Basic) Dump(w io.Writer) error {
 	var err error
 
-	t.While(func (r recs.Any) bool {
+	t.While(func (r godbase.Rec) bool {
 		if err = t.Write(r, w); err != nil {
 			return false
 		}
@@ -121,13 +102,13 @@ func (e RecNotFound) Error() string {
 	return fmt.Sprintf("rec not found: %v", e)
 }
 
-func (t *Basic) Get(id godbase.UId) (recs.Any, error) {
-	rr, ok := t.recs.Get(maps.UIdKey(id))
+func (t *Basic) Get(id godbase.UId) (godbase.Rec, error) {
+	rr, ok := t.recs.Get(godbase.UIdKey(id))
 	if !ok {
 		return nil, RecNotFound(id)
 	}
 	
-	return rr.(recs.Any).Clone(), nil
+	return rr.(godbase.Rec).Clone(), nil
 }
 
 func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
@@ -135,8 +116,8 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 	t.cols.Init(nil, 1)
 	t.recIdHash.Init()
 
-	hashRecId := func(_id maps.Key) uint64 {
-		id := godbase.UId(_id.(maps.UIdKey))
+	hashRecId := func(_id godbase.Key) uint64 {
+		id := godbase.UId(_id.(godbase.UIdKey))
 		return t.recIdHash.Hash(id)
 	}
 
@@ -152,7 +133,7 @@ func (t *Basic) Len() int64 {
 	return t.recs.Len()
 }
 
-func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
+func (t *Basic) Read(rec godbase.Rec, r io.Reader) (godbase.Rec, error) {
 	var s recs.Size
 
 	if err := godbase.Read(&s, r); err != nil {
@@ -167,8 +148,8 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 			return nil, err
 		}
 
-		if i, ok := t.cols.Find(nil, maps.StringKey(n), nil); ok {
-			c := i.Val().(cols.Any)
+		if i, ok := t.cols.Find(nil, godbase.StringKey(n), nil); ok {
+			c := i.Val().(godbase.Col)
 			var v interface{}
 			
 			if v, err = cols.Read(c, r); err != nil {
@@ -179,7 +160,7 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 		} else {
 			log.Printf("col '%v' missing in tbl '%v'", n, t.Name())
  
-			var s cols.ValSize
+			var s godbase.ValSize
 
 			if s, err = cols.ReadSize(r); err != nil {
 				return nil, err
@@ -195,22 +176,22 @@ func (t *Basic) Read(rec recs.Any, r io.Reader) (recs.Any, error) {
 	return rec, nil
 }
 
-func (t *Basic) Reset(rec recs.Any) (recs.Any, error) {
+func (t *Basic) Reset(rec godbase.Rec) (godbase.Rec, error) {
 	id := rec.Id()
-	rr, ok := t.recs.Get(maps.UIdKey(id))
+	rr, ok := t.recs.Get(godbase.UIdKey(id))
 	if !ok {
 		return nil, RecNotFound(id)
 	}
 	
-	for i := rr.(recs.Any).Iter(); i.Valid(); i = i.Next() {
-		c := i.Key().(cols.Any)
+	for i := rr.(godbase.Rec).Iter(); i.Valid(); i = i.Next() {
+		c := i.Key().(godbase.Col)
 		rec.Set(c, c.CloneVal(i.Val()))
 	}
 	
 	return rec, nil
 }
 
-func (t *Basic) Revision(r recs.Any) (v int64) {
+func (t *Basic) Revision(r godbase.Rec) (v int64) {
 	if v, ok := r.Find(&t.revision); ok {
 		return v.(int64)
 	}
@@ -230,13 +211,13 @@ func (t *Basic) Slurp(r io.Reader) error {
 			return err
 		}
 		
-		t.recs.Set(maps.UIdKey(rec.Id()), rec)
+		t.recs.Set(godbase.UIdKey(rec.Id()), rec)
 	}
 
 	return nil
 }
 
-func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
+func (t *Basic) Upsert(rec godbase.Rec) (godbase.Rec, error) {
 	id := rec.Id()
 
 	if v, ok := rec.Find(&t.revision); ok {
@@ -249,17 +230,17 @@ func (t *Basic) Upsert(rec recs.Any) (recs.Any, error) {
 	rr := rec.New()
 	
 	for i := t.cols.First(); i.Valid(); i = i.Next() {
-		c := i.Val().(cols.Any)
+		c := i.Val().(godbase.Col)
 		if v, ok := rec.Find(c); ok {
 			rr.Set(c, c.CloneVal(v))
 		}
 	}
 	
-	t.recs.Set(maps.UIdKey(id), rr)
+	t.recs.Set(godbase.UIdKey(id), rr)
 	return rec, nil
 }
 
-func (t *Basic) UpsertedAt(r recs.Any) (res time.Time) {
+func (t *Basic) UpsertedAt(r godbase.Rec) (res time.Time) {
 	if v, ok := r.Find(&t.upsertedAt); ok {
 		return v.(time.Time)
 	}
@@ -268,12 +249,12 @@ func (t *Basic) UpsertedAt(r recs.Any) (res time.Time) {
 }
 
 func (t *Basic) While(fn recs.TestFn) bool {
-	return t.recs.While(func (_ maps.Key, v interface{}) bool {
-		return fn(v.(recs.Any))
+	return t.recs.While(func (_ godbase.Key, v interface{}) bool {
+		return fn(v.(godbase.Rec))
 	})
 }
 
-func (t *Basic) Write(rec recs.Any, w io.Writer) error {
+func (t *Basic) Write(rec godbase.Rec, w io.Writer) error {
 	s := recs.Size(rec.Len())
 
 	if err := godbase.Write(&s, w); err != nil {
@@ -281,7 +262,7 @@ func (t *Basic) Write(rec recs.Any, w io.Writer) error {
 	}
 
 	for i := rec.Iter(); i.Valid(); i=i.Next() {
-		if err := cols.Write(i.Key().(cols.Any), i.Val(), w); err != nil {
+		if err := cols.Write(i.Key().(godbase.Col), i.Val(), w); err != nil {
 			return err
 		}
 	}

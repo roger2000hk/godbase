@@ -22,13 +22,13 @@ func TestGetSet(t *testing.T) {
 		t.Errorf("invalid get res from empty rec: %v", v)
 	}
 
-	r.SetInt64(c, 1)
-	if v := r.Int64(c); v != 1 {
+	SetInt64(r, c, 1)
+	if v := Int64(r, c); v != 1 {
 		t.Errorf("invalid int64 res from rec: %v", v)
 	}
 
-	r.SetInt64(c, 3)
-	if v := r.Int64(c); v != 3 {
+	SetInt64(r, c, 3)
+	if v := Int64(r, c); v != 3 {
 		t.Errorf("invalid int64 res from updated rec: %v", v)
 	}
 

@@ -3,7 +3,6 @@ package tbls
 import (
 	"bytes"
 	"github.com/fncodr/godbase"
-	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/recs"
 	"testing"
@@ -25,17 +24,17 @@ func TestCreate(t *testing.T) {
 
 	i := foos.Cols()
 
-	if c := i.Val().(cols.Any); c.Name() != "bool" {
+	if c := i.Val().(godbase.Col); c.Name() != "bool" {
 		t.Errorf("invalid col: %v", c)
 	}
 
 	i = i.Next()
-	if c := i.Val().(cols.Any); c.Name() != "fix" {
+	if c := i.Val().(godbase.Col); c.Name() != "fix" {
 		t.Errorf("invalid col: %v", c)
 	}
 
 	i = i.Next()
-	if c := i.Val().(cols.Any); c.Name() != "foos/revision" {
+	if c := i.Val().(godbase.Col); c.Name() != "foos/revision" {
 		t.Errorf("invalid col: %v", c)
 	}
 }
@@ -51,12 +50,12 @@ func TestReadWriteRec(t *testing.T) {
 	uidCol := AddUId(foos, "uid")
 	
 	r := recs.New(nil)
-	r.SetFix(fixCol, *fix.New(123, 10))
-	r.SetBool(boolCol, true)
-	r.SetInt64(int64Col, 1)
-	r.SetString(stringCol, "abc")
-	r.SetTime(timeCol, time.Now())
-	r.SetUId(uidCol, godbase.NewUId())
+	recs.SetFix(r, fixCol, *fix.New(123, 10))
+	recs.SetBool(r, boolCol, true)
+	recs.SetInt64(r, int64Col, 1)
+	recs.SetString(r, stringCol, "abc")
+	recs.SetTime(r, timeCol, time.Now())
+	recs.SetUId(r, uidCol, godbase.NewUId())
 
 	var buf bytes.Buffer
 	if err := foos.Write(r, &buf); err != nil {
@@ -113,7 +112,7 @@ func TestDumpClearSlurp(t *testing.T) {
 
 	foos := New("foos", 100, nil, 1)
 
-	rs := make([]recs.Any, nrecs)
+	rs := make([]godbase.Rec, nrecs)
 
 	for i, _ := range rs {
 		var err error

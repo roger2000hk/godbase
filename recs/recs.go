@@ -9,49 +9,22 @@ import (
 	"time"
 )
 
-type Any interface {
-	Bool(*cols.BoolCol) bool
-	Clear()
-	Clone() Any
-	Fix(*cols.FixCol) fix.Val
-	Delete(cols.Any) bool
-	Eq(Any) bool
-	Find(cols.Any) (interface{}, bool)
-	Get(cols.Any) interface{}
-	Id() godbase.UId
-	Int64(*cols.Int64Col) int64
-	Iter() maps.Iter
-	Len() int
-	New() Any
-	Set(cols.Any, interface{}) Any
-	SetBool(*cols.BoolCol, bool) Any
-	SetFix(*cols.FixCol, fix.Val) Any
-	SetInt64(*cols.Int64Col, int64) Any
-	SetString(*cols.StringCol, string) Any
-	SetTime(*cols.TimeCol, time.Time) Any
-	SetUId(*cols.UIdCol, godbase.UId) Any
-	String(*cols.StringCol) string
-	Time(*cols.TimeCol) time.Time
-	UId(*cols.UIdCol) godbase.UId
-}
-
-
 type Basic maps.Sort
 type NotFound godbase.UId
 type Size uint32
-type TestFn func(Any) bool
+type TestFn func(godbase.Rec) bool
 
-func BasicNew(a *maps.SlabAlloc) Any {
+func BasicNew(a *maps.SlabAlloc) godbase.Rec {
 	return new(Basic).BasicInit(a)
 }
 
-func Init(id godbase.UId, a *maps.SlabAlloc) Any {
+func Init(id godbase.UId, a *maps.SlabAlloc) godbase.Rec {
 	r := new(Basic).BasicInit(a)
-	r.SetUId(cols.RecId(), id)
+	SetUId(r, cols.RecId(), id)
 	return r
 }
 
-func New(a *maps.SlabAlloc) Any {
+func New(a *maps.SlabAlloc) godbase.Rec {
 	return new(Basic).Init(a)
 }
 
@@ -59,8 +32,61 @@ func (e NotFound) Error() string {
 	return fmt.Sprintf("rec not found: %v", e)
 }
 
-func (r *Basic) Bool(c *cols.BoolCol) bool {
+func Bool(r godbase.Rec, c *cols.BoolCol) bool {
 	return r.Get(c).(bool)
+}
+
+func Fix(r godbase.Rec, c *cols.FixCol) (res fix.Val) {
+	return r.Get(c).(fix.Val)
+}
+
+func Int64(r godbase.Rec, c *cols.Int64Col) int64 {
+	return r.Get(c).(int64)
+}
+
+func Ref(r godbase.Rec, c *cols.RefCol, res godbase.Rec) (godbase.Rec, error) {
+	res.Set(cols.RecId(), r.Get(c).(godbase.UId)) 
+	return c.Tbl().Reset(res);
+}
+
+func SetBool(r godbase.Rec, c *cols.BoolCol, v bool) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetFix(r godbase.Rec, c *cols.FixCol, v fix.Val) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetInt64(r godbase.Rec, c *cols.Int64Col, v int64) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetRef(r godbase.Rec, c *cols.RefCol, v godbase.Rec) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetString(r godbase.Rec, c *cols.StringCol, v string) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetTime(r godbase.Rec, c *cols.TimeCol, v time.Time) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func SetUId(r godbase.Rec, c *cols.UIdCol, v godbase.UId) godbase.Rec {
+	return r.Set(c, v).(godbase.Rec)
+}
+
+func String(r godbase.Rec, c *cols.StringCol) string {
+	return r.Get(c).(string)
+}
+
+func Time(r godbase.Rec, c *cols.TimeCol) time.Time {
+	return r.Get(c).(time.Time)
+}
+
+func UId(r godbase.Rec, c *cols.UIdCol) godbase.UId {
+	return r.Get(c).(godbase.UId)
 }
 
 func (r *Basic) BasicInit(a *maps.SlabAlloc) *Basic {
@@ -73,30 +99,26 @@ func (r *Basic) Clear() {
 }
 
 func (r *Basic) CreatedAt() time.Time {
-	return r.Time(cols.CreatedAt())
+	return Time(r, cols.CreatedAt())
 }
 
-func (r *Basic) Clone() Any {
+func (r *Basic) Clone() godbase.Rec {
 	res := r.New()
 
 	for i := r.Iter(); i.Valid(); i = i.Next() {
-		c := i.Key().(cols.Any)
+		c := i.Key().(godbase.Col)
 		res.Set(c, c.CloneVal(i.Val()))
 	}
 	
 	return res
 }
 
-func (r *Basic) Fix(c *cols.FixCol) (res fix.Val) {
-	return r.Get(c).(fix.Val)
-}
-
-func (r *Basic) Delete(c cols.Any) bool {
+func (r *Basic) Delete(c godbase.Col) bool {
 	_, cnt := r.asMap().Delete(nil, nil, c, nil)
 	return cnt == 1
 }
 
-func (r *Basic) Find(c cols.Any) (interface{}, bool) {
+func (r *Basic) Find(c godbase.Col) (interface{}, bool) {
 	if v, ok := r.asMap().Get(c); ok {
 		return v, true
 	}
@@ -104,7 +126,7 @@ func (r *Basic) Find(c cols.Any) (interface{}, bool) {
 	return nil, false
 }
 
-func (r *Basic) Get(c cols.Any) interface{} {
+func (r *Basic) Get(c godbase.Col) interface{} {
 	if v, ok := r.Find(c); ok {
 		return c.Decode(v)
 	}
@@ -112,9 +134,9 @@ func (r *Basic) Get(c cols.Any) interface{} {
 	panic(fmt.Sprintf("field not found: %v", c.Name()))
 }
 
-func (r *Basic) Eq(other Any) bool {
+func (r *Basic) Eq(other godbase.Rec) bool {
 	for i := r.Iter(); i.Valid(); i = i.Next() {
-		c := i.Key().(cols.Any)
+		c := i.Key().(godbase.Col)
 		if ov, ok := other.Find(c); !ok || !c.Eq(ov, i.Val()) {
 			return false
 		}
@@ -124,71 +146,31 @@ func (r *Basic) Eq(other Any) bool {
 }
 
 func (r *Basic) Id() godbase.UId {
-	return r.UId(cols.RecId())
+	return UId(r, cols.RecId())
 }
 
 func (r *Basic) Init(a *maps.SlabAlloc) *Basic {
 	r.BasicInit(a)
-	r.SetTime(cols.CreatedAt(), time.Now())
-	r.SetUId(cols.RecId(), godbase.NewUId())
+	SetTime(r, cols.CreatedAt(), time.Now())
+	SetUId(r, cols.RecId(), godbase.NewUId())
 	return r
 }
 
-func (r *Basic) Iter() maps.Iter {
+func (r *Basic) Iter() godbase.Iter {
 	return r.asMap().First()
-}
-
-func (r *Basic) Int64(c *cols.Int64Col) int64 {
-	return r.Get(c).(int64)
 }
 
 func (r *Basic) Len() int {
 	return int(r.asMap().Len())
 }
 
-func (r *Basic) New() Any {
+func (r *Basic) New() godbase.Rec {
 	return (*Basic)(r.asMap().New().(*maps.Sort))
 }
 
-func (r *Basic) Set(c cols.Any, v interface{}) Any {
+func (r *Basic) Set(c godbase.Col, v interface{}) godbase.Rec {
 	r.asMap().Set(c, c.Encode(v))
 	return r
-}
-
-func (r *Basic) SetBool(c *cols.BoolCol, v bool) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) SetFix(c *cols.FixCol, v fix.Val) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) SetInt64(c *cols.Int64Col, v int64) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) SetString(c *cols.StringCol, v string) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) SetTime(c *cols.TimeCol, v time.Time) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) SetUId(c *cols.UIdCol, v godbase.UId) Any {
-	return r.Set(c, v)
-}
-
-func (r *Basic) String(c *cols.StringCol) string {
-	return r.Get(c).(string)
-}
-
-func (r *Basic) Time(c *cols.TimeCol) time.Time {
-	return r.Get(c).(time.Time)
-}
-
-func (r *Basic) UId(c *cols.UIdCol) godbase.UId {
-	return r.Get(c).(godbase.UId)
 }
 
 func (r *Basic) asMap() *maps.Sort {

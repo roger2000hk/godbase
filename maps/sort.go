@@ -3,6 +3,7 @@ package maps
 import (
 	"bytes"
 	"fmt"
+	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/lists"
 	"unsafe"
 )
@@ -32,7 +33,7 @@ func NewSort(ls int) *Sort {
 	return NewSlab(nil, ls)
 }
 
-func (m *Sort) SlabAllocNode(key Key, val interface{}, prev *Node) *Node{
+func (m *Sort) SlabAllocNode(key godbase.Key, val interface{}, prev *Node) *Node{
 	if m.alloc == nil {
 		 return new(Node).Init(key, val, prev)
 	} 
@@ -64,7 +65,7 @@ func (m *Sort) Clear() {
 	m.len = 0
 }
 
-func (m *Sort) Cut(start, end Iter, fn MapFn) Any {
+func (m *Sort) Cut(start, end godbase.Iter, fn godbase.KVMapFn) godbase.Map {
 	if start == nil {
 		start = m.bottom.next
 	} else
@@ -77,7 +78,7 @@ func (m *Sort) Cut(start, end Iter, fn MapFn) Any {
 	nn := res.bottom
 
 	n := start.(*Node); 
-	for Iter(n) != end {
+	for godbase.Iter(n) != end {
 		next := n.next
 		
 		if n == m.bottom {
@@ -119,7 +120,7 @@ func (m *Sort) Cut(start, end Iter, fn MapFn) Any {
 	return res
 }
 
-func (m *Sort) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+func (m *Sort) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
 	n := m.bottom.next
 
 	if start == nil {
@@ -174,7 +175,7 @@ func (n *Node) Delete() {
 	}
 }
 
-func (m *Sort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m *Sort) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if !ok {
@@ -188,7 +189,7 @@ func (m *Sort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return n, n.key == key && (val == nil || n.val == val)
 }
 
-func (m *Sort) FindNode(start Iter, key Key) (*Node, bool) {
+func (m *Sort) FindNode(start godbase.Iter, key godbase.Key) (*Node, bool) {
 	if start == nil {
 		start = m.top.next
 	}
@@ -254,12 +255,12 @@ func (m *Sort) FindNode(start Iter, key Key) (*Node, bool) {
 	return n.prev, false
 }
 
-func (m *Sort) First() Iter {
+func (m *Sort) First() godbase.Iter {
 	return m.bottom.next
 }
 
 
-func (m *Sort) Get(key Key) (interface{}, bool) {
+func (m *Sort) Get(key godbase.Key) (interface{}, bool) {
 	n, ok := m.FindNode(nil, key)
 	
 	if ok {
@@ -290,7 +291,8 @@ func (m *Sort) Init(alloc *SlabAlloc, levels int) *Sort {
 	return m
 }
 
-func (m *Sort) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *Sort) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+	allowMulti bool) (godbase.Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
@@ -318,11 +320,11 @@ func (m *Sort) Levels() int {
 	return res
 }
 
-func (m *Sort) New() Any {
+func (m *Sort) New() godbase.Map {
 	return NewSlab(m.alloc, m.Levels())
 }
 
-func (m *Sort) Set(key Key, val interface{}) bool {
+func (m *Sort) Set(key godbase.Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok {
@@ -363,13 +365,13 @@ func (m *Sort) String() string {
 type Node struct {
 	freeNode lists.EDouble
 	down, next, prev, up *Node
-	key Key
+	key godbase.Key
 	val interface{}
 }
 
 var freeNodeOffs = unsafe.Offsetof(new(Node).freeNode)
 
-func (n *Node) Init(key Key, val interface{}, prev *Node) *Node {
+func (n *Node) Init(key godbase.Key, val interface{}, prev *Node) *Node {
 	n.key, n.val = key, val
 	n.up = n
 
@@ -383,15 +385,15 @@ func (n *Node) Init(key Key, val interface{}, prev *Node) *Node {
 	return n
 }
 
-func (n *Node) Key() Key {
+func (n *Node) Key() godbase.Key {
 	return n.key
 }
 
-func (n *Node) Next() Iter {
+func (n *Node) Next() godbase.Iter {
 	return n.next
 }
 
-func (n *Node) Prev() Iter {
+func (n *Node) Prev() godbase.Iter {
 	return n.prev
 }
 
@@ -420,7 +422,7 @@ func (a *SlabAlloc) Init(slabSize int) *SlabAlloc {
 	return a
 }
 
-func (a *SlabAlloc) New(key Key, val interface{}, prev *Node) *Node {
+func (a *SlabAlloc) New(key godbase.Key, val interface{}, prev *Node) *Node {
 	var res *Node
 
 	if n := a.freeList.Next(); n != n {
@@ -439,7 +441,7 @@ func (a *SlabAlloc) New(key Key, val interface{}, prev *Node) *Node {
 	return res.Init(key, val, prev)
 }
 
-func (m *Sort) While(fn TestFn) bool {
+func (m *Sort) While(fn godbase.KVTestFn) bool {
 	for n := m.bottom.next; n != m.bottom; n = n.next {
 		if !fn(n.key, n.val) {
 			return false

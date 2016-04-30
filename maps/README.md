@@ -58,7 +58,7 @@ type Iter interface {
 }
 
 // Basic map ops supported by all implementations
-type Any interface {
+type Map interface {
 	// Clears all elems from map. Deallocates nodes for maps that use allocators.
 	Clear()
 
@@ -69,7 +69,7 @@ type Any interface {
 	// own. Circular cuts, with start/end on opposite sides of root; are supported. 
 	// Returns a cut from the start slot for hash maps.
 
-	Cut(start, end Iter, fn MapFn) Any
+	Cut(start, end Iter, fn KVMapFn) Map
 
 	// Deletes elems from start to end, matching key/val;
 	// start, end, key & val are all optional, nil means all elems. Specifying 
@@ -99,7 +99,7 @@ type Any interface {
 	Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
 
 	// Returns a new, empty map of the same type as the receiver
-	New() Any
+	New() Map
 
 	// Returns the number of elems in map
 	Len() int64
@@ -111,11 +111,11 @@ type Any interface {
 	String() string
 
 	// Calls fn with successive elems until it returns false; returns false on early exit
-	While(TestFn) bool
+	While(KVTestFn) bool
 }
 
-type TestFn func (Key, interface{}) bool
-
+type KVMapFn func (Key, interface{}) (Key, interface{})
+type KVTestFn func (Key, interface{}) bool
 
 ```
 
@@ -158,7 +158,7 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	sortAlloc := func (_ Key) Any { return NewSort(2) }
+	sortAlloc := func (_ Key) Map { return NewSort(2) }
 	as := NewSlots(1000, genHash, sortAlloc)
 	NewHash(as)
 
@@ -244,7 +244,7 @@ type Suffix struct {
 	Wrap
 }
 
-func NewSuffix(m Any) *Suffix {
+func NewSuffix(m Map) *Suffix {
 	res := new(Suffix)
 	res.Init(m)
 	return res
@@ -279,12 +279,12 @@ func (m *Suffix) Insert(start Iter, key Key, val interface{}, allowMulti bool) (
 
 ```
 
-maps.Suffix, like all wraps, can be used wherever maps.Any is expected; with the restriction that it only supports StringKeys, for obvious reasons. A suffix map is a nice tool to solve string completion problems, this one comes bundled with all the additional features of godbase map api.
+maps.Suffix, like all wraps, can be used wherever a Map is expected; with the restriction that it only supports StringKeys, for obvious reasons. A suffix map is a nice tool to solve string completion problems, this one comes bundled with all the additional features of godbase map api.
 
 ```go
 
 func TestSuffix(t *testing.T) {
-	// NewSuffix wraps any map
+	// NewSuffix wraps any Map
 	// iters only work within slots for hash maps; therefore, the obvious 
 	// combination is with one of the sorted maps.
 

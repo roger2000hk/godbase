@@ -2,6 +2,7 @@ package examples
 
 import (
 	"bytes"
+	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/recs"
 	"github.com/fncodr/godbase/tbls"
 	"testing"
@@ -17,11 +18,11 @@ func TestDumpClearSlurp(t *testing.T) {
 
 	// fill table with recs
 
-	rs := make([]recs.Any, nrecs)
+	rs := make([]godbase.Rec, nrecs)
 
 	for i, _ := range rs {
 		r := recs.New(nil)
-		r.SetInt64(bar, int64(i))
+		recs.SetInt64(r, bar, int64(i))
 		
 		var err error
 		if rs[i], err = foos.Upsert(r); err != nil {

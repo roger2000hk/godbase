@@ -3,6 +3,7 @@ package maps
 import (
 	"bytes"
 	"fmt"
+	"github.com/fncodr/godbase"
 )
 
 const ELevels = 10
@@ -14,7 +15,7 @@ type ESort struct {
 }
 
 type ENode struct {
-	key Key
+	key godbase.Key
 	next [ELevels]*ENode
 	prev [ELevels]*ENode
 }
@@ -31,7 +32,7 @@ func (m *ESort) Clear() {
 	m.len = 0
 }
 
-func (m *ESort) Cut(start, end Iter, fn MapFn) Any {
+func (m *ESort) Cut(start, end godbase.Iter, fn godbase.KVMapFn) godbase.Map {
 	if start == nil {
 		start = m.root.next[ELevels-1]
 	}
@@ -83,7 +84,7 @@ func (m *ESort) Cut(start, end Iter, fn MapFn) Any {
 	return res
 }
 
-func (m *ESort) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+func (m *ESort) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
 	n := m.root.next[ELevels-1]
 
 	if start == nil {
@@ -120,7 +121,7 @@ func (m *ESort) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	return n, cnt
 }
 
-func (m *ESort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m *ESort) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
 	n, ok := m.FindNode(start, key)
 
 	if !ok {
@@ -134,7 +135,7 @@ func (m *ESort) Find(start Iter, key Key, val interface{}) (Iter, bool) {
 	return n, n.key == key && (val == nil || n == val)
 }
 
-func (m *ESort) FindNode(start Iter, key Key) (*ENode, bool) {
+func (m *ESort) FindNode(start godbase.Iter, key godbase.Key) (*ENode, bool) {
 	if start == nil {
 		start = m.root.next[0]
 	}
@@ -191,11 +192,11 @@ func (m *ESort) FindNode(start Iter, key Key) (*ENode, bool) {
 	return n, false
 }
 
-func (m *ESort) First() Iter {
+func (m *ESort) First() godbase.Iter {
 	return m.root.next[ELevels-1]
 }
 
-func (m *ESort) Get(key Key) (interface{}, bool) {
+func (m *ESort) Get(key godbase.Key) (interface{}, bool) {
 	n, ok := m.FindNode(nil, key)
 	
 	if ok {
@@ -211,7 +212,8 @@ func (m *ESort) Init() *ESort {
 	return m
 }
 
-func (m *ESort) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *ESort) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+	allowMulti bool) (godbase.Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
 	if ok && !allowMulti {
@@ -226,11 +228,11 @@ func (m *ESort) Len() int64 {
 	return m.len
 }
 
-func (m *ESort) New() Any {
+func (m *ESort) New() godbase.Map {
 	return NewESort()
 }
 
-func (m *ESort) Set(key Key, val interface{}) bool {
+func (m *ESort) Set(key godbase.Key, val interface{}) bool {
 	i, ok := m.Insert(nil, key, val, false)
 
 	if !ok && i != val {
@@ -266,7 +268,7 @@ func (n *ENode) Delete() {
 	}
 }
 
-func (n *ENode) Init(key Key) *ENode {
+func (n *ENode) Init(key godbase.Key) *ENode {
 	n.key = key
 
 	for i := 0; i < ELevels; i++ {
@@ -284,15 +286,15 @@ func (n *ENode) InsertAfter(node *ENode, i int) *ENode {
 	return node
 }
 
-func (n *ENode) Key() Key {
+func (n *ENode) Key() godbase.Key {
 	return n.key
 }
 
-func (n *ENode) Next() Iter {
+func (n *ENode) Next() godbase.Iter {
 	return n.next[ELevels-1]
 }
 
-func (n *ENode) Prev() Iter {
+func (n *ENode) Prev() godbase.Iter {
 	return n.prev[ELevels-1]
 }
 
@@ -304,7 +306,7 @@ func (n *ENode) Valid() bool {
 	return n.key != nil
 }
 
-func (m *ESort) While(fn TestFn) bool {
+func (m *ESort) While(fn godbase.KVTestFn) bool {
 	for n := m.root.next[ELevels-1]; n != &m.root; n = n.next[ELevels-1] {
 		if !fn(n.key, n) {
 			return false

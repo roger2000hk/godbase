@@ -2,10 +2,11 @@ package maps
 
 import (
 	//"fmt"
+	"github.com/fncodr/godbase"
 	"testing"
 )
 
-func runCutTests(t *testing.T, m Any) {
+func runCutTests(t *testing.T, m godbase.Map) {
 	its := sortedItems(100)
 
 	for i, it := range its {
@@ -24,7 +25,7 @@ func runCutTests(t *testing.T, m Any) {
 	}
 
 	cm := m.Cut(start, end, 
-		func (k Key, v interface{}) (Key, interface{}) { 
+		func (k godbase.Key, v interface{}) (godbase.Key, interface{}) { 
 			return testKey(int(k.(testKey)) * 2), v
 		})
 
@@ -89,7 +90,7 @@ func TestConstructors(t *testing.T) {
 	// the allocator receives the key as param which enables choosing
 	// differend kinds of slot chains for different keys.
 
-	sortAlloc := func (_ Key) Any { return NewSort(2) }
+	sortAlloc := func (_ godbase.Key) godbase.Map { return NewSort(2) }
 	as := NewSlots(1000, genHash, sortAlloc)
 	NewHash(as)
 
@@ -112,13 +113,16 @@ func TestConstructors(t *testing.T) {
 	NewHash(ess)
 
 	// 1000 hash slots backed by hash maps with 100 embedded node slots
-	hs := NewHashSlots(1000, genHash, func (_ Key) Slots { return NewESortSlots(100, genHash) })
+	hs := NewHashSlots(1000, genHash, func (_ godbase.Key) Slots { 
+		return NewESortSlots(100, genHash) 
+	})
+
 	NewHash(hs)
 }
 
 var basicIts = randItems(testReps)
 
-func runBasicTests(t *testing.B, label string, m Any, its []testItem) {
+func runBasicTests(t *testing.B, label string, m godbase.Map, its []testItem) {
 	for i, it := range its {
 		if res, ok := m.Insert(nil, it.node.key, &its[i].node, false); !ok {
 			t.Errorf("invalid insert res: %v", res)
@@ -199,13 +203,13 @@ func BenchmarkBasicESortHash(t *testing.B) {
 	runBasicTests(t, "ESortHash", NewHash(NewESortSlots(testESlots, genHash)), basicIts) 
 }
 
-func BenchmarkBasicSortAnyHash(t *testing.B) {
-	runBasicTests(t, "SortAnyHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
+func BenchmarkBasicSortBasicHash(t *testing.B) {
+	runBasicTests(t, "SortBasicHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
 		basicIts) 
 }
 
-func BenchmarkBasicESortAnyHash(t *testing.B) {
-	runBasicTests(t, "ESortAnyHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
+func BenchmarkBasicESortBasicHash(t *testing.B) {
+	runBasicTests(t, "ESortBasicHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
 		basicIts) 
 }
 

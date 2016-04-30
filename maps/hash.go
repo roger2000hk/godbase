@@ -2,19 +2,20 @@ package maps
 
 import (
 	"fmt"
+	"github.com/fncodr/godbase"
 )
 
 type Slots interface {
 	Clear()
-	Get(key Key, create bool) Any
+	Get(key godbase.Key, create bool) godbase.Map
 	New() Slots
-	While(fn TestFn) bool
+	While(fn godbase.KVTestFn) bool
 }
 
-type AnySlots struct {
+type BasicSlots struct {
 	fn HashFn
 	alloc SlotAlloc
-	slots []Any
+	slots []godbase.Map
 }
 
 type ESortSlots struct {
@@ -25,7 +26,7 @@ type ESortSlots struct {
 type MapSlots struct {
 	fn MapHashFn
 	alloc SlotAlloc
-	slots map[interface{}]Any
+	slots map[interface{}]godbase.Map
 }
 
 type Hash struct {
@@ -47,10 +48,10 @@ type SortSlots struct {
 	slots []Sort
 }
 
-type HashFn func (Key) uint64
-type MapHashFn func (Key) interface{}
-type SlotAlloc func (key Key) Any
-type SlotsAlloc func (key Key) Slots
+type HashFn func (godbase.Key) uint64
+type MapHashFn func (godbase.Key) interface{}
+type SlotAlloc func (key godbase.Key) godbase.Map
+type SlotsAlloc func (key godbase.Key) Slots
 
 func NewESortSlots(sc int, fn HashFn) *ESortSlots {
 	ss := new(ESortSlots)
@@ -75,7 +76,7 @@ func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
 	ss := new(MapSlots)
 	ss.fn = fn
 	ss.alloc = a
-	ss.slots = make(map[interface{}]Any, sc)
+	ss.slots = make(map[interface{}]godbase.Map, sc)
 	return ss
 }
 
@@ -92,15 +93,15 @@ func NewSortSlots(sc int, fn HashFn, ls int) *SortSlots {
 	return NewSlabSlots(sc, fn, nil, ls)
 }
 
-func NewSlots(sc int, fn HashFn, a SlotAlloc) *AnySlots {
-	ss := new(AnySlots)
+func NewSlots(sc int, fn HashFn, a SlotAlloc) *BasicSlots {
+	ss := new(BasicSlots)
 	ss.fn = fn
 	ss.alloc = a
-	ss.slots = make([]Any, sc)
+	ss.slots = make([]godbase.Map, sc)
 	return ss
 }
 
-func (ss *AnySlots) Clear() {
+func (ss *BasicSlots) Clear() {
 	for i := range ss.slots {
 		ss.slots[i] = nil
 	}
@@ -135,29 +136,29 @@ func (ss *SortSlots) Clear() {
 	}
 }
 
-func (m *Hash) Cut(start, end Iter, fn MapFn) Any {
+func (m *Hash) Cut(start, end godbase.Iter, fn godbase.KVMapFn) godbase.Map {
 	return m.slots.Get(start.Key(), true).Cut(start, end, fn)
 }
 
-func (m *Hash) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+func (m *Hash) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
 	res, cnt := m.slots.Get(key, true).Delete(start, end, key, val)
 	m.len -= int64(cnt)
 	return res, cnt
 }
 
-func (m *Hash) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m *Hash) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
 	return m.slots.Get(key, true).Find(start, key, val)
 }
 
-func (m *Hash) First() Iter {
+func (m *Hash) First() godbase.Iter {
 	panic("Hash doesn't support First()!")
 }
 
-func (m *Hash) Get(key Key) (interface{}, bool) {
+func (m *Hash) Get(key godbase.Key) (interface{}, bool) {
 	return m.slots.Get(key, true).Get(key)
 }
 
-func (ss *AnySlots) Get(key Key, create bool) Any {
+func (ss *BasicSlots) Get(key godbase.Key, create bool) godbase.Map {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := ss.slots[i]
 
@@ -174,7 +175,7 @@ func (ss *AnySlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *ESortSlots) Get(key Key, create bool) Any {
+func (ss *ESortSlots) Get(key godbase.Key, create bool) godbase.Map {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -189,7 +190,7 @@ func (ss *ESortSlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *HashSlots) Get(key Key, create bool) Any {
+func (ss *HashSlots) Get(key godbase.Key, create bool) godbase.Map {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -204,7 +205,7 @@ func (ss *HashSlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *MapSlots) Get(key Key, create bool) Any {
+func (ss *MapSlots) Get(key godbase.Key, create bool) godbase.Map {
 	i := ss.fn(key)
 	s, ok := ss.slots[i]
 
@@ -221,7 +222,7 @@ func (ss *MapSlots) Get(key Key, create bool) Any {
 	return nil
 }
 
-func (ss *SortSlots) Get(key Key, create bool) Any {
+func (ss *SortSlots) Get(key godbase.Key, create bool) godbase.Map {
 	i := ss.fn(key) % uint64(len(ss.slots))
 	s := &ss.slots[i]
 
@@ -242,7 +243,8 @@ func (m *Hash) Init(slots Slots) *Hash {
 	return m
 }
 
-func (m *Hash) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m *Hash) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+	allowMulti bool) (godbase.Iter, bool) {
 	res, ok := m.slots.Get(key, true).Insert(start, key, val, allowMulti)
 
 	if ok {
@@ -256,7 +258,7 @@ func (m *Hash) Len() int64 {
 	return m.len
 }
 
-func (ss *AnySlots) New() Slots {
+func (ss *BasicSlots) New() Slots {
 	return NewSlots(len(ss.slots), ss.fn, ss.alloc)
 }
 
@@ -264,7 +266,7 @@ func (ss *ESortSlots) New() Slots {
 	return NewESortSlots(len(ss.slots), ss.fn)
 }
 
-func (m *Hash) New() Any {
+func (m *Hash) New() godbase.Map {
 	return NewHash(m.slots.New())
 }
 
@@ -280,7 +282,7 @@ func (ss *SortSlots) New() Slots {
 	return NewSlabSlots(len(ss.slots), ss.fn, ss.alloc, ss.levels)
 }
 
-func (m *Hash) Set(key Key, val interface{}) bool {
+func (m *Hash) Set(key godbase.Key, val interface{}) bool {
 	if m.slots.Get(key, true).Set(key, val) {
 		m.len++
 		return true
@@ -293,7 +295,7 @@ func (m *Hash) String() string {
 	return fmt.Sprintf("%v", m.slots)
 }
 
-func (ss *AnySlots) While(fn TestFn) bool {
+func (ss *BasicSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if s != nil && !s.While(fn) {
 			return false
@@ -303,7 +305,7 @@ func (ss *AnySlots) While(fn TestFn) bool {
 	return true
 }
 
-func (ss *ESortSlots) While(fn TestFn) bool {
+func (ss *ESortSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if s.isInit && !s.While(fn) {
 			return false
@@ -313,11 +315,11 @@ func (ss *ESortSlots) While(fn TestFn) bool {
 	return true
 }
 
-func (m *Hash) While(fn TestFn) bool {
+func (m *Hash) While(fn godbase.KVTestFn) bool {
 	return m.slots.While(fn)
 }
 
-func (ss *HashSlots) While(fn TestFn) bool {
+func (ss *HashSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if s.isInit && !s.While(fn) {
 			return false
@@ -327,7 +329,7 @@ func (ss *HashSlots) While(fn TestFn) bool {
 	return true
 }
 
-func (ss *MapSlots) While(fn TestFn) bool {
+func (ss *MapSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if !s.While(fn) {
 			return false
@@ -337,7 +339,7 @@ func (ss *MapSlots) While(fn TestFn) bool {
 	return true
 }
 
-func (ss *SortSlots) While(fn TestFn) bool {
+func (ss *SortSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if s.isInit && !s.While(fn) {
 			return false

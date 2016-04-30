@@ -1,6 +1,7 @@
 package maps
 
 import (
+	"github.com/fncodr/godbase"
 	"math/rand"
 	"unsafe"
 )
@@ -28,13 +29,6 @@ const (
 var testItemOffs = unsafe.Offsetof(new(testItem).node)
 var testAlloc = NewSlabAlloc(testSlabSize)
 
-type testAny interface {
-	Any
-	testDelete(start, end Iter, key Key, val interface{}) (Iter, int)
-	testFind(start Iter, key Key, val interface{}) (Iter, bool)
-	testInsert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
-}
-
 type testItem struct {
 	node ENode
 }
@@ -42,13 +36,13 @@ type testItem struct {
 type testItems []testItem
 type testKey int
 
-func (k testKey) Less(other Key) bool {
+func (k testKey) Less(other godbase.Key) bool {
 	return k < other.(testKey)
 }
 
-func genHash(k Key) uint64 { return uint64(k.(testKey)) }
+func genHash(k godbase.Key) uint64 { return uint64(k.(testKey)) }
 
-func genMapHash(k Key) interface{} { return k }
+func genMapHash(k godbase.Key) interface{} { return k }
 
 func toTestItem(node *ENode) *testItem {
 	return (*testItem)(unsafe.Pointer(uintptr(unsafe.Pointer(node)) - testItemOffs))
@@ -85,10 +79,10 @@ func randItems(n int) testItems {
 	return res
 }
 
-func allocESort(_ Key) Any {
+func allocESort(_ godbase.Key) godbase.Map {
 	return NewESort()
 }
 
-func allocSlab(_ Key) Any {
+func allocSlab(_ godbase.Key) godbase.Map {
 	return NewSlab(testAlloc, testHashLevels)
 }

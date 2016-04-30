@@ -1,6 +1,7 @@
 package idxs
 
 import (
+	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/recs"
@@ -60,11 +61,11 @@ func TestKeyEq(t *testing.T) {
 func TestUniqueInsertDelete(t *testing.T) {
 	foo := cols.NewInt64("foo")
 	bar := cols.NewString("bar")
-	foobarIdx := NewHash([]cols.Any{foo, bar}, true, 100, nil, 1)
+	foobarIdx := NewHash([]godbase.Col{foo, bar}, true, 100, nil, 1)
 
 	r := recs.New(nil)
-	r.SetInt64(foo, 1)
-	r.SetString(bar, "abc")
+	recs.SetInt64(r, foo, 1)
+	recs.SetString(r, bar, "abc")
 
 	if _, err := foobarIdx.Insert(r); err != nil {
 		t.Errorf("insert failed: %v", err)
@@ -75,8 +76,8 @@ func TestUniqueInsertDelete(t *testing.T) {
 	}
 
 	rr := recs.New(nil)
-	rr.SetInt64(foo, 1)
-	rr.SetString(bar, "abc")
+	recs.SetInt64(rr, foo, 1)
+	recs.SetString(rr, bar, "abc")
 
 	if _, err := foobarIdx.Insert(rr); err == nil {
 		t.Errorf("dup insert allowed")
@@ -94,25 +95,25 @@ func TestUniqueInsertDelete(t *testing.T) {
 func TestMultiSort(t *testing.T) {
 	date := cols.NewTime("date")
 	amount := cols.NewFix("amount", 1000)
-	orderIdx := NewSort([]cols.Any{date, amount}, false, nil, 1)
+	orderIdx := NewSort([]godbase.Col{date, amount}, false, nil, 1)
 	d := time.Now().Truncate(time.Hour * 24)
 
 	o1 := recs.New(nil)
-	o1.SetTime(date, d)
-	o1.SetFix(amount, *fix.New(200, 1))
+	recs.SetTime(o1, date, d)
+	recs.SetFix(o1, amount, *fix.New(200, 1))
 	orderIdx.Insert(o1)
 
 	o2 := recs.New(nil)
-	o2.SetTime(date, d)
-	o2.SetFix(amount, *fix.New(300, 1))
+	recs.SetTime(o2, date, d)
+	recs.SetFix(o2, amount, *fix.New(300, 1))
 	orderIdx.Insert(o2)
 
 	o3 := recs.New(nil)
-	o3.SetTime(date, d.AddDate(0, 0, 1))
-	o3.SetFix(amount, *fix.New(100, 1))
+	recs.SetTime(o3, date, d.AddDate(0, 0, 1))
+	recs.SetFix(o3, amount, *fix.New(100, 1))
 	orderIdx.Insert(o3)
 
-	i, _ := orderIdx.Find(nil, orderIdx.Key(o3.Time(date)), nil)
+	i, _ := orderIdx.Find(nil, orderIdx.Key(recs.Time(o3, date)), nil)
 	i = i.Next()
 	if i.Val() != o3.Id() {
 		t.Errorf("invalid find res: %v", i.Key())

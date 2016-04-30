@@ -2,6 +2,7 @@ package cols
 
 import (
 	"bytes"
+	"github.com/fncodr/godbase"
 	"testing"
 )
 
@@ -12,7 +13,7 @@ func TestReadWrite(t *testing.T) {
 	col.Write(int64(42), &buf)
 
 	var err error
-	var s ValSize
+	var s godbase.ValSize
 
 	if s, err = ReadSize(&buf); err != nil {
 		t.Error(err)

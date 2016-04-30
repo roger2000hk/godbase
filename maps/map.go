@@ -2,9 +2,10 @@ package maps
 
 import (
 	"fmt"
+	"github.com/fncodr/godbase"
 )
 
-type Map map[Key]interface{}
+type Map map[godbase.Key]interface{}
 
 func NewMap() Map {
 	return make(Map)
@@ -16,11 +17,11 @@ func (m Map) Clear() {
 	}
 }
 
-func (m Map) Cut(start, end Iter, fn MapFn) Any {
+func (m Map) Cut(start, end godbase.Iter, fn godbase.KVMapFn) godbase.Map {
 	panic("Map doesn't support iters")
 }
 
-func (m Map) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
+func (m Map) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
 	if start != nil || end != nil {
 		panic("Map doesn't support iters")
 	}
@@ -33,21 +34,22 @@ func (m Map) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
 	return nil, 1
 }
 
-func (m Map) Find(start Iter, key Key, val interface{}) (Iter, bool) {
+func (m Map) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
 	v, ok := m[key]
 	return nil, ok && (val == nil || v == val)
 }
 
-func (m Map) First() Iter {
+func (m Map) First() godbase.Iter {
 	panic("Map doesn't support iters!")
 }
 
-func (m Map) Get(key Key) (interface{}, bool) {
+func (m Map) Get(key godbase.Key) (interface{}, bool) {
 	v, ok := m[key]
 	return v, ok
 }
 
-func (m Map) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
+func (m Map) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+	allowMulti bool) (godbase.Iter, bool) {
 	if start != nil {
 		panic("Map doesn't support iters!")
 	}
@@ -68,11 +70,11 @@ func (m Map) Len() int64 {
 	return int64(len(m))
 }
 
-func (m Map) New() Any {
+func (m Map) New() godbase.Map {
 	return NewMap()
 }
 
-func (m Map) Set(key Key, val interface{}) bool {
+func (m Map) Set(key godbase.Key, val interface{}) bool {
 	_, ok := m[key]
 	m[key] = val
 	return ok
@@ -82,7 +84,7 @@ func (m Map) String() string {
 	return fmt.Sprintf("%v", m)
 }
 
-func (m Map) While(fn TestFn) bool {
+func (m Map) While(fn godbase.KVTestFn) bool {
 	for k, v := range m {
 		if !fn(k, v) {
 			return false

@@ -24,3 +24,7 @@ Added method to return a new map of the same type.
 
 ### 2016-04-28 added maps.Any.Clear/While
 Added methods for clearing map & for looping with callback.
+
+### 2016-04-30 Moved Any-interfaces to godbase package
+This means that maps.Any is named godbase.Map, same goes for cols.Any, recs.Any, idxs.Any & tbls.Any.
+Also moved Key & Iter to godbase.

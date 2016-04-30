@@ -2,6 +2,7 @@ package maps
 
 import (
 	//"fmt"
+	"github.com/fncodr/godbase"
 	"testing"
 )
 
@@ -9,7 +10,7 @@ var fullIts1 = sortedItems(testReps)
 var fullIts2 = sortedItems(testReps)
 var fullIts3 = sortedItems(testReps)
 
-func runFullTests(t *testing.B, label string, m Any, its1, its2, its3 []testItem) {
+func runFullTests(t *testing.B, label string, m godbase.Map, its1, its2, its3 []testItem) {
 	for i, it := range its1 {
 		m.Insert(nil, it.node.key, &its1[i].node, true)
 		m.Insert(nil, it.node.key, &its2[i].node, true)
@@ -91,13 +92,13 @@ func BenchmarkFullESortHash(t *testing.B) {
 		fullIts1, fullIts2, fullIts3)
 }
 
-func BenchmarkFullSortAnyHash(t *testing.B) {
-	runFullTests(t, "SortAnyHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
+func BenchmarkFullSortBasicHash(t *testing.B) {
+	runFullTests(t, "SortBasicHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
 		fullIts1, fullIts2, fullIts3) 
 }
 
-func BenchmarkFullESortAnyHash(t *testing.B) {
-	runFullTests(t, "ESortAnyHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
+func BenchmarkFullESortBasicHash(t *testing.B) {
+	runFullTests(t, "ESortBasicHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
 		fullIts1, fullIts2, fullIts3) 
 }
 
