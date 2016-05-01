@@ -41,8 +41,22 @@ func (i *Suffix) Drop(start godbase.Iter, r godbase.Rec) error {
 	return nil
 }
 
-func (i *Suffix) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
-	return i.recs.Find(start, key, val)	
+func (self *Suffix) Find(start godbase.Iter, _key godbase.Key, val interface{}) (godbase.Iter, bool) {
+	res := start
+	key := _key.(godbase.StringsKey)
+	
+	for i, _ := range self.cols {
+		if len(key) < i+1 {
+			break
+		}
+
+		var ok bool
+		if res, ok = self.recs.Find(start, godbase.StringKey(key[i]), val); ok {
+			return res, true
+		}
+	}
+
+	return res, false
 }
 
 func (i *Suffix) Init(n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
