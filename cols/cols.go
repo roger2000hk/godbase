@@ -198,6 +198,34 @@ func NewUnion(n string, fn UnionTypeFn) *UnionCol {
 	return new(UnionCol).Init(n, fn)
 }
 
+func (c *BoolCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *FixCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *Int64Col) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *StringCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *TimeCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *UIdCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
+func (c *UnionCol) AddToTbl(t godbase.Tbl) {
+	t.AddCol(c)
+}
+
 func (c *Basic) AsKey(r godbase.Rec, v interface{}) godbase.Key {
 	return c.colType.AsKey(r, v)
 }

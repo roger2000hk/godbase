@@ -1,23 +1,25 @@
 package idxs
 
 import (
-	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
-	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
 )
 
 type Suffix struct {
-	defs.Basic
-	col *cols.StringCol
+	Basic
+	cols []*cols.StringCol
 	recs maps.Suffix
 	unique bool
 }
 
-func NewSuffix(n string, c *cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
-	return new(Suffix).Init(n, c, u, a, ls)
+func NewSuffix(n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
+	return new(Suffix).Init(n, cs, u, a, ls)
+}
+
+func (self *Suffix) AddToTbl(tbl godbase.Tbl)  {
+	tbl.AddIdx(self)
 }
 
 func (i *Suffix) Delete(start godbase.Iter, r godbase.Rec) error {
@@ -27,9 +29,12 @@ func (i *Suffix) Delete(start godbase.Iter, r godbase.Rec) error {
 func (i *Suffix) Drop(start godbase.Iter, r godbase.Rec) error {
 	id := r.Id()
 
-	if v, ok := r.Find(i.col); ok {
-		if _, ok := i.recs.Delete(start, nil, godbase.StringKey(v.(string)), id); ok != 1 {
-			return recs.NotFound(id)
+	for _, col := range i.cols {
+		if v, ok := r.Find(col); ok {
+			if _, ok := i.recs.Delete(start, nil, godbase.StringKey(v.(string)), id); 
+			ok != 1 {
+				return recs.NotFound(id)
+			}
 		}
 	}
 
@@ -40,48 +45,62 @@ func (i *Suffix) Find(start godbase.Iter, key godbase.Key, val interface{}) (god
 	return i.recs.Find(start, key, val)	
 }
 
-func (i *Suffix) Init(n string, c *cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
+func (i *Suffix) Init(n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
 	i.Basic.Init(n)
 	i.recs.Init(a, ls)
-	i.col = c
+	i.cols = cs
 	i.unique = u
 	return i
 }
 
 func (i *Suffix) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) {
 	id := r.Id()
+	res := start
 
-	if v, ok := r.Find(i.col); ok {
-		k := godbase.StringKey(v.(string))
-		res, ok := i.recs.Insert(start, k, id, i.unique)
-
-		if !ok && !i.col.Eq(res.Val(), v) {
-			return nil, &DupKey{key: k}
+	for _, col := range i.cols {
+		if v, ok := r.Find(col); ok {
+			k := godbase.StringKey(v.(string))
+			var ok bool
+			res, ok = i.recs.Insert(start, k, id, i.unique)
+			
+			if !ok && !col.Eq(res.Val(), v) {
+				return nil, &DupKey{key: k}
+			}
 		}
-
-		return res, nil
 	}
 	
-	return start, nil
+	return res, nil
 }
 
 func (i *Suffix) Key(vs...interface{}) godbase.Key {
-	if len(vs) > 1 {
-		panic(fmt.Sprintf("invalid suffix key: %v", vs))
+	res := make([]string, len(vs))
+
+	for i, v := range vs {
+		res[i] = v.(string)
 	}
 
-	return godbase.StringKey(vs[0].(string))
+	return godbase.StringsKey(res)
 }
 
 func (i *Suffix) Load(rec godbase.Rec) (godbase.Rec, error) {
-	if v, ok := rec.Find(i.col); ok {
-		i.recs.Set(godbase.StringKey(v.(string)), rec.Id())
+	for _, col := range i.cols {
+		if v, ok := rec.Find(col); ok {
+			i.recs.Set(godbase.StringKey(v.(string)), rec.Id())
+		}
 	}
-	
+
 	return rec, nil
 }
 
 func (i *Suffix) RecKey(rec godbase.Rec) godbase.Key {
-	return godbase.StringKey(recs.String(rec, i.col))
+	var res []string
+
+	for _, c := range i.cols {
+		if v, ok := rec.Find(c); ok {
+			res = append(res, v.(string))
+		}
+	}
+
+	return godbase.StringsKey(res)
 }
 

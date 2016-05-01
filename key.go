@@ -15,6 +15,7 @@ type BoolKey bool
 type FixKey fix.Val
 type Int64Key int64
 type StringKey string
+type StringsKey []string
 type TimeKey time.Time
 type UIdKey UId
 
@@ -34,6 +35,18 @@ func (k Int64Key) Less(other Key) bool {
 
 func (k StringKey) Less(other Key) bool {
 	return strings.Compare(string(k), string(other.(StringKey))) < 0
+}
+
+func (k StringsKey) Less(_other Key) bool {
+	other := _other.(StringsKey)
+
+	for i, v := range k {
+		if res := strings.Compare(v, other[i]); res != 0 {
+			return res < 0
+		}
+	}
+
+	return false
 }
 
 func (k TimeKey) Less(other Key) bool {

@@ -40,33 +40,7 @@ func AddFix(t godbase.Tbl, n string, d int64) *cols.FixCol {
 func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, 
 	ls int) godbase.Idx {
 	i := idxs.NewHash(n, cs, u, sc, a, ls)
-	AddIdx(t, i)
-	return i
-}
-
-func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
-	OnDelete(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
-		return i.Delete(nil, rec)
-	})
-
-	OnDrop(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
-		return i.Drop(nil, rec)
-	})
-
-	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
-		var _prev recs.Basic
-		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
-			if _, ok := err.(recs.NotFound); !ok {
-				return err
-			}
-		} else {
-			i.Delete(nil, prev)
-		}
-
-		_, err := i.Insert(nil, rec)
-		return err
-	})
-
+	t.AddIdx(i)
 	return i
 }
 
@@ -81,7 +55,7 @@ func AddRef(t godbase.Tbl, n string, rt godbase.Tbl) *cols.RefCol {
 func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, 
 	ls int) godbase.Idx {
 	i := idxs.NewSort(n, cs, u, a, ls)
-	AddIdx(t, i)
+	t.AddIdx(i)
 	return i
 }
 
@@ -89,10 +63,10 @@ func AddString(t godbase.Tbl, n string) *cols.StringCol {
 	return t.AddCol(cols.NewString(n)).(*cols.StringCol)
 }
 
-func AddSuffixIdx(t godbase.Tbl, n string, c *cols.StringCol, u bool, a *maps.SlabAlloc, 
+func AddSuffixIdx(t godbase.Tbl, n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, 
 	ls int) godbase.Idx {
-	i := idxs.NewSuffix(n, c, u, a, ls)
-	AddIdx(t, i)
+	i := idxs.NewSuffix(n, cs, u, a, ls)
+	t.AddIdx(i)
 	return i
 }
 
@@ -108,8 +82,8 @@ func AddUnion(t godbase.Tbl, n string, fn cols.UnionTypeFn) *cols.UnionCol {
 	return t.AddCol(cols.NewUnion(n, fn)).(*cols.UnionCol)
 }
 
-func New(n string, rsc int, ma *maps.SlabAlloc, rls int) godbase.Tbl {
-	return new(Basic).Init(n, rsc, ma, rls)
+func New(n string, ds []godbase.TblDef, rsc int, ma *maps.SlabAlloc, rls int) godbase.Tbl {
+	return new(Basic).Init(n, ds, rsc, ma, rls)
 }
 
 func OnDelete(t godbase.Tbl, sub godbase.EvtSub, fn OnDeleteFn) {
@@ -134,6 +108,32 @@ func OnUpsert(t godbase.Tbl, sub godbase.EvtSub, fn OnUpsertFn) {
 	t.OnUpsert().Subscribe(sub, func(args...interface{}) error {
 		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
 	})
+}
+
+func (t *Basic) AddIdx(i godbase.Idx) godbase.Idx {
+	OnDelete(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		return i.Delete(nil, rec)
+	})
+
+	OnDrop(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		return i.Drop(nil, rec)
+	})
+
+	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		var _prev recs.Basic
+		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
+			if _, ok := err.(recs.NotFound); !ok {
+				return err
+			}
+		} else {
+			i.Delete(nil, prev)
+		}
+
+		_, err := i.Insert(nil, rec)
+		return err
+	})
+
+	return i
 }
 
 func (t *Basic) Col(n string) godbase.Col {
@@ -217,7 +217,7 @@ func (t *Basic) Dump(w io.Writer) error {
 	return err
 }
 
-func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
+func (t *Basic) Init(n string, ds []godbase.TblDef, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
 	t.mapAlloc = ma
@@ -237,6 +237,13 @@ func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.AddCol(cols.RecId())
 	t.AddCol(t.revision.Init(fmt.Sprintf("%v/revision", n)))
 	t.AddCol(t.upsertedAt.Init(fmt.Sprintf("%v/upsertedAt", n)))
+
+	if ds != nil {
+		for _, d := range ds {
+			d.AddToTbl(t)
+		}
+	}
+
 	return t
 }
 

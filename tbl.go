@@ -8,6 +8,7 @@ import (
 type Tbl interface {
 	Def
 	AddCol(Col) Col
+	AddIdx(Idx) Idx
 	Clear()
 	Col(string) Col
 	Cols() Iter
@@ -27,4 +28,9 @@ type Tbl interface {
 	Upsert(Cx, Rec) (Rec, error)
 	UpsertedAt(Rec) time.Time
 	Write(Rec, io.Writer) error
+}
+
+type TblDef interface {
+	Def
+	AddToTbl(Tbl)
 }

@@ -5,12 +5,11 @@ import (
 	"hash"
 	"hash/fnv"
 	"github.com/fncodr/godbase"
-	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 )
 
-type Basic struct {
-	defs.Basic
+type Map struct {
+	Basic
 	cols []godbase.Col
 	hash hash.Hash64
 	recs godbase.Map
@@ -29,11 +28,15 @@ type KeyNotFound struct {
 	key godbase.Key
 }
 
-func (i *Basic) Delete(start godbase.Iter, r godbase.Rec) error {
+func (self *Map) AddToTbl(tbl godbase.Tbl)  {
+	tbl.AddIdx(self)
+}
+
+func (i *Map) Delete(start godbase.Iter, r godbase.Rec) error {
 	return i.Drop(start, r)
 }
 
-func (i *Basic) Drop(start godbase.Iter, r godbase.Rec) error {
+func (i *Map) Drop(start godbase.Iter, r godbase.Rec) error {
 	k := i.RecKey(r)
 
 	if _, cnt := i.recs.Delete(start, nil, k, r.Id()); cnt == 0 {
@@ -51,11 +54,11 @@ func (e *KeyNotFound) Error() string {
 	return fmt.Sprintf("key not found: %v", e.key)
 }
 
-func (i *Basic) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
+func (i *Map) Find(start godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, bool) {
 	return i.recs.Find(start, key, val)
 }
 
-func (i *Basic) Init(n string, cs []godbase.Col, u bool, rs godbase.Map) *Basic {
+func (i *Map) Init(n string, cs []godbase.Col, u bool, rs godbase.Map) *Map {
 	i.Basic.Init(n)
 	i.cols = cs
 	i.hash = fnv.New64()
@@ -64,7 +67,7 @@ func (i *Basic) Init(n string, cs []godbase.Col, u bool, rs godbase.Map) *Basic 
 	return i
 }
 
-func (i *Basic) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) {
+func (i *Map) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) {
 	k := i.RecKey(r)
 	res, ok := i.recs.Insert(start, k, r.Id(), !i.unique)
 
@@ -75,12 +78,12 @@ func (i *Basic) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) 
 	return res, nil
 }
 
-func (i *Basic) Load(rec godbase.Rec) (godbase.Rec, error) {
+func (i *Map) Load(rec godbase.Rec) (godbase.Rec, error) {
 	i.recs.Set(i.RecKey(rec), rec.Id())
 	return rec, nil
 }
 
-func (i *Basic) Key(ks...interface{}) godbase.Key {
+func (i *Map) Key(ks...interface{}) godbase.Key {
 	il, kl := len(i.cols), len(ks)
 	var k1, k2, k3 godbase.Key
 	
@@ -105,7 +108,7 @@ func (i *Basic) Key(ks...interface{}) godbase.Key {
 	return Key3{k1, k2, k3}
 }
 
-func (i *Basic) RecKey(r godbase.Rec) godbase.Key {
+func (i *Map) RecKey(r godbase.Rec) godbase.Key {
 	l := len(i.cols)
 	var k1, k2, k3 godbase.Key
 	
@@ -151,20 +154,20 @@ func (k Key3) Less(_other godbase.Key) bool {
 		k[2].Less(other[2]))
 }
 
-func New(n string, cs []godbase.Col, u bool, recs godbase.Map) *Basic {
-	return new(Basic).Init(n, cs, u, recs)
+func New(n string, cs []godbase.Col, u bool, recs godbase.Map) *Map {
+	return new(Map).Init(n, cs, u, recs)
 }
 
-func NewHash(n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, ls int) *Basic {
-	i := new(Basic)
+func NewHash(n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, ls int) *Map {
+	i := new(Map)
 	return i.Init(n, cs, u, maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)))
 }
 
-func NewSort(n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, ls int) *Basic {
+func NewSort(n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, ls int) *Map {
 	return New(n, cs, u, maps.NewSlab(a, ls))
 }
 
-func genHashFn(i *Basic) func(godbase.Key) uint64 {
+func genHashFn(i *Map) func(godbase.Key) uint64 {
 	return func(_key godbase.Key) uint64 {
 		i.hash.Reset()
 		l := len(i.cols)

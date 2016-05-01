@@ -11,7 +11,7 @@ import (
 )
 
 func TestCreate(t *testing.T) {
-	foos := New("foos", 100, nil, 1)
+	foos := New("foos", nil, 100, nil, 1)
 
 	AddBool(foos, "bool")
 	AddFix(foos, "fix", 10)
@@ -41,7 +41,7 @@ func TestCreate(t *testing.T) {
 }
 
 func TestReadWriteRec(t *testing.T) {
-	foos := New("foos", 100, nil, 1)
+	foos := New("foos", nil, 100, nil, 1)
 
 	boolCol := AddBool(foos, "bool")
 	fixCol := AddFix(foos, "fix", 10)
@@ -76,7 +76,7 @@ func TestReadWriteRec(t *testing.T) {
 func TestUpsert(t *testing.T) {
 	cx := cxs.New(100)
 
-	foos := New("foos", 100, nil, 1)
+	foos := New("foos", nil, 100, nil, 1)
 
 	r := recs.New(nil)
 
@@ -114,7 +114,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
 	cx := cxs.New(100)
-	foos := New("foos", 100, nil, 1)
+	foos := New("foos", nil, 100, nil, 1)
 
 	rs := make([]godbase.Rec, nrecs)
 

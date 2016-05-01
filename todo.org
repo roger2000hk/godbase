@@ -1,3 +1,6 @@
+* add remento TextIdx test
+** insert stuff and search names
+
 * add remento.Prod
 ** name
 
@@ -22,9 +25,14 @@
 ** add Sorted(...interface{}) constructor
 
 * add sets.Hash
-** model on maps.Hash
-** use Sorted for slots
-
+** value based
+** fn & slots
+** type Slot []interface{}
+** alloc slots upfront
+** use linear probing
+** append to slots
+** leave org intact
+*** alloc/copy
 
 * add idxs.Sorted with FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional

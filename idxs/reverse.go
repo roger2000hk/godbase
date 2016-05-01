@@ -3,7 +3,6 @@ package idxs
 import (
 	"fmt"
 	"github.com/fncodr/godbase"
-	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
 	"hash"
@@ -11,7 +10,7 @@ import (
 
 
 type Reverse struct {
-	defs.Basic
+	Basic
 	col godbase.Col
 	hash hash.Hash64
 	recIdHash godbase.UIdHash
@@ -27,6 +26,10 @@ func NewReverse(n string, c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Rev
 	}
 
 	return i.Init(n, c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))
+}
+
+func (self *Reverse) AddToTbl(tbl godbase.Tbl)  {
+	tbl.AddIdx(self)
 }
 
 func (i *Reverse) Delete(start godbase.Iter, r godbase.Rec) error {

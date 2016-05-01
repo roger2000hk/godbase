@@ -1,7 +1,7 @@
 package godbase
 
 type Idx interface {
-	Def
+	TblDef
 	Delete(Iter, Rec) error
 	Drop(Iter, Rec) error
 	Find(start Iter, key Key, val interface{}) (Iter, bool)

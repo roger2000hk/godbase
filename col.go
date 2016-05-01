@@ -6,7 +6,7 @@ import (
 )
 
 type Col interface {
-	Def
+	TblDef
 	AsKey(Rec, interface{}) Key
 	CloneVal(interface{}) interface{}
 	Decode(interface{}) interface{}
