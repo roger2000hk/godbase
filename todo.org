@@ -37,6 +37,9 @@
 * add idxs.Sorted with FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
 
+* add maps.AsSet(godbase.Map)
+** wrap map as Set
+
 * add godbase.dbs package
 ** add godbase.Db with MapAlloc
 ** add dbs.Basic
