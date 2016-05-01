@@ -40,6 +40,10 @@
 * add maps.AsSet(godbase.Map)
 ** wrap map as Set
 
+* change RcUnlimited to enum RcCapacType
+** Single/Limited/Unlimited
+** how to implement enum? EnumCol?
+
 * add godbase.dbs package
 ** add godbase.Db with MapAlloc
 ** add dbs.Basic

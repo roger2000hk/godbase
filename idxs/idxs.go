@@ -137,21 +137,29 @@ func (i *Map) RecKey(r godbase.Rec) godbase.Key {
 
 func (k Key1) Less(_other godbase.Key) bool {
 	other := _other.(Key1)
-	return k[0] != nil && other[0] != nil && k[0].Less(other[0])
+	nil0 := k[0] == nil || other[0] == nil
+ 
+	return nil0 || k[0].Less(other[0])
 }
 
 func (k Key2) Less(_other godbase.Key) bool {
 	other := _other.(Key2)
-	return (k[0] != nil && other[0] != nil && k[0].Less(other[0])) || 
-		(k[1] != nil && other[1] != nil && k[0] == other[0] && k[1].Less(other[1]))
+	nil0, eq0 := k[0] == nil || other[0] == nil, k[0] == other[0]
+	nil1 := k[1] == nil || other[1] == nil
+
+	return (nil0 || k[0].Less(other[0])) &&
+		(nil1 || ((nil0 || eq0) && k[1].Less(other[1])))
 }
 
 func (k Key3) Less(_other godbase.Key) bool {
 	other := _other.(Key3)
-	return (k[0] != nil && other[0] != nil && k[0].Less(other[0])) || 
-		(k[1] != nil && other[1] != nil && k[0] == other[0] && k[1].Less(other[1])) || 
-		(k[2] != nil && other[2] != nil && k[0] == other[0] && k[1] == other[1] && 
-		k[2].Less(other[2]))
+	nil0, eq0 := k[0] == nil || other[0] == nil, k[0] == other[0]
+	nil1, eq1 := k[1] == nil || other[1] == nil, k[1] == other[1]
+	nil2 := k[2] == nil || other[2] == nil
+
+	return (nil0 || k[0].Less(other[0])) &&
+		(nil1 || ((nil0 || eq0) && k[1].Less(other[1]))) &&
+		(nil2 || ((nil0 || eq0) && (nil1 || eq1) && k[2].Less(other[2])))
 }
 
 func New(n string, cs []godbase.Col, u bool, recs godbase.Map) *Map {
