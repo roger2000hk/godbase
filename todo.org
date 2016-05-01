@@ -1,6 +1,4 @@
-* add idxs.NewSuffix (init with maps.Suffix)
-** convert remento name idxs to suffix
-** add remento suffix search test after insert
+* add remento name search test after insert
 
 * add remento.Prod
 ** name

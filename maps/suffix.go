@@ -31,13 +31,13 @@ func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{
 }
 
 // override to insert all suffixes
-func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, allowMulti bool) (godbase.Iter, bool) {
+func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, multi bool) (godbase.Iter, bool) {
 	sk := key.(godbase.StringKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, allowMulti)
+		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, true)
 	}
 
-	return m.Sort.Insert(start, key, val, allowMulti)
+	return m.Sort.Insert(start, key, val, multi)
 }
 

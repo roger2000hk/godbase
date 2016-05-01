@@ -89,11 +89,11 @@ type Map interface {
 	Get(key Key) (interface{}, bool)
 
 	// Inserts key/val into map after start;
-	// start & val are both optional, dup checks can be disabled by setting allowMulti to false. 
+	// start & val are both optional, dup checks can be disabled by setting multi to false. 
 	// Returns iter to inserted val & true on success, or iter to existing val & false on dup. 
 	// Specifying a start iter for hash maps only works within the same slot.
 
-	Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool)
+	Insert(start Iter, key Key, val interface{}, multi bool) (Iter, bool)
 
 	// Returns a new, empty map of the same type as the receiver
 	New() Map
@@ -263,14 +263,14 @@ func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{
 }
 
 // override to insert all suffixes
-func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, allowMulti bool) (godbase.Iter, bool) {
+func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, multi bool) (godbase.Iter, bool) {
 	sk := key.(godbase.StringKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, allowMulti)
+		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, multi)
 	}
 
-	return m.Sort.Insert(start, key, val, allowMulti)
+	return m.Sort.Insert(start, key, val, multi)
 }
 
 func TestSuffix(t *testing.T) {
