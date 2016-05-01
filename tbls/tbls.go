@@ -29,8 +29,6 @@ type OnDropFn func(godbase.Cx, godbase.Rec) error
 type OnLoadFn func(godbase.Cx, godbase.Rec) error
 type OnUpsertFn func(godbase.Cx, godbase.Rec) error
 
-type RecNotFound godbase.UId
-
 func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
 	return t.AddCol(cols.NewBool(n)).(*cols.BoolCol)
 }
@@ -58,7 +56,7 @@ func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
 	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
 		var _prev recs.Basic
 		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
-			if _, ok := err.(RecNotFound); !ok {
+			if _, ok := err.(recs.NotFound); !ok {
 				return err
 			}
 		} else {
@@ -89,6 +87,13 @@ func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabA
 
 func AddString(t godbase.Tbl, n string) *cols.StringCol {
 	return t.AddCol(cols.NewString(n)).(*cols.StringCol)
+}
+
+func AddSuffixIdx(t godbase.Tbl, n string, c *cols.StringCol, u bool, a *maps.SlabAlloc, 
+	ls int) godbase.Idx {
+	i := idxs.NewSuffix(n, c, u, a, ls)
+	AddIdx(t, i)
+	return i
 }
 
 func AddTime(t godbase.Tbl, n string) *cols.TimeCol {
@@ -165,7 +170,7 @@ func (t *Basic) Delete(cx godbase.Cx, id godbase.UId) error {
 	i, ok := t.recs.Find(nil, k, nil)
 
 	if !ok {
-		return RecNotFound(id)
+		return recs.NotFound(id)
 	}
 
 	if err := t.onDelete.Publish(cx, i.Val().(godbase.Rec)); err != nil {
@@ -184,7 +189,7 @@ func (t *Basic) Drop(cx godbase.Cx, id godbase.UId) error {
 	i, ok := t.recs.Find(nil, k, nil)
 
 	if !ok {
-		return RecNotFound(id)
+		return recs.NotFound(id)
 	}
 
 	if err := t.onDrop.Publish(cx, i.Val().(godbase.Rec)); err != nil {
@@ -210,10 +215,6 @@ func (t *Basic) Dump(w io.Writer) error {
 	})
 
 	return err
-}
-
-func (e RecNotFound) Error() string {
-	return fmt.Sprintf("rec not found: %v", e)
 }
 
 func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
@@ -306,7 +307,7 @@ func (t *Basic) Reset(rec godbase.Rec) (godbase.Rec, error) {
 	id := rec.Id()
 	rr, ok := t.recs.Get(godbase.UIdKey(id))
 	if !ok {
-		return nil, RecNotFound(id)
+		return nil, recs.NotFound(id)
 	}
 	
 	for i := rr.(godbase.Rec).Iter(); i.Valid(); i = i.Next() {

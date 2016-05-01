@@ -1,7 +1,9 @@
 package idxs
 
 import (
+	"fmt"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/defs"
 	"github.com/fncodr/godbase/maps"
 	"github.com/fncodr/godbase/recs"
 	"hash"
@@ -9,13 +11,14 @@ import (
 
 
 type Reverse struct {
+	defs.Basic
 	col godbase.Col
 	hash hash.Hash64
 	recIdHash godbase.UIdHash
 	recs godbase.Map
 }
 
-func NewReverse(c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Reverse {
+func NewReverse(n string, c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Reverse {
 	i := new(Reverse)
 	i.recIdHash.Init()
 	
@@ -23,7 +26,7 @@ func NewReverse(c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Reverse {
 		return i.recIdHash.Hash(godbase.UId(id.(godbase.UIdKey)))
 	}
 
-	return i.Init(c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))
+	return i.Init(n, c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))
 }
 
 func (i *Reverse) Delete(start godbase.Iter, r godbase.Rec) error {
@@ -44,7 +47,8 @@ func (i *Reverse) Find(start godbase.Iter, key godbase.Key, val interface{}) (go
 	return i.recs.Find(start, key, val)	
 }
 
-func (i *Reverse) Init(c godbase.Col, rs godbase.Map) *Reverse {
+func (i *Reverse) Init(n string, c godbase.Col, rs godbase.Map) *Reverse {
+	i.Basic.Init(n)
 	i.col = c
 	i.recs = rs
 	return i
@@ -61,7 +65,20 @@ func (i *Reverse) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error
 	return res, nil
 }
 
+func (i *Reverse) Key(vs...interface{}) godbase.Key {
+	if len(vs) > 1 {
+		panic(fmt.Sprintf("invalid suffix key: %v", vs))
+	}
+
+	return godbase.UIdKey(vs[0].(godbase.Rec).Id())
+}
+
 func (i *Reverse) Load(rec godbase.Rec) (godbase.Rec, error) {
 	i.recs.Set(godbase.UIdKey(rec.Id()), rec.Get(i.col))
 	return rec, nil
 }
+
+func (i *Reverse) RecKey(rec godbase.Rec) godbase.Key {
+	return godbase.UIdKey(rec.Id())
+}
+

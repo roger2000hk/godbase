@@ -30,6 +30,11 @@
 ** use Sorted for slots
 
 
+* add godbase.dbs package
+** add godbase.Db with MapAlloc
+** add dbs.Basic
+** replaces global MapAlloc in remento
+ 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
 
