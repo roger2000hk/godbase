@@ -43,8 +43,9 @@ func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *ma
 }
 
 func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
-	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error { 
-		if prev, err := t.Reset(cx.InitRecId(new(recs.Basic), rec.Id())); err != nil {
+	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		var _prev recs.Basic
+		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
 			if _, ok := err.(RecNotFound); !ok {
 				return err
 			}
