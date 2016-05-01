@@ -1,5 +1,3 @@
-* add remento name search test after insert
-
 * add remento.Prod
 ** name
 
@@ -27,6 +25,9 @@
 ** model on maps.Hash
 ** use Sorted for slots
 
+
+* add idxs.Sorted with FindRange(start, end key, out *sets.Hash) *sets.Hash
+** start/end optional
 
 * add godbase.dbs package
 ** add godbase.Db with MapAlloc
