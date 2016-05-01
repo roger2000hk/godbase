@@ -28,11 +28,11 @@ type InsertFn func(godbase.Cx, godbase.Rec) error
 type RecNotFound godbase.UId
 
 func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
-	return t.Add(cols.NewBool(n)).(*cols.BoolCol)
+	return t.AddCol(cols.NewBool(n)).(*cols.BoolCol)
 }
 
 func AddFix(t godbase.Tbl, n string, d int64) *cols.FixCol {
-	return t.Add(cols.NewFix(n, d)).(*cols.FixCol)
+	return t.AddCol(cols.NewFix(n, d)).(*cols.FixCol)
 }
 
 func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, 
@@ -61,11 +61,11 @@ func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
 }
 
 func AddInt64(t godbase.Tbl, n string) *cols.Int64Col {
-	return t.Add(cols.NewInt64(n)).(*cols.Int64Col)
+	return t.AddCol(cols.NewInt64(n)).(*cols.Int64Col)
 }
 
 func AddRef(t godbase.Tbl, n string, rt godbase.Tbl) *cols.RefCol {
-	return t.Add(cols.NewRef(n, rt)).(*cols.RefCol)
+	return t.AddCol(cols.NewRef(n, rt)).(*cols.RefCol)
 }
 
 func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, 
@@ -76,19 +76,19 @@ func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabA
 }
 
 func AddString(t godbase.Tbl, n string) *cols.StringCol {
-	return t.Add(cols.NewString(n)).(*cols.StringCol)
+	return t.AddCol(cols.NewString(n)).(*cols.StringCol)
 }
 
 func AddTime(t godbase.Tbl, n string) *cols.TimeCol {
-	return t.Add(cols.NewTime(n)).(*cols.TimeCol)
+	return t.AddCol(cols.NewTime(n)).(*cols.TimeCol)
 }
 
 func AddUId(t godbase.Tbl, n string) *cols.UIdCol {
-	return t.Add(cols.NewUId(n)).(*cols.UIdCol)
+	return t.AddCol(cols.NewUId(n)).(*cols.UIdCol)
 }
 
 func AddUnion(t godbase.Tbl, n string, fn cols.UnionTypeFn) *cols.UnionCol {
-	return t.Add(cols.NewUnion(n, fn)).(*cols.UnionCol)
+	return t.AddCol(cols.NewUnion(n, fn)).(*cols.UnionCol)
 }
 
 func New(n string, rsc int, ma *maps.SlabAlloc, rls int) godbase.Tbl {
@@ -113,7 +113,7 @@ func (t *Basic) Cols() godbase.Iter {
 	return t.cols.First()
 }
 
-func (t *Basic) Add(c godbase.Col) godbase.Col {
+func (t *Basic) AddCol(c godbase.Col) godbase.Col {
 	if _, ok := t.cols.Insert(nil, godbase.StringKey(c.Name()), c, false); ok {
 		return c
 	}
@@ -161,10 +161,10 @@ func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	}
 
 	t.recs.Init(maps.NewSlabSlots(rsc, hashRecId, ma, rls))
-	t.Add(cols.CreatedAt())
-	t.Add(cols.RecId())
-	t.Add(t.revision.Init(fmt.Sprintf("%v/revision", n)))
-	t.Add(t.upsertedAt.Init(fmt.Sprintf("%v/upsertedAt", n)))
+	t.AddCol(cols.CreatedAt())
+	t.AddCol(cols.RecId())
+	t.AddCol(t.revision.Init(fmt.Sprintf("%v/revision", n)))
+	t.AddCol(t.upsertedAt.Init(fmt.Sprintf("%v/upsertedAt", n)))
 	return t
 }
 

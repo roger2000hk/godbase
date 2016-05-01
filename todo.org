@@ -1,5 +1,3 @@
-* rename Tbl.Add to AddCol
-
 * add godbase.Db
 ** Path() string
 ** dbs package

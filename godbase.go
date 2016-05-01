@@ -126,7 +126,7 @@ type Rec interface {
 
 type Tbl interface {
 	Def
-	Add(Col) Col
+	AddCol(Col) Col
 	Clear()
 	Col(string) Col
 	Cols() Iter
