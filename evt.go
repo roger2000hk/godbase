@@ -1,6 +1,6 @@
 package godbase
 
-type EvtFn func(...interface{})
+type EvtFn func(...interface{}) error
 
 type EvtSub interface{}
 
@@ -19,10 +19,14 @@ func (self *Evt) Init() *Evt {
 	return self
 }
 
-func (e *Evt) Publish(args...interface{}) {
+func (e *Evt) Publish(args...interface{}) error {
 	for _, fn := range e.subs {
-		fn(args...)
+		if err := fn(args...); err != nil {
+			return err
+		}
 	} 
+
+	return nil
 }
 
 func (e *Evt) Subscribe(k EvtSub, fn EvtFn) {

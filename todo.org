@@ -1,18 +1,23 @@
+* rename Tbl.Add to AddCol
+
 * add Clear/Delete & Load events
-
-* finish tbls.AddSortIdx / AddHashIdx
-** hook up events
-
-* add capac check to remento tests
-
-* load settings table to decide amount scale in remento
-** add SettingNameIdx
-** slurp setting tbl on startup if exists
-*** otherwise init with defaults
-*** create db dir if not exists
+** hook up in AddIdx
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
+
+* add *Rc.Update(start, end, total, avail) (big.Rat, error)
+** return min of avail / total if total != 0
+
+* add resv loop benchmark with unlimited resources
+
+
+* load settings table to decide amount scale in remento
+** add remento.InitDb(path)
+*** create path if not exists
+*** slurp setting tbl if exists
+*** otherwise init with defaults
+*** call in remento_test.init()
 
 * add ref test
 
