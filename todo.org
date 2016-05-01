@@ -11,6 +11,8 @@
 * add Clear/Delete & Load events
 ** hook up in AddIdx
 
+* change Revix.Insert to use recs.Insert with multi=false like Basic
+
 * add remento.Prod
 ** name
 
@@ -24,7 +26,7 @@
 *** clear recid in returned recs
 *** break if gap between start/end
 *** allow overlapping prices
-*** add test
+*** add test** add Rc.SumPrices(cx, start, end) []Price
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
@@ -48,6 +50,7 @@
 * add fix.NewFloat64
 * rename fix.Init to fix.SetBig
 * add SetFloat64 / SetInt64
+* add fix benchmark based on big.Rat
 
 * add SliceCol
 ** take col type as param to cols.Slice()
