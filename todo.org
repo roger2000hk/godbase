@@ -1,9 +1,5 @@
-* change Map.Suffix from wrap to struct exteding Sorted
-** add idxs.NewSuffix (init with maps.Suffix)
+* add idxs.NewSuffix (init with maps.Suffix)
 ** convert remento name idxs to suffix
-** update map README
-*** extending
-*** add logging wrap example
 
 * add basic slice based set in godbase.sets package
 ** value based like old.Slice
