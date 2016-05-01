@@ -28,3 +28,5 @@ Added methods for clearing map & for looping with callback.
 ### 2016-04-30 Moved Any-interfaces to godbase package
 This means that maps.Any is named godbase.Map, same goes for cols.Any, recs.Any, idxs.Any & tbls.Any.
 Also moved Key & Iter to godbase.
+
+### 2016-05-01 Converted Suffix to proper implementation and added Trace wrap

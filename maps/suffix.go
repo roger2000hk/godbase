@@ -6,12 +6,12 @@ import (
 )
 
 type Suffix struct {
-	Wrap
+	Sort
 }
 
-func NewSuffix(m godbase.Map) *Suffix {
+func NewSuffix(a *SlabAlloc, ls int) *Suffix {
 	res := new(Suffix)
-	res.Init(m)
+	res.Sort.Init(a, ls)
 	return res
 }
 
@@ -21,11 +21,11 @@ func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{
 	cnt := 0
 
 	for i := 1; i < len(sk) - 1; i++ {
-		_, sc := m.wrapped.Delete(start, end, godbase.StringKey(sk[i:]), val)
+		_, sc := m.Sort.Delete(start, end, godbase.StringKey(sk[i:]), val)
 		cnt += sc
 	}
 
-	res, sc := m.wrapped.Delete(start, end, sk, val)
+	res, sc := m.Sort.Delete(start, end, sk, val)
 	cnt += sc
 	return res, cnt
 }
@@ -35,9 +35,9 @@ func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, al
 	sk := key.(godbase.StringKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.wrapped.Insert(start, godbase.StringKey(sk[i:]), val, allowMulti)
+		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, allowMulti)
 	}
 
-	return m.wrapped.Insert(start, key, val, allowMulti)
+	return m.Sort.Insert(start, key, val, allowMulti)
 }
 

@@ -1,13 +1,3 @@
-* add Tbl/Idx.Drop() bool
-** add Tbl.OnDrop
-*** hook up in AddIdx
-** call OnDrop on recs in Tbl.Clear()
-** separate imp, don't call drop from delete
-
-* add Tbl.Delete
-** trigger OnDelete
-** commit tbl.delete & more evts
-
 * change Map.Suffix from wrap to struct exteding Sorted
 ** add idxs.NewSuffix (init with maps.Suffix)
 ** convert remento name idxs to suffix

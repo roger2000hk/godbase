@@ -1,31 +1,31 @@
 # beating The Map
-### a glorious quest to write a faster, more flexible map
+#### a glorious quest to write a faster, more flexible map
 
-## why?
+### why?
 Good question. This rabbit hole was deeper than planned, but I still feel it was worth the effort given the results. To cut a long story short, I was itching for more flexible maps to implement in-memory indexing in godbase. I quickly found that my lofty goal of adding multi-capability and sorting, while matching the performance of native maps; was far from a walk in the park. Which is probably part of the reason I couldn't find anyone else trying.
 
-## how?
+### how?
 I ended up with two designs based on deterministic skip lists. One with a configurable number of levels, one node per level/value, and optionally slab-allocated nodes; the other with embedded nodes, constant number of levels, using one node per value. These do pretty good by themselves, especially considering that they add sorting to the mix; both currently hovering around 2-5 times slower than a native map. The embedded flavor usually wins the allocation race by a slim margin but pays the price of having a fixed number of levels for tiny / huge datasets. Still, somewhere along a line; not separately allocating nodes affects overall performance positively.
 
 Once sorted maps were working properly, I had the crazy idea to put a hash on top just to see what happens. It turns out that dividing the dataset into a tuned number of ordered sets occasionally beats native maps in the synthetic performance game for millions of items. That's far from the end of the story though. I still haven't had enough time to ponder the consequences of having access to both hashed and ordered aspects of the data simultaneously, but I have a hunch it will bend the rules to my advantage in a number of tricky scenarios. Additionally; any kind of map can be hashed, which opens the door for multi level hashing where each chain is another hash that further divides the dataset along a potentially orthogonal axis.
 
-## status
+### status
 Basic functionality and testing in place, and evolving on a daily basis. The rest of godbase is currently being built on top, there are plenty of examples in the other sub packages.
 
-## benchmarks
+### benchmarks
 Several parameters are available for tuning the tests, they are defined in test.go
 
 ```
 	go test -bench=.*
 ```
 
-## license
+### license
 NOP
 
-## code
+### code
 I trust you'll find godbase more RISC/Lispy than your everyday set/map api. Providing an optimal api is part of implementing an optimal algorithm, and there's more low hanging fruit in the garden of set/map apis than most places. It's obvious to me that academic dogmatics and software (or life in general, for that matter) isn't really the match made in heaven it's being sold as.
 
-### interfaces
+#### interfaces
 
 ```go
 
@@ -116,7 +116,7 @@ type KVTestFn func (Key, interface{}) bool
 
 ```
 
-### constructors
+#### constructors
 
 ```go
 
@@ -186,7 +186,7 @@ func TestConstructors(t *testing.T) {
 
 ```
 
-### embedded nodes
+#### embedded nodes
 I picked up the idea of embedding node infrastructure into elems from the Linux kernel, but I'm sure the idea is at least as old as the C language. It's a nice tool to reduce memory allocation which bends the rules enough for the previously undoable to become possible. If you don't mind keeping a reference per collection in your type, or sprinkling a pinch of unsafe magic on top; this might be for you. lists.EDouble contains a double-linked list implementation based on the same idea.
 
 ```go
@@ -232,90 +232,116 @@ func TestEmbedded(t *testing.T) {
 
 ```
 
-### wrapping it up
-godbase provides scaffolding for trivial extension of the api in form of a Wrap struct, maps.Suffix serves well as an introduction:
+#### extending
+Extending the map api is as simple as embedding one of the implementations in your struct and optionally overriding parts of the api. maps.Suffix implements a suffix map on top of maps.Sorted:
 
-```go
+```
 
 type Suffix struct {
-	Wrap
+	Sort
 }
 
-func NewSuffix(m Map) *Suffix {
+func NewSuffix(a *SlabAlloc, ls int) *Suffix {
 	res := new(Suffix)
-	res.Init(m)
+	res.Sort.Init(a, ls)
 	return res
 }
 
 // override to delete all suffixes
-func (m *Suffix) Delete(start, end Iter, key Key, val interface{}) (Iter, int) {
-	sk := key.(StringKey)
+func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
+	sk := key.(godbase.StringKey)
 	cnt := 0
 
 	for i := 1; i < len(sk) - 1; i++ {
-		_, sc := m.wrapped.Delete(start, end, StringKey(sk[i:]), val)
+		_, sc := m.Sort.Delete(start, end, godbase.StringKey(sk[i:]), val)
 		cnt += sc
 	}
 
-	res, sc := m.wrapped.Delete(start, end, sk, val)
+	res, sc := m.Sort.Delete(start, end, sk, val)
 	cnt += sc
 	return res, cnt
 }
 
 // override to insert all suffixes
-func (m *Suffix) Insert(start Iter, key Key, val interface{}, allowMulti bool) (Iter, bool) {
-	sk := key.(StringKey)
+func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, allowMulti bool) (godbase.Iter, bool) {
+	sk := key.(godbase.StringKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.wrapped.Insert(start, StringKey(sk[i:]), val, allowMulti)
+		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, allowMulti)
 	}
 
-	return m.wrapped.Insert(start, key, val, allowMulti)
+	return m.Sort.Insert(start, key, val, allowMulti)
 }
 
-
-```
-
-maps.Suffix, like all wraps, can be used wherever a Map is expected; with the restriction that it only supports StringKeys, for obvious reasons. A suffix map is a nice tool to solve string completion problems, this one comes bundled with all the additional features of godbase map api.
-
-```go
-
 func TestSuffix(t *testing.T) {
-	// NewSuffix wraps any Map
-	// iters only work within slots for hash maps; therefore, the obvious 
-	// combination is with one of the sorted maps.
+	m := NewSuffix(nil, 3)
 
-	m := NewSuffix(NewSort(4))
-
-	// keys must be of type StringKey
+	// keys must be of type godbase.StringKey
 	// per key dup check control is inherited from the map api
 
-	m.Insert(nil, StringKey("abc"), "abc", true)
-	m.Insert(nil, StringKey("abcdef"), "abcdef", true)
-	m.Insert(nil, StringKey("abcdefghi"), "abcdefghi", true)
+	m.Insert(nil, godbase.StringKey("abc"), "abc", true)
+	m.Insert(nil, godbase.StringKey("abcdef"), "abcdef", true)
+	m.Insert(nil, godbase.StringKey("abcdefghi"), "abcdefghi", true)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i, _ := m.Find(nil, StringKey("de"), nil)
+	i, _ := m.Find(nil, godbase.StringKey("de"), nil)
 	
 	// since we're prefix searching, iter needs to be stepped once
 	i = i.Next()
 
 	// then we get all matching suffixes in order
-	if i.Key().(StringKey) != "def" || i.Val().(string) != "abcdef" {
+	if i.Key().(godbase.StringKey) != "def" || i.Val().(string) != "abcdef" {
 		t.Errorf("invalid find res: %v", i.Key())
 	}
 
 	i = i.Next()
 
-	if i.Key().(StringKey) != "defghi" || i.Val().(string) != "abcdefghi" {
+	if i.Key().(godbase.StringKey) != "defghi" || i.Val().(string) != "abcdefghi" {
 		t.Errorf("invalid find res: %v", i.Key())
 	}
 
 	// check that Delete removes all suffixes for specified val
-	if res, cnt := m.Delete(nil, nil, StringKey("bcdef"), "abcdef"); 
-	cnt != 4 || res.Next().Key().(StringKey) != "cdefghi" {
+	if res, cnt := m.Delete(nil, nil, godbase.StringKey("bcdef"), "abcdef"); 
+	cnt != 4 || res.Next().Key().(godbase.StringKey) != "cdefghi" {
 		t.Errorf("invalid delete res: %v", res.Next().Key())	
 	}
+}
+
+```
+
+#### wrapping it up
+godbase provides scaffolding for trivial ad-hoc extension of the api in form of a Wrap struct. maps.Trace serves well as an introduction:
+
+```go
+
+// embedding Wrap gives you default delegation to wrapped map
+
+type Trace struct {
+	Wrap
+
+	// we're adding an id for logging
+	id string
+}
+
+func NewTrace(m godbase.Map, id string) *Trace {
+	res := new(Trace)
+	res.Init(m)
+	res.id = id
+	return res
+}
+
+// override to log actions before updating wrapped map
+
+func (m *Trace) Delete(start, end godbase.Iter, key godbase.Key, 
+	val interface{}) (godbase.Iter, int) {
+	log.Printf("%v.delete '%v': '%v'", m.id, key, val)
+	return m.wrapped.Delete(start, end, key, val)
+}
+
+func (m *Trace) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+	multi bool) (godbase.Iter, bool) {
+	log.Printf("%v.insert/%v '%v': '%v'", m.id, multi, key, val)
+	return m.wrapped.Insert(start, key, val, multi)
 }
 
 ```

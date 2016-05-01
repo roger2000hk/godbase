@@ -7,11 +7,7 @@ import (
 )
 
 func TestSuffix(t *testing.T) {
-	// NewSuffix wraps any map
-	// iters only work within slots for hash maps; therefore, the obvious 
-	// combination is with one of the sorted maps.
-
-	m := NewSuffix(NewSort(4))
+	m := NewSuffix(nil, 3)
 
 	// keys must be of type godbase.StringKey
 	// per key dup check control is inherited from the map api
