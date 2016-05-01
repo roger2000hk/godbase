@@ -1,7 +1,12 @@
-* add Clear/Delete & Load events
-** hook up in AddIdx
+* add Tbl/Idx.Drop() bool
+** add Tbl.OnDrop
+*** hook up in AddIdx
+** call OnDrop on recs in Tbl.Clear()
+** call Drop() from Delete()
 
-* change Revix.Insert to use recs.Insert with multi=false like Basic
+* add Tbl.Delete
+** trigger OnDelete
+** commit tbl.delete & more evts
 
 * add remento.Prod
 ** name
@@ -17,6 +22,10 @@
 *** break if gap between start/end
 *** allow overlapping prices
 *** add test** add Rc.SumPrices(cx, start, end) []Price
+
+* change Map.Suffix from wrap to struct exteding Sorted
+** add idxs.NewSuffix (init with maps.Suffix)
+** update map README
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test

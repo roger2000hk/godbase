@@ -17,14 +17,17 @@ type Basic struct {
 	defs.Basic
 	cols maps.Sort
 	mapAlloc *maps.SlabAlloc
-	onUpsert godbase.Evt
+	onDelete, onLoad, onUpsert godbase.Evt
 	recIdHash godbase.UIdHash
 	recs maps.Hash
 	revision cols.Int64Col
 	upsertedAt cols.TimeCol
 }
 
-type InsertFn func(godbase.Cx, godbase.Rec) error
+type OnDeleteFn func(godbase.Cx, godbase.Rec) error
+type OnLoadFn func(godbase.Cx, godbase.Rec) error
+type OnUpsertFn func(godbase.Cx, godbase.Rec) error
+
 type RecNotFound godbase.UId
 
 func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
@@ -43,6 +46,15 @@ func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *ma
 }
 
 func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
+	OnDelete(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		return i.Delete(nil, rec)
+	})
+
+	OnLoad(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		_, err := i.Load(rec)
+		return err
+	})
+
 	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
 		var _prev recs.Basic
 		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
@@ -50,10 +62,10 @@ func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
 				return err
 			}
 		} else {
-			i.Delete(prev)
+			i.Delete(nil, prev)
 		}
 
-		_, err := i.Insert(rec)
+		_, err := i.Insert(nil, rec)
 		return err
 	})
 
@@ -95,7 +107,19 @@ func New(n string, rsc int, ma *maps.SlabAlloc, rls int) godbase.Tbl {
 	return new(Basic).Init(n, rsc, ma, rls)
 }
 
-func OnUpsert(t godbase.Tbl, sub godbase.EvtSub, fn InsertFn) {
+func OnDelete(t godbase.Tbl, sub godbase.EvtSub, fn OnDeleteFn) {
+	t.OnDelete().Subscribe(sub, func(args...interface{}) error {
+		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
+	})
+}
+
+func OnLoad(t godbase.Tbl, sub godbase.EvtSub, fn OnLoadFn) {
+	t.OnLoad().Subscribe(sub, func(args...interface{}) error {
+		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
+	})
+}
+
+func OnUpsert(t godbase.Tbl, sub godbase.EvtSub, fn OnUpsertFn) {
 	t.OnUpsert().Subscribe(sub, func(args...interface{}) error {
 		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
 	})
@@ -152,6 +176,8 @@ func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
 	t.mapAlloc = ma
+	t.onDelete.Init()
+	t.onLoad.Init()
 	t.onUpsert.Init()
 	t.recIdHash.Init()
 	
@@ -170,6 +196,14 @@ func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 
 func (t *Basic) Len() int64 {
 	return t.recs.Len()
+}
+
+func (self *Basic) OnDelete() *godbase.Evt {
+	return &self.onDelete
+}
+
+func (self *Basic) OnLoad() *godbase.Evt {
+	return &self.onLoad
 }
 
 func (self *Basic) OnUpsert() *godbase.Evt {
@@ -242,7 +276,16 @@ func (t *Basic) Revision(r godbase.Rec) (v int64) {
 	return -1
 }
 
-func (t *Basic) Slurp(r io.Reader) error {
+func (t *Basic) Load(cx godbase.Cx, rec godbase.Rec) (godbase.Rec, error) {
+	if err := t.onLoad.Publish(cx, rec); err != nil {
+		return nil, err
+	}
+	
+	t.recs.Set(godbase.UIdKey(rec.Id()), rec)
+	return rec, nil
+}
+
+func (t *Basic) Slurp(cx godbase.Cx, r io.Reader) error {
 	for true {
 		rec, err := t.Read(recs.New(nil), r)
 
@@ -254,7 +297,7 @@ func (t *Basic) Slurp(r io.Reader) error {
 			return err
 		}
 		
-		t.recs.Set(godbase.UIdKey(rec.Id()), rec)
+		t.Load(cx, rec)
 	}
 
 	return nil

@@ -67,11 +67,11 @@ func TestUniqueInsertDelete(t *testing.T) {
 	recs.SetInt64(r, foo, 1)
 	recs.SetString(r, bar, "abc")
 
-	if _, err := foobarIdx.Insert(r); err != nil {
+	if _, err := foobarIdx.Insert(nil, r); err != nil {
 		t.Errorf("insert failed: %v", err)
 	}
 
-	if _, err := foobarIdx.Insert(r); err != nil {
+	if _, err := foobarIdx.Insert(nil, r); err != nil {
 		t.Errorf("dup insert of same rec not allowed")
 	}
 
@@ -79,15 +79,15 @@ func TestUniqueInsertDelete(t *testing.T) {
 	recs.SetInt64(rr, foo, 1)
 	recs.SetString(rr, bar, "abc")
 
-	if _, err := foobarIdx.Insert(rr); err == nil {
+	if _, err := foobarIdx.Insert(nil, rr); err == nil {
 		t.Errorf("dup insert allowed")
 	}
 
-	if err := foobarIdx.Delete(r); err != nil {
+	if err := foobarIdx.Delete(nil, r); err != nil {
 		t.Errorf("del failed: %v", err)
 	}
 
-	if err := foobarIdx.Delete(rr); err == nil {
+	if err := foobarIdx.Delete(nil, rr); err == nil {
 		t.Errorf("dup del allowed")
 	}
 }
@@ -101,17 +101,17 @@ func TestMultiSort(t *testing.T) {
 	o1 := recs.New(nil)
 	recs.SetTime(o1, date, d)
 	recs.SetFix(o1, amount, *fix.New(200, 1))
-	orderIdx.Insert(o1)
+	orderIdx.Insert(nil, o1)
 
 	o2 := recs.New(nil)
 	recs.SetTime(o2, date, d)
 	recs.SetFix(o2, amount, *fix.New(300, 1))
-	orderIdx.Insert(o2)
+	orderIdx.Insert(nil, o2)
 
 	o3 := recs.New(nil)
 	recs.SetTime(o3, date, d.AddDate(0, 0, 1))
 	recs.SetFix(o3, amount, *fix.New(100, 1))
-	orderIdx.Insert(o3)
+	orderIdx.Insert(nil, o3)
 
 	i, _ := orderIdx.Find(nil, orderIdx.Key(recs.Time(o3, date)), nil)
 	i = i.Next()

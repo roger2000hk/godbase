@@ -29,10 +29,10 @@ type KeyNotFound struct {
 	key godbase.Key
 }
 
-func (i *Basic) Delete(r godbase.Rec) error {
+func (i *Basic) Delete(start godbase.Iter, r godbase.Rec) error {
 	k := i.RecKey(r)
 
-	if _, cnt := i.recs.Delete(nil, nil, k, r.Id()); cnt == 0 {
+	if _, cnt := i.recs.Delete(start, nil, k, r.Id()); cnt == 0 {
 		return &KeyNotFound{key: k}
 	}
 
@@ -60,14 +60,20 @@ func (i *Basic) Init(n string, cs []godbase.Col, u bool, rs godbase.Map) *Basic 
 	return i
 }
 
-func (i *Basic) Insert(r godbase.Rec) (godbase.Rec, error) {
+func (i *Basic) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) {
 	k := i.RecKey(r)
+	res, ok := i.recs.Insert(start, k, r.Id(), !i.unique)
 
-	if res, ok := i.recs.Insert(nil, k, r.Id(), !i.unique); !ok && res.Val() != r.Id() {
+	if !ok && res.Val() != r.Id() {
 		return nil, &DupKey{key: k}
-	}
+	} 
 
-	return r, nil
+	return res, nil
+}
+
+func (i *Basic) Load(rec godbase.Rec) (godbase.Rec, error) {
+	i.recs.Set(i.RecKey(rec), rec.Id())
+	return rec, nil
 }
 
 func (i *Basic) Key(ks...interface{}) godbase.Key {

@@ -51,7 +51,7 @@ func TestDumpClearSlurp(t *testing.T) {
 
 	// slurp recs from buffer
 
-	if err := foos.Slurp(&buf); err != nil {
+	if err := foos.Slurp(cx, &buf); err != nil {
 		panic(err)
 	}
 

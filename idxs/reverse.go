@@ -26,10 +26,10 @@ func NewReverse(c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Reverse {
 	return i.Init(c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))
 }
 
-func (i *Reverse) Delete(r godbase.Rec) error {
+func (i *Reverse) Delete(start godbase.Iter, r godbase.Rec) error {
 	id := r.Id()
 
-	if _, ok := i.recs.Delete(nil, nil, godbase.UIdKey(id), nil); ok != 1 {
+	if _, ok := i.recs.Delete(start, nil, godbase.UIdKey(id), nil); ok != 1 {
 		return recs.NotFound(id)
 	}
 
@@ -46,7 +46,18 @@ func (i *Reverse) Init(c godbase.Col, rs godbase.Map) *Reverse {
 	return i
 }
 
-func (i *Reverse) Insert(r godbase.Rec) (godbase.Rec, error) {
-	i.recs.Set(godbase.UIdKey(r.Id()), r.Get(i.col))
-	return r, nil
+func (i *Reverse) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error) {
+	k, v := godbase.UIdKey(r.Id()), r.Get(i.col)
+	res, ok := i.recs.Insert(start, k, v, false)
+
+	if !ok && !i.col.Eq(res.Val(), v) {
+		return nil, &DupKey{key: k}
+	}
+
+	return res, nil
+}
+
+func (i *Reverse) Load(rec godbase.Rec) (godbase.Rec, error) {
+	i.recs.Set(godbase.UIdKey(rec.Id()), rec.Get(i.col))
+	return rec, nil
 }

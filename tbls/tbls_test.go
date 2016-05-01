@@ -137,7 +137,7 @@ func TestDumpClearSlurp(t *testing.T) {
 		t.Errorf("wrong len after clear: %v", l)
 	}
 
-	if err := foos.Slurp(&buf); err != nil {
+	if err := foos.Slurp(cx, &buf); err != nil {
 		panic(err)
 	}
 

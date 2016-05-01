@@ -46,9 +46,10 @@ type Def interface {
 
 type Idx interface {
 	Def
-	Delete(Rec) error
+	Delete(Iter, Rec) error
 	Find(start Iter, key Key, val interface{}) (Iter, bool)
-	Insert(Rec) (Rec, error)
+	Insert(Iter, Rec) (Iter, error)
+	Load(Rec) (Rec, error)
 	Key(...interface{}) Key
 	RecKey(r Rec) Key
 }
@@ -100,7 +101,7 @@ type Map interface {
 	// Returns the number of elems in map
 	Len() int64
 
-	// Inserts/updates key to val and returns val
+	// Inserts/updates key to val and returns true on insert
 	Set(key Key, val interface{}) bool
 
 	// Returns string repr for printing
@@ -132,11 +133,14 @@ type Tbl interface {
 	Cols() Iter
 	Dump(io.Writer) error
 	Len() int64
+	Load(Cx, Rec) (Rec, error)
 	Reset(Rec) (Rec, error)
 	Read(Rec, io.Reader) (Rec, error)
 	Revision(Rec) int64
+	OnDelete() *Evt
+	OnLoad() *Evt
 	OnUpsert() *Evt
-	Slurp(io.Reader) error
+	Slurp(Cx, io.Reader) error
 	Upsert(Cx, Rec) (Rec, error)
 	UpsertedAt(Rec) time.Time
 	Write(Rec, io.Writer) error
