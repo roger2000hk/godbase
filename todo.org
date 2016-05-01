@@ -1,7 +1,30 @@
 * rename Tbl.Add to AddCol
 
+* add godbase.Db
+** Path() string
+** dbs package
+** Basic struct
+** add Cx.Db() Db
+*** take as constructor param
+** encapsulate remento db in Db struct
+
 * add Clear/Delete & Load events
 ** hook up in AddIdx
+
+* add remento.Prod
+** name
+
+* add remento.Price
+** start, end, prod, rc & amnt
+** add PriceRcIdx(rc, prod, start)
+** add Rc.Prices(cx, start, end) []Price
+** add []Price.Calc(rc, start, end) []Price
+*** sum parts of prices according to part of total time span on with minute precision
+*** break on new prod
+*** clear recid in returned recs
+*** break if gap between start/end
+*** allow overlapping prices
+*** add test
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
