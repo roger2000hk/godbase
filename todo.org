@@ -1,11 +1,3 @@
-* add godbase.Db
-** Path() string
-** dbs package
-** Basic struct
-** add Cx.Db() Db
-*** take as constructor param
-** encapsulate remento db in Db struct
-
 * add Clear/Delete & Load events
 ** hook up in AddIdx
 
@@ -36,11 +28,10 @@
 * add resv loop perf test with unlimited resources
 
 * load settings table to decide amount scale in remento
-** add remento.InitDb(path)
-*** create path if not exists
-*** slurp setting tbl if exists
-*** otherwise init with defaults
-*** call in remento_test.init()
+** create path if it doesn't exist in db.init
+** slurp setting tbl if exists
+** otherwise init with defaults
+** call in remento_test.init()
 
 * add ref test
 
