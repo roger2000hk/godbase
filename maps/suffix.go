@@ -35,7 +35,7 @@ func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, mu
 	sk := key.(godbase.StringKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, true)
+		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, multi)
 	}
 
 	return m.Sort.Insert(start, key, val, multi)
