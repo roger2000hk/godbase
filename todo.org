@@ -2,7 +2,7 @@
 ** add Tbl.OnDrop
 *** hook up in AddIdx
 ** call OnDrop on recs in Tbl.Clear()
-** call Drop() from Delete()
+** separate imp, don't call drop from delete
 
 * add Tbl.Delete
 ** trigger OnDelete
@@ -25,6 +25,7 @@
 
 * change Map.Suffix from wrap to struct exteding Sorted
 ** add idxs.NewSuffix (init with maps.Suffix)
+** convert remento name idxs to suffix
 ** update map README
 
 * add *Rc.NewResv(start, end, capac) *Resv

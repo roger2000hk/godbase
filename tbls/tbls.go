@@ -50,11 +50,6 @@ func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
 		return i.Delete(nil, rec)
 	})
 
-	OnLoad(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
-		_, err := i.Load(rec)
-		return err
-	})
-
 	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
 		var _prev recs.Basic
 		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
