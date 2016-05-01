@@ -8,9 +8,9 @@
 
 * add *Rc.Update(start, end, total, avail) (big.Rat, error)
 ** return min of avail / total if total != 0
+* add resv test
 
-* add resv loop benchmark with unlimited resources
-
+* add resv loop perf test with unlimited resources
 
 * load settings table to decide amount scale in remento
 ** add remento.InitDb(path)
