@@ -1,7 +1,7 @@
 # godbase
 #### a hacker friendly Golang DB
 
-still cooking, but here's a tiny teaser:
+Still cooking, but here's a tiny teaser:
 
 ```go
 
