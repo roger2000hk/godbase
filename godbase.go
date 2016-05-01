@@ -117,6 +117,7 @@ type Tbl interface {
 	Reset(Rec) (Rec, error)
 	Read(Rec, io.Reader) (Rec, error)
 	Revision(Rec) int64
+	OnUpsert() *Evt
 	Slurp(io.Reader) error
 	Upsert(Rec) (Rec, error)
 	UpsertedAt(Rec) time.Time
@@ -134,7 +135,7 @@ type Rec interface {
 	Iter() Iter
 	Len() int
 	New() Rec
-	Set(Col, interface{}) Rec
+	Set(Col, interface{}) interface{}
 }
 
 type KVMapFn func (Key, interface{}) (Key, interface{})

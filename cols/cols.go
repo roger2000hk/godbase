@@ -282,8 +282,12 @@ func (t *FixType) Encode(_v interface{}) interface{} {
 	return _v
 }
 
-func (_ *RefType) Encode(v interface{}) interface{} {
-	return godbase.UId(v.(godbase.Rec).Id())
+func (_ *RefType) Encode(_v interface{}) interface{} {
+	if v, ok := _v.(godbase.Rec); ok {
+		return godbase.UId(v.Id())
+	}
+
+	return _v.(godbase.UId)
 }
 
 func (_ *BasicType) Eq(l, r interface{}) bool {

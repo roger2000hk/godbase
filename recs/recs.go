@@ -49,32 +49,32 @@ func Ref(r godbase.Rec, c *cols.RefCol, res godbase.Rec) (godbase.Rec, error) {
 	return c.Tbl().Reset(res);
 }
 
-func SetBool(r godbase.Rec, c *cols.BoolCol, v bool) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetBool(r godbase.Rec, c *cols.BoolCol, v bool) bool {
+	return r.Set(c, v).(bool)
 }
 
-func SetFix(r godbase.Rec, c *cols.FixCol, v fix.Val) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetFix(r godbase.Rec, c *cols.FixCol, v fix.Val) fix.Val {
+	return r.Set(c, v).(fix.Val)
 }
 
-func SetInt64(r godbase.Rec, c *cols.Int64Col, v int64) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetInt64(r godbase.Rec, c *cols.Int64Col, v int64) int64 {
+	return r.Set(c, v).(int64)
 }
 
 func SetRef(r godbase.Rec, c *cols.RefCol, v godbase.Rec) godbase.Rec {
 	return r.Set(c, v).(godbase.Rec)
 }
 
-func SetString(r godbase.Rec, c *cols.StringCol, v string) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetString(r godbase.Rec, c *cols.StringCol, v string) string {
+	return r.Set(c, v).(string)
 }
 
-func SetTime(r godbase.Rec, c *cols.TimeCol, v time.Time) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetTime(r godbase.Rec, c *cols.TimeCol, v time.Time) time.Time {
+	return r.Set(c, v).(time.Time)
 }
 
-func SetUId(r godbase.Rec, c *cols.UIdCol, v godbase.UId) godbase.Rec {
-	return r.Set(c, v).(godbase.Rec)
+func SetUId(r godbase.Rec, c *cols.UIdCol, v godbase.UId) godbase.UId {
+	return r.Set(c, v).(godbase.UId)
 }
 
 func String(r godbase.Rec, c *cols.StringCol) string {
@@ -168,9 +168,9 @@ func (r *Basic) New() godbase.Rec {
 	return (*Basic)(r.asMap().New().(*maps.Sort))
 }
 
-func (r *Basic) Set(c godbase.Col, v interface{}) godbase.Rec {
+func (r *Basic) Set(c godbase.Col, v interface{}) interface{} {
 	r.asMap().Set(c, c.Encode(v))
-	return r
+	return v
 }
 
 func (r *Basic) asMap() *maps.Sort {

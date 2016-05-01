@@ -16,12 +16,14 @@ import (
 type Basic struct {
 	defs.Basic
 	cols maps.Sort
+	onUpsert godbase.Evt
 	recIdHash godbase.UIdHash
 	recs maps.Hash
 	revision cols.Int64Col
 	upsertedAt cols.TimeCol
 }
 
+type InsertFn func(godbase.Rec)
 type RecNotFound godbase.UId
 
 func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
@@ -70,6 +72,12 @@ func AddUnion(t godbase.Tbl, n string, fn cols.UnionTypeFn) *cols.UnionCol {
 
 func New(n string, rsc int, ra *maps.SlabAlloc, rls int) godbase.Tbl {
 	return new(Basic).Init(n, rsc, ra, rls)
+}
+
+func OnUpsert(t godbase.Tbl, sub godbase.EvtSub, fn InsertFn) {
+	t.OnUpsert().Subscribe(sub, func(args...interface{}) {
+		fn(args[0].(godbase.Rec))
+	})
 }
 
 func (t *Basic) Col(n string) godbase.Col {
@@ -131,8 +139,9 @@ func (t *Basic) Get(id godbase.UId) (godbase.Rec, error) {
 func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
+	t.onUpsert.Init()
 	t.recIdHash.Init()
-
+	
 	hashRecId := func(_id godbase.Key) uint64 {
 		id := godbase.UId(_id.(godbase.UIdKey))
 		return t.recIdHash.Hash(id)
@@ -148,6 +157,10 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 
 func (t *Basic) Len() int64 {
 	return t.recs.Len()
+}
+
+func (self *Basic) OnUpsert() *godbase.Evt {
+	return &self.onUpsert
 }
 
 func (t *Basic) Read(rec godbase.Rec, r io.Reader) (godbase.Rec, error) {
@@ -253,6 +266,7 @@ func (t *Basic) Upsert(rec godbase.Rec) (godbase.Rec, error) {
 		}
 	}
 	
+	t.onUpsert.Publish(rr)
 	t.recs.Set(godbase.UIdKey(id), rr)
 	return rec, nil
 }
