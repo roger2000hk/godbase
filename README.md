@@ -1,5 +1,5 @@
 # godbase
-### a hacker friendly Golang DB
+#### a hacker friendly Golang DB
 
 still cooking, but here's a tiny teaser:
 
