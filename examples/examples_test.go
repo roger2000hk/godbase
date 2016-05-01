@@ -15,7 +15,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	// create new context with rec slab size 100
 	cx := cxs.New(100)
 
-	// create tmp tbl named "foos" backed by a hashed 1-level map without allocator 
+	// create tmp tbl named "foos" backed by a 100 slot hashed 1-level map without allocator 
 
 	foos := tbls.New("foos", nil, 100, nil, 1)
 	bar := tbls.AddInt64(foos, "bar")
