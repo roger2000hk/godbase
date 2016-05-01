@@ -29,7 +29,7 @@
 * add SliceCol
 ** take col type as param to cols.Slice()
 
-* go on with remento
+* remento
 ** add offset idx
 ** add slice(Ref) col ResvItems
 
