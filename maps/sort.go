@@ -393,10 +393,6 @@ func (n *Node) Next() godbase.Iter {
 	return n.next
 }
 
-func (n *Node) Prev() godbase.Iter {
-	return n.prev
-}
-
 func (n *Node) Top() *Node {
 	var res *Node
 	for res = n; res.up != res; res = res.up { }

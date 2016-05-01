@@ -10,9 +10,6 @@ type Iter interface {
 	// Returns iter to next elem
 	Next() Iter
 
-	// Returns iter to prev elem
-	Prev() Iter
-
 	// Returns val for elem
 	Val() interface{}
 

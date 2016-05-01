@@ -294,10 +294,6 @@ func (n *ENode) Next() godbase.Iter {
 	return n.next[ELevels-1]
 }
 
-func (n *ENode) Prev() godbase.Iter {
-	return n.prev[ELevels-1]
-}
-
 func (n *ENode) Val() interface{} {
 	return n
 }
