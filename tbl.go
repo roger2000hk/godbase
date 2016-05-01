@@ -11,12 +11,15 @@ type Tbl interface {
 	Clear()
 	Col(string) Col
 	Cols() Iter
+	Delete(Cx, UId) error
+	Drop(Cx, UId) error
 	Dump(io.Writer) error
 	Len() int64
 	Load(Cx, Rec) (Rec, error)
 	Reset(Rec) (Rec, error)
 	Read(Rec, io.Reader) (Rec, error)
 	Revision(Rec) int64
+	OnDrop() *Evt
 	OnDelete() *Evt
 	OnLoad() *Evt
 	OnUpsert() *Evt

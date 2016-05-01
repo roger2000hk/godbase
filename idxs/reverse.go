@@ -27,6 +27,10 @@ func NewReverse(c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Reverse {
 }
 
 func (i *Reverse) Delete(start godbase.Iter, r godbase.Rec) error {
+	return i.Drop(start, r)
+}
+
+func (i *Reverse) Drop(start godbase.Iter, r godbase.Rec) error {
 	id := r.Id()
 
 	if _, ok := i.recs.Delete(start, nil, godbase.UIdKey(id), nil); ok != 1 {

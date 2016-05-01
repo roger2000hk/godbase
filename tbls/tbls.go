@@ -17,7 +17,7 @@ type Basic struct {
 	defs.Basic
 	cols maps.Sort
 	mapAlloc *maps.SlabAlloc
-	onDelete, onLoad, onUpsert godbase.Evt
+	onDelete, onDrop, onLoad, onUpsert godbase.Evt
 	recIdHash godbase.UIdHash
 	recs maps.Hash
 	revision cols.Int64Col
@@ -25,6 +25,7 @@ type Basic struct {
 }
 
 type OnDeleteFn func(godbase.Cx, godbase.Rec) error
+type OnDropFn func(godbase.Cx, godbase.Rec) error
 type OnLoadFn func(godbase.Cx, godbase.Rec) error
 type OnUpsertFn func(godbase.Cx, godbase.Rec) error
 
@@ -48,6 +49,10 @@ func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *ma
 func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
 	OnDelete(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
 		return i.Delete(nil, rec)
+	})
+
+	OnDrop(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
+		return i.Drop(nil, rec)
 	})
 
 	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
@@ -108,6 +113,12 @@ func OnDelete(t godbase.Tbl, sub godbase.EvtSub, fn OnDeleteFn) {
 	})
 }
 
+func OnDrop(t godbase.Tbl, sub godbase.EvtSub, fn OnDropFn) {
+	t.OnDrop().Subscribe(sub, func(args...interface{}) error {
+		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
+	})
+}
+
 func OnLoad(t godbase.Tbl, sub godbase.EvtSub, fn OnLoadFn) {
 	t.OnLoad().Subscribe(sub, func(args...interface{}) error {
 		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
@@ -149,6 +160,44 @@ func (t *Basic) Clear() {
 	t.recs.Clear()
 }
 
+func (t *Basic) Delete(cx godbase.Cx, id godbase.UId) error {
+	k := godbase.UIdKey(id)
+	i, ok := t.recs.Find(nil, k, nil)
+
+	if !ok {
+		return RecNotFound(id)
+	}
+
+	if err := t.onDelete.Publish(cx, i.Val().(godbase.Rec)); err != nil {
+		return err
+	}
+
+	if _, ok := t.recs.Delete(i, nil, godbase.UIdKey(id), nil); ok != 1{
+		panic(fmt.Sprintf("delete failed: %v", id))
+	}
+
+	return nil
+}
+
+func (t *Basic) Drop(cx godbase.Cx, id godbase.UId) error {
+	k := godbase.UIdKey(id)
+	i, ok := t.recs.Find(nil, k, nil)
+
+	if !ok {
+		return RecNotFound(id)
+	}
+
+	if err := t.onDrop.Publish(cx, i.Val().(godbase.Rec)); err != nil {
+		return err
+	}
+
+	if _, ok := t.recs.Delete(i, nil, godbase.UIdKey(id), nil); ok != 1 {
+		panic(fmt.Sprintf("delete failed: %v", id))
+	}
+
+	return nil
+}
+
 func (t *Basic) Dump(w io.Writer) error {
 	var err error
 
@@ -172,6 +221,7 @@ func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.cols.Init(nil, 1)
 	t.mapAlloc = ma
 	t.onDelete.Init()
+	t.onDrop.Init()
 	t.onLoad.Init()
 	t.onUpsert.Init()
 	t.recIdHash.Init()
@@ -195,6 +245,10 @@ func (t *Basic) Len() int64 {
 
 func (self *Basic) OnDelete() *godbase.Evt {
 	return &self.onDelete
+}
+
+func (self *Basic) OnDrop() *godbase.Evt {
+	return &self.onDrop
 }
 
 func (self *Basic) OnLoad() *godbase.Evt {

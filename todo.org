@@ -21,6 +21,11 @@
 ** implement Iter for Slice
 *** subslice on next
 *** return val as key
+** add Sorted(...interface{}) constructor
+
+* add sets.Hash
+** model on maps.Hash
+** use Sorted for slots
 
 * add remento.Prod
 ** name

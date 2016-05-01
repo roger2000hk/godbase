@@ -30,6 +30,10 @@ type KeyNotFound struct {
 }
 
 func (i *Basic) Delete(start godbase.Iter, r godbase.Rec) error {
+	return i.Drop(start, r)
+}
+
+func (i *Basic) Drop(start godbase.Iter, r godbase.Rec) error {
 	k := i.RecKey(r)
 
 	if _, cnt := i.recs.Delete(start, nil, k, r.Id()); cnt == 0 {
