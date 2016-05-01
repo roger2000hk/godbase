@@ -16,6 +16,7 @@ import (
 type Basic struct {
 	defs.Basic
 	cols maps.Sort
+	mapAlloc *maps.SlabAlloc
 	onUpsert godbase.Evt
 	recIdHash godbase.UIdHash
 	recs maps.Hash
@@ -23,7 +24,7 @@ type Basic struct {
 	upsertedAt cols.TimeCol
 }
 
-type InsertFn func(godbase.Rec) error
+type InsertFn func(godbase.Cx, godbase.Rec) error
 type RecNotFound godbase.UId
 
 func AddBool(t godbase.Tbl, n string) *cols.BoolCol {
@@ -42,8 +43,8 @@ func AddHashIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, sc int, a *ma
 }
 
 func AddIdx(t godbase.Tbl, i godbase.Idx) godbase.Idx {
-	OnUpsert(t, i, func (rec godbase.Rec) error { 
-		if prev, err := t.Get(rec.Id()); err != nil {
+	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error { 
+		if prev, err := t.Reset(cx.InitRecId(new(recs.Basic), rec.Id())); err != nil {
 			if _, ok := err.(RecNotFound); !ok {
 				return err
 			}
@@ -89,13 +90,13 @@ func AddUnion(t godbase.Tbl, n string, fn cols.UnionTypeFn) *cols.UnionCol {
 	return t.Add(cols.NewUnion(n, fn)).(*cols.UnionCol)
 }
 
-func New(n string, rsc int, ra *maps.SlabAlloc, rls int) godbase.Tbl {
-	return new(Basic).Init(n, rsc, ra, rls)
+func New(n string, rsc int, ma *maps.SlabAlloc, rls int) godbase.Tbl {
+	return new(Basic).Init(n, rsc, ma, rls)
 }
 
 func OnUpsert(t godbase.Tbl, sub godbase.EvtSub, fn InsertFn) {
 	t.OnUpsert().Subscribe(sub, func(args...interface{}) error {
-		return fn(args[0].(godbase.Rec))
+		return fn(args[0].(godbase.Cx), args[1].(godbase.Rec))
 	})
 }
 
@@ -146,18 +147,10 @@ func (e RecNotFound) Error() string {
 	return fmt.Sprintf("rec not found: %v", e)
 }
 
-func (t *Basic) Get(id godbase.UId) (godbase.Rec, error) {
-	rr, ok := t.recs.Get(godbase.UIdKey(id))
-	if !ok {
-		return nil, RecNotFound(id)
-	}
-	
-	return rr.(godbase.Rec).Clone(), nil
-}
-
-func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
+func (t *Basic) Init(n string, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
+	t.mapAlloc = ma
 	t.onUpsert.Init()
 	t.recIdHash.Init()
 	
@@ -166,7 +159,7 @@ func (t *Basic) Init(n string, rsc int, ra *maps.SlabAlloc, rls int) *Basic {
 		return t.recIdHash.Hash(id)
 	}
 
-	t.recs.Init(maps.NewSlabSlots(rsc, hashRecId, ra, rls))
+	t.recs.Init(maps.NewSlabSlots(rsc, hashRecId, ma, rls))
 	t.Add(cols.CreatedAt())
 	t.Add(cols.RecId())
 	t.Add(t.revision.Init(fmt.Sprintf("%v/revision", n)))
@@ -266,7 +259,7 @@ func (t *Basic) Slurp(r io.Reader) error {
 	return nil
 }
 
-func (t *Basic) Upsert(rec godbase.Rec) (godbase.Rec, error) {
+func (t *Basic) Upsert(cx godbase.Cx, rec godbase.Rec) (godbase.Rec, error) {
 	id := rec.Id()
 
 	if v, ok := rec.Find(&t.revision); ok {
@@ -276,7 +269,7 @@ func (t *Basic) Upsert(rec godbase.Rec) (godbase.Rec, error) {
 	}
 
 	rec.Set(&t.upsertedAt, time.Now())
-	rr := rec.New()
+	rr := recs.New(t.mapAlloc)
 	
 	for i := t.cols.First(); i.Valid(); i = i.Next() {
 		c := i.Val().(godbase.Col)
@@ -285,8 +278,12 @@ func (t *Basic) Upsert(rec godbase.Rec) (godbase.Rec, error) {
 		}
 	}
 	
-	if err := t.onUpsert.Publish(rr); err != nil {
+	if err := t.onUpsert.Publish(cx, rr); err != nil {
 		return nil, err
+	}
+
+	if i, ok := t.recs.Find(nil, godbase.UIdKey(id), nil); ok {
+		i.Val().(godbase.Rec).Clear()
 	}
 
 	t.recs.Set(godbase.UIdKey(id), rr)

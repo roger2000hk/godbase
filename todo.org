@@ -31,9 +31,7 @@
 
 * go on with remento
 ** add offset idx
-** add name idxs
-** add Resv
-** add slice col ResvItems
+** add slice(Ref) col ResvItems
 
 * add MapCol
 ** take two col types as params to cols.Map()

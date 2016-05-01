@@ -34,6 +34,11 @@ type ColType interface {
 	Write(Rec, interface{}, io.Writer) error
 }
 
+type Cx interface {
+	InitRec(Rec) Rec
+	InitRecId(Rec, UId) Rec
+}
+
 type Def interface {
 	Key
 	Name() string
@@ -105,25 +110,6 @@ type Map interface {
 	While(KVTestFn) bool
 }
 
-type Tbl interface {
-	Def
-	Add(Col) Col
-	Clear()
-	Col(string) Col
-	Cols() Iter
-	Dump(io.Writer) error
-	Get(UId) (Rec, error)
-	Len() int64
-	Reset(Rec) (Rec, error)
-	Read(Rec, io.Reader) (Rec, error)
-	Revision(Rec) int64
-	OnUpsert() *Evt
-	Slurp(io.Reader) error
-	Upsert(Rec) (Rec, error)
-	UpsertedAt(Rec) time.Time
-	Write(Rec, io.Writer) error
-}
-
 type Rec interface {
 	Clear()
 	Clone() Rec
@@ -136,6 +122,24 @@ type Rec interface {
 	Len() int
 	New() Rec
 	Set(Col, interface{}) interface{}
+}
+
+type Tbl interface {
+	Def
+	Add(Col) Col
+	Clear()
+	Col(string) Col
+	Cols() Iter
+	Dump(io.Writer) error
+	Len() int64
+	Reset(Rec) (Rec, error)
+	Read(Rec, io.Reader) (Rec, error)
+	Revision(Rec) int64
+	OnUpsert() *Evt
+	Slurp(io.Reader) error
+	Upsert(Cx, Rec) (Rec, error)
+	UpsertedAt(Rec) time.Time
+	Write(Rec, io.Writer) error
 }
 
 type KVMapFn func (Key, interface{}) (Key, interface{})

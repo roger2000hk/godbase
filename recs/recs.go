@@ -20,16 +20,12 @@ func BasicNew(a *maps.SlabAlloc) godbase.Rec {
 
 func Init(id godbase.UId, a *maps.SlabAlloc) godbase.Rec {
 	r := new(Basic).BasicInit(a)
-	SetUId(r, cols.RecId(), id)
+	r.InitId(id)
 	return r
 }
 
 func New(a *maps.SlabAlloc) godbase.Rec {
 	return new(Basic).Init(a)
-}
-
-func (e NotFound) Error() string {
-	return fmt.Sprintf("rec not found: %v", e)
 }
 
 func Bool(r godbase.Rec, c *cols.BoolCol) bool {
@@ -118,6 +114,21 @@ func (r *Basic) Delete(c godbase.Col) bool {
 	return cnt == 1
 }
 
+func (r *Basic) Eq(other godbase.Rec) bool {
+	for i := r.Iter(); i.Valid(); i = i.Next() {
+		c := i.Key().(godbase.Col)
+		if ov, ok := other.Find(c); !ok || !c.Eq(ov, i.Val()) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (e NotFound) Error() string {
+	return fmt.Sprintf("rec not found: %v", e)
+}
+
 func (r *Basic) Find(c godbase.Col) (interface{}, bool) {
 	if v, ok := r.asMap().Get(c); ok {
 		return v, true
@@ -134,17 +145,6 @@ func (r *Basic) Get(c godbase.Col) interface{} {
 	panic(fmt.Sprintf("field not found: %v", c.Name()))
 }
 
-func (r *Basic) Eq(other godbase.Rec) bool {
-	for i := r.Iter(); i.Valid(); i = i.Next() {
-		c := i.Key().(godbase.Col)
-		if ov, ok := other.Find(c); !ok || !c.Eq(ov, i.Val()) {
-			return false
-		}
-	}
-
-	return true
-}
-
 func (r *Basic) Id() godbase.UId {
 	return UId(r, cols.RecId())
 }
@@ -154,6 +154,10 @@ func (r *Basic) Init(a *maps.SlabAlloc) *Basic {
 	SetTime(r, cols.CreatedAt(), time.Now())
 	SetUId(r, cols.RecId(), godbase.NewUId())
 	return r
+}
+
+func (self *Basic) InitId(id godbase.UId) {
+	SetUId(self, cols.RecId(), id)
 }
 
 func (r *Basic) Iter() godbase.Iter {

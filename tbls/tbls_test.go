@@ -3,6 +3,7 @@ package tbls
 import (
 	"bytes"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/cxs"
 	"github.com/fncodr/godbase/fix"
 	"github.com/fncodr/godbase/recs"
 	"testing"
@@ -73,6 +74,8 @@ func TestReadWriteRec(t *testing.T) {
 }
 
 func TestUpsert(t *testing.T) {
+	cx := cxs.New(100)
+
 	foos := New("foos", 100, nil, 1)
 
 	r := recs.New(nil)
@@ -86,7 +89,7 @@ func TestUpsert(t *testing.T) {
 		t.Errorf("invalid upsert time before upsert: %v", v)	
 	}
 
-	foos.Upsert(r)
+	foos.Upsert(cx, r)
 
 	if l := foos.Len(); l != 1 {
 		t.Errorf("invalid len after upsert: %v", l)	
@@ -100,7 +103,7 @@ func TestUpsert(t *testing.T) {
 		t.Errorf("invalid upsert time after upsert: %v", v)	
 	}
 
-	if rr, err := foos.Get(r.Id()); err != nil {
+	if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
 		panic(err)
 	} else if !rr.Eq(r) {
 		t.Errorf("invalid rec found: %v/%v", rr, r)
@@ -110,6 +113,7 @@ func TestUpsert(t *testing.T) {
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
+	cx := cxs.New(100)
 	foos := New("foos", 100, nil, 1)
 
 	rs := make([]godbase.Rec, nrecs)
@@ -117,7 +121,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	for i, _ := range rs {
 		var err error
 
-		if rs[i], err = foos.Upsert(recs.New(nil)); err != nil {
+		if rs[i], err = foos.Upsert(cx, recs.New(nil)); err != nil {
 			panic(err)
 		}
 	}
@@ -142,7 +146,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	}
 
 	for _, r := range rs {
-		if rr, err := foos.Get(r.Id()); err != nil {
+		if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
 			panic(err)
 		} else if !r.Eq(rr) {
 			t.Errorf("invalid rec found: %v/%v", rr, r)

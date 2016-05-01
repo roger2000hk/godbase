@@ -3,6 +3,7 @@ package examples
 import (
 	"bytes"
 	"github.com/fncodr/godbase"
+	"github.com/fncodr/godbase/cxs"
 	"github.com/fncodr/godbase/recs"
 	"github.com/fncodr/godbase/tbls"
 	"testing"
@@ -10,6 +11,9 @@ import (
 
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
+
+	// create new context with rec slab size 100
+	cx := cxs.New(100)
 
 	// create tmp tbl named "foos" backed by a hashed 1-level map without allocator 
 
@@ -25,7 +29,7 @@ func TestDumpClearSlurp(t *testing.T) {
 		recs.SetInt64(r, bar, int64(i))
 		
 		var err error
-		if rs[i], err = foos.Upsert(r); err != nil {
+		if rs[i], err = foos.Upsert(cx, r); err != nil {
 			panic(err)
 		}
 	}
@@ -61,7 +65,7 @@ func TestDumpClearSlurp(t *testing.T) {
 		// Get() returns rec for id or err
 		// Eq() compares vals for all cols in receiver with param
 
-		if rr, err := foos.Get(r.Id()); err != nil {
+		if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
 			panic(err)
 		} else if !r.Eq(rr) {
 			t.Errorf("invalid loaded rec: %v/%v", rr, r)
