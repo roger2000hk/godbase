@@ -2,20 +2,17 @@ package godbase
 
 type Set interface {
 	// deletes key from set, starting at offs
-	// returns updated set and ok
+	// returns updated set and idx, or org set and -1 if not found
 
-	Delete(int, Key) (Set, bool)
+	Delete(int, Key) (Set, int)
 
-	// returns true if key exists, starting at offs
-	HasKey(int, Key) bool
-
-	// returns index of key, starting at offs; or length if not found
+	// returns index of key, starting at offs; or -1 if not found
 	Index(int, Key) int
 
 	// inserts key into set, starting at offs
-	// returns updated set and ok
+	// returns updated set and final index; or org set and -1 if not found
 
-	Insert(int, Key) (Set, bool)
+	Insert(int, Key) (Set, int)
 
 	// returns number of elems in set
 	Len() int64

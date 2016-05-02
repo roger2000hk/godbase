@@ -8,48 +8,41 @@ import (
 
 type Sort []godbase.Key
 
-func (self Sort) Delete(offs int, key godbase.Key) (godbase.Set, bool) {
-	l := len(self)
-	if i := self.Index(offs, key); i < l {
+func (self Sort) Delete(offs int, key godbase.Key) (godbase.Set, int) {
+	if i := self.Index(offs, key); i != -1 {
 		if self[i] == key {
 			copy(self[i:], self[i+1:])
-			return self, true
+			return self, i
 		}
 	}
 
-	return self, false
-}
-
-func (self Sort) HasKey(offs int, key godbase.Key) bool {
-	if i := self.Index(offs, key); i < len(self) {
-		return self[i] == key
-	}
-
-	return false
+	return self, 1
 }
 
 func (self Sort) Index(offs int, key godbase.Key) int {
-	return sort.Search(len(self)-offs, func(i int) bool {
+	if i := sort.Search(len(self)-offs, func(i int) bool {
 		v := self[i+offs]
 		return key == v || key.Less(v)
-	})
+	}); i < len(self) {
+		return i
+	}
+
+	return -1
 }
 
-func (self Sort) Insert(offs int, key godbase.Key) (godbase.Set, bool) {
-	l := len(self)
-
-	if i := self.Index(offs, key); i < l {
+func (self Sort) Insert(offs int, key godbase.Key) (godbase.Set, int) {
+	if i := self.Index(offs, key); i != -1 {
 		if self[i] == key {
-			return self[i:], false
+			return self, -1
 		}
 		
 		self = append(self, nil)
 		copy(self[i+1:], self[i:])
 		self[i] = key
-		return self, true
+		return self, i
 	}
 
-	return append(self, key), true 
+	return append(self, key), len(self) 
 }
 
 func (self Sort) Len() int64 {

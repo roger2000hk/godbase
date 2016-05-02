@@ -29,23 +29,23 @@ func randits(n int) []int64 {
 }
 
 func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
-	var ok bool
+	var i int
 
 	for _, it := range its {
-		if s, ok = s.Insert(0, godbase.Int64Key(it)); !ok {
+		if s, i = s.Insert(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("insert failed: %v", it)
 		}
 		//fmt.Printf("%v\n", s)
 	}
 
 	for _, it := range its {
-		if !s.HasKey(0, godbase.Int64Key(it)) {
+		if i := s.Index(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("not found: %v", it)
 		}
 	}
 
 	for _, it := range its {
-		if s, ok = s.Delete(0, godbase.Int64Key(it)); !ok {
+		if s, i = s.Delete(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("delete failed: %v", it)
 		}
 	}
