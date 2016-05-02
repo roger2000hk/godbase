@@ -30,6 +30,8 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * add sets.Suffix
 ** copy maps
 
+* add sets.Wrap
+
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
 
