@@ -32,20 +32,20 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	var ok bool
 
 	for _, it := range its {
-		if s, ok = s.Insert(godbase.Int64Key(it)); !ok {
+		if s, ok = s.Insert(0, godbase.Int64Key(it)); !ok {
 			b.Errorf("insert failed: %v", it)
 		}
 		//fmt.Printf("%v\n", s)
 	}
 
 	for _, it := range its {
-		if !s.HasKey(godbase.Int64Key(it)) {
+		if !s.HasKey(0, godbase.Int64Key(it)) {
 			b.Errorf("not found: %v", it)
 		}
 	}
 
 	for _, it := range its {
-		if s, ok = s.Delete(godbase.Int64Key(it)); !ok {
+		if s, ok = s.Delete(0, godbase.Int64Key(it)); !ok {
 			b.Errorf("delete failed: %v", it)
 		}
 	}

@@ -8,16 +8,9 @@ import (
 
 type Sort []godbase.Key
 
-func (self Sort) Index(key godbase.Key, offs int) int {
-	return sort.Search(len(self)-offs, func(i int) bool {
-		v := self[i+offs]
-		return key == v || key.Less(v)
-	})
-}
-
-func (self Sort) Delete(key godbase.Key) (godbase.Set, bool) {
+func (self Sort) Delete(offs int, key godbase.Key) (godbase.Set, bool) {
 	l := len(self)
-	if i := self.Index(key, 0); i < l {
+	if i := self.Index(offs, key); i < l {
 		if self[i] == key {
 			copy(self[i:], self[i+1:])
 			return self, true
@@ -27,18 +20,25 @@ func (self Sort) Delete(key godbase.Key) (godbase.Set, bool) {
 	return self, false
 }
 
-func (self Sort) HasKey(key godbase.Key) bool {
-	if i := self.Index(key, 0); i < len(self) {
+func (self Sort) HasKey(offs int, key godbase.Key) bool {
+	if i := self.Index(offs, key); i < len(self) {
 		return self[i] == key
 	}
 
 	return false
 }
 
-func (self Sort) Insert(key godbase.Key) (godbase.Set, bool) {
+func (self Sort) Index(offs int, key godbase.Key) int {
+	return sort.Search(len(self)-offs, func(i int) bool {
+		v := self[i+offs]
+		return key == v || key.Less(v)
+	})
+}
+
+func (self Sort) Insert(offs int, key godbase.Key) (godbase.Set, bool) {
 	l := len(self)
 
-	if i := self.Index(key, 0); i < l {
+	if i := self.Index(offs, key); i < l {
 		if self[i] == key {
 			return self[i:], false
 		}

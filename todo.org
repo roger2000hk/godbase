@@ -24,6 +24,12 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** fix idxs multi tests
 ** commit
 
+* add Set.Range(start, end Key) Sort
+** slice set
+
+* add sets.Suffix
+** copy maps
+
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
 

@@ -10,10 +10,10 @@ type Hash struct {
 	slots []Sort
 }
 
-func (self Hash) Delete(key godbase.Key) (godbase.Set, bool) {
+func (self Hash) Delete(offs int, key godbase.Key) (godbase.Set, bool) {
 	i := self.fn(key) % uint64(len(self.slots))
 
-	if s, ok := self.slots[i].Delete(key); ok {
+	if s, ok := self.slots[i].Delete(offs, key); ok {
 		self.slots[i] = s.(Sort)
 		self.len--
 		return self, true
@@ -22,9 +22,14 @@ func (self Hash) Delete(key godbase.Key) (godbase.Set, bool) {
 	return self, false
 }
 
-func (self Hash) HasKey(key godbase.Key) bool {
+func (self Hash) HasKey(offs int, key godbase.Key) bool {
 	i := self.fn(key) % uint64(len(self.slots))
-	return self.slots[i].HasKey(key)
+	return self.slots[i].HasKey(offs, key)
+}
+
+func (self Hash) Index(offs int, key godbase.Key) int {
+	i := self.fn(key) % uint64(len(self.slots))
+	return self.slots[i].Index(offs, key)	
 }
 
 func (self *Hash) Init(sc int, fn godbase.HashFn) *Hash {
@@ -33,10 +38,10 @@ func (self *Hash) Init(sc int, fn godbase.HashFn) *Hash {
 	return self
 }
 
-func (self Hash) Insert(key godbase.Key) (godbase.Set, bool) {
+func (self Hash) Insert(offs int, key godbase.Key) (godbase.Set, bool) {
 	i := self.fn(key) % uint64(len(self.slots))
 
-	if s, ok := self.slots[i].Insert(key); ok {
+	if s, ok := self.slots[i].Insert(offs, key); ok {
 		self.slots[i] = s.(Sort)
 		self.len++
 		return self, true
