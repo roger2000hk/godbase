@@ -1,20 +1,5 @@
 * add remento TextIdx test
-** insert stuff and search names
-
-* add remento.Prod
-** name
-
-* add remento.Price
-** start, end, prod, rc & amnt
-** add PriceRcIdx(rc, prod, start)
-** add Rc.Prices(cx, start, end) []Price
-** add []Price.Calc(rc, start, end) []Price
-*** sum parts of prices according to part of total time span on with minute precision
-*** break on new prod
-*** clear recid in returned recs
-*** break if gap between start/end
-*** allow overlapping prices
-*** add test** add Rc.SumPrices(cx, start, end) []Price
+** fix error & commit textidx tests
 
 * add basic slice based set in godbase.sets package
 ** value based like old.Slice
@@ -43,6 +28,17 @@
 * change RcUnlimited to enum RcCapacType
 ** Single/Limited/Unlimited
 ** how to implement enum? EnumCol?
+
+* implement price calculation
+** add Rc.Prices(cx, start, end) []Price
+** add []Price.Calc(rc, start, end) []Price
+*** sum parts of prices according to part of total time span on with minute precision
+*** break on new prod
+*** clear recid in returned recs
+*** break if gap between start/end
+*** allow overlapping prices
+*** add test** add Rc.SumPrices(cx, start, end) []Price
+
 
 * add godbase.dbs package
 ** add godbase.Db with MapAlloc

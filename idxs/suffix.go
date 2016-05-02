@@ -75,7 +75,7 @@ func (i *Suffix) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error)
 		if v, ok := r.Find(col); ok {
 			k := godbase.StringKey(v.(string))
 			var ok bool
-			res, ok = i.recs.Insert(start, k, id, i.unique)
+			res, ok = i.recs.Insert(start, k, id, !i.unique)
 			
 			if !ok && !col.Eq(res.Val(), v) {
 				return nil, &DupKey{key: k}
