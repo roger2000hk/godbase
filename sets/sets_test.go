@@ -35,6 +35,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 		if s, ok = s.Insert(godbase.Int64Key(it)); !ok {
 			b.Errorf("insert failed: %v", it)
 		}
+		//fmt.Printf("%v\n", s)
 	}
 
 	for _, it := range its {
@@ -53,7 +54,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 func BenchmarkSortBasics(b *testing.B) {
  	var s Sort
 
-	runBasicTests(b, godbase.Set(s), randits(5000))
+	runBasicTests(b, godbase.Set(s), randits(10000))
 }
 
 func BenchmarkHashBasics(b *testing.B) {

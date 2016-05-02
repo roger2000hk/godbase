@@ -43,11 +43,10 @@ func (self Sort) Insert(key godbase.Key) (godbase.Set, bool) {
 			return self[i:], false
 		}
 		
-		ns := make(Sort, l+1)
-		copy(ns, self[:i])
-		ns[i] = key
-		copy(ns[i+1:], self[i:])
-		return ns, true
+		self = append(self, nil)
+		copy(self[i+1:], self[i:])
+		self[i] = key
+		return self, true
 	}
 
 	return append(self, key), true 

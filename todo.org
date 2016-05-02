@@ -21,7 +21,7 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
-** run idxs multi tests
+** fix idxs multi tests
 ** commit
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
@@ -51,6 +51,8 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** add godbase.Db with MapAlloc
 ** add dbs.Basic
 ** replaces global MapAlloc in remento
+
+* add sets.MapHash/HashSlots like map
  
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
