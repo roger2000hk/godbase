@@ -15,6 +15,7 @@ type Tbl interface {
 	Delete(Cx, UId) error
 	Drop(Cx, UId) error
 	Dump(io.Writer) error
+	Exists(UId) bool
 	Len() int64
 	Load(Cx, Rec) (Rec, error)
 	Reset(Rec) (Rec, error)

@@ -217,6 +217,11 @@ func (t *Basic) Dump(w io.Writer) error {
 	return err
 }
 
+func (self *Basic) Exists(id godbase.UId) bool {
+	_, ok := self.recs.Find(nil, godbase.UIdKey(id), nil)
+	return ok
+}
+
 func (t *Basic) Init(n string, ds []godbase.TblDef, rsc int, ma *maps.SlabAlloc, rls int) *Basic {
 	t.Basic.Init(n)
 	t.cols.Init(nil, 1)
