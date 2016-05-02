@@ -48,7 +48,6 @@ type SortSlots struct {
 	slots []Sort
 }
 
-type MapHashFn func (godbase.Key) interface{}
 type SlotAlloc func (key godbase.Key) godbase.Map
 type SlotsAlloc func (key godbase.Key) Slots
 

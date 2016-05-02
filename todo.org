@@ -27,7 +27,16 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * add Set.Range(start, end Key) Sort
 ** slice set
 
-* add Set.Clone()
+* add sets.Hash
+** use array of godbase.Set & Alloc
+
+* add sets.HashHash
+** use array of Hash
+
+* replace maps.hash slot mess with one file per imp
+** Hash, ESortHash, SortHash, MapHash, HashHash
+
+* add Set.Clone() Set
 ** alloc new and copy for Sort
 ** delegate for Hash
 *** only call slot.Clone() if len > 0

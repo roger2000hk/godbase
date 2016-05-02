@@ -19,6 +19,7 @@ type Def interface {
 }
 
 type HashFn func (Key) uint64
+type MapHashFn func (Key) interface{}
 type NameSize uint8
 type UId uuid.UUID
 type ValSize uint32

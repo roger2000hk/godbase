@@ -57,8 +57,15 @@ func BenchmarkSortBasics(b *testing.B) {
 	runBasicTests(b, godbase.Set(s), randits(10000))
 }
 
-func BenchmarkHashBasics(b *testing.B) {
-	var s Hash
+func BenchmarkSortHashBasics(b *testing.B) {
+	var s SortHash
 	s.Init(100000, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
+	runBasicTests(b, s, randits(100000))
+}
+
+func BenchmarkMapHashBasics(b *testing.B) {
+	var s MapHash
+	s.Init(20000, func(k godbase.Key) interface{} { return k }, 
+		func(_ godbase.Key) godbase.Set { return new(Sort) })
 	runBasicTests(b, s, randits(100000))
 }
