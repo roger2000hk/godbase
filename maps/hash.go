@@ -24,7 +24,7 @@ type ESortSlots struct {
 }
 
 type MapSlots struct {
-	fn Mapgodbase.HashFn
+	fn MapHashFn
 	alloc SlotAlloc
 	slots map[interface{}]godbase.Map
 }
@@ -48,7 +48,7 @@ type SortSlots struct {
 	slots []Sort
 }
 
-type Mapgodbase.HashFn func (godbase.Key) interface{}
+type MapHashFn func (godbase.Key) interface{}
 type SlotAlloc func (key godbase.Key) godbase.Map
 type SlotsAlloc func (key godbase.Key) Slots
 
@@ -71,7 +71,7 @@ func NewHashSlots(sc int, fn godbase.HashFn, a SlotsAlloc) *HashSlots {
 	return ss
 }
 
-func NewMapSlots(sc int, fn Mapgodbase.HashFn, a SlotAlloc) *MapSlots {
+func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
 	ss := new(MapSlots)
 	ss.fn = fn
 	ss.alloc = a

@@ -24,8 +24,7 @@ func (k BoolKey) Less(other Key) bool {
 }
 
 func (_k FixKey) Less(_other Key) bool {
-	k := fix.Val(_k)
-	other := fix.Val(_other.(FixKey))
+	k, other := fix.Val(_k), fix.Val(_other.(FixKey))
 	return k.Cmp(other) < 0
 }
 
