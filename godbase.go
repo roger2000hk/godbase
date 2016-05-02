@@ -18,6 +18,7 @@ type Def interface {
 	Name() string
 }
 
+type HashFn func (Key) uint64
 type NameSize uint8
 type UId uuid.UUID
 type ValSize uint32

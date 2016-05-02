@@ -13,18 +13,18 @@ type Slots interface {
 }
 
 type BasicSlots struct {
-	fn HashFn
+	fn godbase.HashFn
 	alloc SlotAlloc
 	slots []godbase.Map
 }
 
 type ESortSlots struct {
-	fn HashFn
+	fn godbase.HashFn
 	slots []ESort
 }
 
 type MapSlots struct {
-	fn MapHashFn
+	fn Mapgodbase.HashFn
 	alloc SlotAlloc
 	slots map[interface{}]godbase.Map
 }
@@ -36,24 +36,23 @@ type Hash struct {
 }
 
 type HashSlots struct {
-	fn HashFn
+	fn godbase.HashFn
 	alloc SlotsAlloc
 	slots []Hash
 }
 
 type SortSlots struct {
 	alloc *SlabAlloc
-	fn HashFn
+	fn godbase.HashFn
 	levels int
 	slots []Sort
 }
 
-type HashFn func (godbase.Key) uint64
-type MapHashFn func (godbase.Key) interface{}
+type Mapgodbase.HashFn func (godbase.Key) interface{}
 type SlotAlloc func (key godbase.Key) godbase.Map
 type SlotsAlloc func (key godbase.Key) Slots
 
-func NewESortSlots(sc int, fn HashFn) *ESortSlots {
+func NewESortSlots(sc int, fn godbase.HashFn) *ESortSlots {
 	ss := new(ESortSlots)
 	ss.fn = fn
 	ss.slots = make([]ESort, sc)
@@ -64,7 +63,7 @@ func NewHash(slots Slots) *Hash {
 	return new(Hash).Init(slots)
 }
 
-func NewHashSlots(sc int, fn HashFn, a SlotsAlloc) *HashSlots {
+func NewHashSlots(sc int, fn godbase.HashFn, a SlotsAlloc) *HashSlots {
 	ss := new(HashSlots)
 	ss.fn = fn
 	ss.alloc = a
@@ -72,7 +71,7 @@ func NewHashSlots(sc int, fn HashFn, a SlotsAlloc) *HashSlots {
 	return ss
 }
 
-func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
+func NewMapSlots(sc int, fn Mapgodbase.HashFn, a SlotAlloc) *MapSlots {
 	ss := new(MapSlots)
 	ss.fn = fn
 	ss.alloc = a
@@ -80,7 +79,7 @@ func NewMapSlots(sc int, fn MapHashFn, a SlotAlloc) *MapSlots {
 	return ss
 }
 
-func NewSlabSlots(sc int, fn HashFn, a *SlabAlloc, ls int) *SortSlots {
+func NewSlabSlots(sc int, fn godbase.HashFn, a *SlabAlloc, ls int) *SortSlots {
 	ss := new(SortSlots)
 	ss.alloc = a
 	ss.fn = fn
@@ -89,11 +88,11 @@ func NewSlabSlots(sc int, fn HashFn, a *SlabAlloc, ls int) *SortSlots {
 	return ss
 }
 
-func NewSortSlots(sc int, fn HashFn, ls int) *SortSlots {
+func NewSortSlots(sc int, fn godbase.HashFn, ls int) *SortSlots {
 	return NewSlabSlots(sc, fn, nil, ls)
 }
 
-func NewSlots(sc int, fn HashFn, a SlotAlloc) *BasicSlots {
+func NewSlots(sc int, fn godbase.HashFn, a SlotAlloc) *BasicSlots {
 	ss := new(BasicSlots)
 	ss.fn = fn
 	ss.alloc = a

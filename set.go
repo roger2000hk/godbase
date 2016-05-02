@@ -15,5 +15,5 @@ type Set interface {
 	Insert(key Key) (Set, bool)
 
 	// returns number of elems in set
-	Len() int
+	Len() int64
 }

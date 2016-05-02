@@ -1,11 +1,3 @@
-* add basic slice based set in godbase.sets package
-** value based like old.Slice
-** implement delete/find/insert
-** implement Iter for Slice
-*** subslice on next
-*** return val as key
-** add Sorted(...interface{}) constructor
-
 * add sets.Hash
 ** value based
 ** fn & slots
