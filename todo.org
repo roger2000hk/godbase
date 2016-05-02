@@ -27,6 +27,11 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * add Set.Range(start, end Key) Sort
 ** slice set
 
+* add Set.Clone()
+** alloc new and copy for Sort
+** delegate for Hash
+*** only call slot.Clone() if len > 0
+
 * add sets.Suffix
 ** copy maps
 
