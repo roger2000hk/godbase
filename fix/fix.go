@@ -1,5 +1,7 @@
 package fix
 
+// package godbase/fix implements speedy fixed-point math based on big.Int
+
 import (
 	"fmt"
 	"math/big"

@@ -1,6 +1,6 @@
 package godbase
 
-// Iters are circular and cheap, since they are nothing but a common 
+// Iters are cheap, since they are nothing but a common 
 // interface on top of actual nodes. 
 
 type Iter interface {
