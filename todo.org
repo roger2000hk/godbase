@@ -1,4 +1,6 @@
-* fix Idx.TestMultiSort
+* change Key interface from Less to Cmp
+** use Cmp instead of == for comparing keys in map/set imps
+** compare perf
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
