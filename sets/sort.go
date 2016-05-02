@@ -12,7 +12,7 @@ func (self Sort) Delete(offs int, key godbase.Key) (godbase.Set, int) {
 	if i := self.Index(offs, key); i != -1 {
 		if self[i] == key {
 			copy(self[i:], self[i+1:])
-			return self, i
+			return self[:len(self)-1], i
 		}
 	}
 

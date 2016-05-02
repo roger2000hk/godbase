@@ -65,7 +65,7 @@ func BenchmarkSortHashBasics(b *testing.B) {
 
 func BenchmarkMapHashBasics(b *testing.B) {
 	var s MapHash
-	s.Init(20000, func(k godbase.Key) interface{} { return k }, 
+	s.Init(20000, func(k godbase.Key) interface{} { return k.(godbase.Int64Key) % 200000 }, 
 		func(_ godbase.Key) godbase.Set { return new(Sort) })
 	runBasicTests(b, s, randits(100000))
 }
