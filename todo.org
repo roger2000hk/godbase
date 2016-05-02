@@ -1,6 +1,28 @@
+BenchmarkBasicMap-4                     2000000000               0.01 ns/op
+BenchmarkBasicSort-4                    2000000000               0.04 ns/op
+BenchmarkBasicSlab-4                    2000000000               0.04 ns/op
+BenchmarkBasicESort-4                   2000000000               0.03 ns/op
+BenchmarkBasicSlabHash-4                2000000000               0.01 ns/op
+BenchmarkBasicESortHash-4               1000000000               0.02 ns/op
+BenchmarkBasicSortBasicHash-4           2000000000               0.01 ns/op
+BenchmarkBasicESortBasicHash-4          2000000000               0.01 ns/op
+BenchmarkBasicSortMapHash-4             1000000000               0.03 ns/op
+BenchmarkBasicESortMapHash-4            1000000000               0.03 ns/op
+BenchmarkFullSort-4                     1000000000               0.08 ns/op
+BenchmarkFullSlab-4                     1000000000               0.08 ns/op
+BenchmarkFullESort-4                    2000000000               0.03 ns/op
+BenchmarkFullSlabHash-4                 2000000000               0.01 ns/op
+BenchmarkFullESortHash-4                1000000000               0.03 ns/op
+BenchmarkFullSortBasicHash-4            1000000000               0.02 ns/op
+BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
+BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
+BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
+
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
+** run idxs multi tests
+** commit
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
