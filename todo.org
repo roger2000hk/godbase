@@ -25,15 +25,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** commit
 
 
-* improve sets.Sort's allocation stategy
-** don't shrink on delete
-** only alloc on insert if needed (check lens)
-** adapt Index() to handle end nils gracefully
-** compare perf
-** add Set.Shrink()
-*** alloc to len & copy
-*** delegate in hash
-
 * add Set.Range(start, end Key) Sort
 ** slice set
 
@@ -58,8 +49,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional
-
-* rename Tbl.Exists to HasKey
 
 * change RcUnlimited to enum RcCapacType
 ** Single/Limited/Unlimited
