@@ -26,6 +26,16 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** fix idxs multi tests
 ** commit
 
+
+* improve sets.Sort's allocation stategy
+** don't shrink on delete
+** only alloc on insert if needed (check lens)
+** adapt Index() to handle end nils gracefully
+** compare perf
+** add Set.Shrink()
+*** alloc to len & copy
+*** delegate in hash
+
 * add Set.Range(start, end Key) Sort
 ** slice set
 
