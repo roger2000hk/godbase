@@ -51,39 +51,29 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 }
 
 func BenchmarkSortBasics(b *testing.B) {
+	const nreps = 20000
  	var s Sort
-	runBasicTests(b, &s, randits(10000))
+	s.Resize(nreps)
+	runBasicTests(b, &s, randits(nreps))
 }
+
+var hashslots = 100000
+var hashits = randits(200000)
 
 func BenchmarkSortHashBasics(b *testing.B) {
 	var s SortHash
-	s.Init(10000, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
-	runBasicTests(b, &s, randits(200000))
+	s.Init(hashslots, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
+	runBasicTests(b, &s, hashits)
 }
 
 func BenchmarkMapHashBasics(b *testing.B) {
 	var s MapHash
-	s.Init(10000, func(k godbase.Key) interface{} { return k.(godbase.Int64Key) % 10000 }, 
+	s.Init(hashslots, func(k godbase.Key) interface{} { return int64(k.(godbase.Int64Key)) % int64(hashslots) }, 
 		func(_ godbase.Key) godbase.Set { return new(Sort) })
-	runBasicTests(b, &s, randits(300000))
+	runBasicTests(b, &s, hashits)
 }
 
 func BenchmarkMapBasics(b *testing.B) {
-	its := randits(300000)
-	m := make(map[int64]bool)
-
-	for _, it := range its {
-		m[it] = true
-	}
-
-	for _, it := range its {
-		if _, ok := m[it]; !ok {
-			b.Errorf("not found: %v", it)
-		}
-	}
-
-	for _, it := range its {
-		delete(m, it)
-	}
+	runBasicTests(b, NewMap(0), hashits)
 }
 

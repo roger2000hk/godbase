@@ -48,14 +48,22 @@ func (self *Sort) Insert(offs int, key godbase.Key) int {
 			return i
 		}
 		
-		self.its = append(self.its, nil)
-		copy(self.its[i+1:], self.its[i:])
+		if len(self.its) == self.len  {
+			self.its = append(self.its, nil)
+		}
+
+		copy(self.its[i+1:self.len+1], self.its[i:self.len])
 		self.its[i] = key
  		self.len++
 		return i
 	}
 
-	self.its = append(self.its, key)
+	if self.len < len(self.its) {
+		self.its[self.len] = key
+	} else {
+		self.its = append(self.its, key)
+	}
+
 	self.len++
 	return self.len-1 
 }
@@ -66,4 +74,12 @@ func (self *Sort) Items() SortIts {
 
 func (self *Sort) Len() int64 {
 	return int64(self.len)
+
+}
+
+func (self *Sort) Resize(len int) *Sort {
+	nits := make(SortIts, len)
+	copy(nits, self.its)
+	self.its = nits
+	return self
 }
