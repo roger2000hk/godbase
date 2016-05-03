@@ -49,15 +49,14 @@ func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
 	return self
 }
 
-func (self *MapHash) Insert(offs int, key godbase.Key) int {
-	si := self.fn(key)
+func (self *MapHash) Insert(offs int, key godbase.Key, multi bool) (int, bool) {
+	i, ok := self.slot(key, self.fn(key)).Insert(offs, key, multi)
 
-	if i := self.slot(key, si).Insert(offs, key); i != -1 {
+	if ok {
 		self.len++
-		return i
 	}
 	
-	return -1
+	return i, ok
 }
 
 func (self *MapHash) Len() int64 {

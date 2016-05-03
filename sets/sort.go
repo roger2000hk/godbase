@@ -42,15 +42,15 @@ func (self *Sort) Index(offs int, key godbase.Key) int {
 	return -1
 }
 
-func (self *Sort) Insert(offs int, key godbase.Key) int {
+func (self *Sort) Insert(offs int, key godbase.Key, multi bool) (int, bool) {
 	if i := self.Index(offs, key); i != -1 {
-		if self.its[i] == key {
-			return i
+		if self.its[i] == key && !multi {
+			return i, false
 		}
 
 		isl := len(self.its)
 		
-		if isl == self.len  {
+ 		if isl == self.len  {
 			self.its = append(self.its, nil)
 			isl++
 		}
@@ -58,7 +58,7 @@ func (self *Sort) Insert(offs int, key godbase.Key) int {
 		copy(self.its[i+1:isl], self.its[i:isl-1])
 		self.its[i] = key
  		self.len++
-		return i
+		return i, true
 	}
 
 	if self.len < len(self.its) {
@@ -68,7 +68,7 @@ func (self *Sort) Insert(offs int, key godbase.Key) int {
 	}
 
 	self.len++
-	return self.len-1 
+	return self.len-1, true
 }
 
 func (self *Sort) Items() SortIts {

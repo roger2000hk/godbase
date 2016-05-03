@@ -107,8 +107,14 @@ func (self *Basic) Ref(col *cols.RefCol, res godbase.Rec) (godbase.Rec, error) {
 }
 
 func (self *Basic) Set(col godbase.Col, val interface{}) interface{} {
-	i := self.cols.Insert(0, col)
-	self.vals = insertVal(self.vals, i, col.Encode(val))
+	i, ok := self.cols.Insert(0, col, false)
+
+	if ok {
+		self.vals = insertVal(self.vals, i, col.Encode(val))
+	} else {
+		self.vals[i] = val
+	}
+
 	return val
 }
 

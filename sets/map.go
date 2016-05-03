@@ -31,9 +31,19 @@ func (self Map) Index(_ int, k godbase.Key) int {
 	return -1
 }
 
-func (self Map) Insert(_ int, k godbase.Key) int {
+func (self Map) Insert(_ int, k godbase.Key, multi bool) (int, bool) {
+	if multi {
+		panic("multi not supported")
+	}
+
+	_, ok := self[k]
+
+	if ok {
+		return 1, false
+	}
+
 	self[k] = true
-	return 1
+	return 1, true
 }
 
 func (self Map) Len() int64 {

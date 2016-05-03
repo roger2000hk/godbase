@@ -29,10 +29,8 @@ func randits(n int) []int64 {
 }
 
 func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
-	var i int
-
 	for _, it := range its {
-		if i = s.Insert(0, godbase.Int64Key(it)); i == -1 {
+		if _, ok := s.Insert(0, godbase.Int64Key(it), false); !ok {
 			b.Errorf("insert failed: %v", it)
 		}
 	}
@@ -44,7 +42,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	}
 
 	for _, it := range its {
-		if i = s.Delete(0, godbase.Int64Key(it)); i == -1 {
+		if i := s.Delete(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("delete failed: %v", it)
 		}
 	}

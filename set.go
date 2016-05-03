@@ -13,9 +13,10 @@ type Set interface {
 	Index(int, Key) int
 
 	// inserts key into set, starting at offs
-	// returns updated set and final index; or org set and -1 if not found
+	// rejects duplicate keys if multi=false and returns updated set and final index; 
+	// or org set and -1 if not found
 
-	Insert(int, Key) int
+	Insert(offs int, key Key, multi bool) (int, bool)
 
 	// returns number of elems in set
 	Len() int64

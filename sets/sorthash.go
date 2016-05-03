@@ -47,15 +47,15 @@ func (self *SortHash) Init(sc int, fn godbase.HashFn) *SortHash {
 	return self
 }
 
-func (self *SortHash) Insert(offs int, key godbase.Key) int {
+func (self *SortHash) Insert(offs int, key godbase.Key, multi bool) (int, bool) {
 	si := self.fn(key) % uint64(len(self.slots))
-
-	if i := self.slots[si].Insert(offs, key); i != -1 {
+	i, ok := self.slots[si].Insert(offs, key, multi)
+	
+	if ok {
 		self.len++
-		return i
 	}
 	
-	return -1
+	return i, ok
 }
 
 func (self *SortHash) Len() int64 {
