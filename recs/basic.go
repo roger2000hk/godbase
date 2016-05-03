@@ -89,8 +89,7 @@ func (self *Basic) Id() godbase.UId {
 }
 
 func (self *Basic) Init(id godbase.UId) *Basic {
-	self.SetTime(cols.CreatedAt(), time.Now())
-	self.SetUId(cols.RecId(), id)
+	Init(self, id)
 	return self
 }
 
@@ -125,7 +124,7 @@ func (self *Basic) SetInt64(col *cols.Int64Col, v int64) int64 {
 	return self.Set(col, v).(int64)
 }
 
-func (self *Basic) SetRef(col *cols.Int64Col, v *Basic) *Basic {
+func (self *Basic) SetRef(col *cols.RefCol, v *Basic) *Basic {
 	return self.Set(col, v).(*Basic)
 }
 
