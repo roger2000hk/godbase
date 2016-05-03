@@ -30,6 +30,9 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** commit
 
 
+* replace maps.hash slot mess with one file per imp
+** Hash, ESortHash, SortHash, MapHash, HashHash
+
 * add Set.Shrink to remove end nils
 
 * add sets.Hash
@@ -37,9 +40,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
 * add sets.HashHash
 ** use array of Hash
-
-* replace maps.hash slot mess with one file per imp
-** Hash, ESortHash, SortHash, MapHash, HashHash
 
 * add Set.Clone() Set
 ** alloc new and copy for Sort
