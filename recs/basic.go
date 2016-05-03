@@ -65,7 +65,7 @@ func (self *Basic) Eq(_other godbase.Rec) bool {
 
 
 func (self *Basic) Find(col godbase.Col) (interface{}, bool) {
-	if i := self.cols.Index(0, col); i != -1 && self.cols.Items()[i] == col {
+	if i := self.cols.First(0, col); i != -1 && self.cols.Items()[i] == col {
 		return col.Decode(self.vals[i]), true
 	}
 
