@@ -47,12 +47,15 @@ func (self *Sort) Insert(offs int, key godbase.Key) int {
 		if self.its[i] == key {
 			return i
 		}
+
+		isl := len(self.its)
 		
-		if len(self.its) == self.len  {
+		if isl == self.len  {
 			self.its = append(self.its, nil)
+			isl++
 		}
 
-		copy(self.its[i+1:self.len+1], self.its[i:self.len])
+		copy(self.its[i+1:isl], self.its[i:isl-1])
 		self.its[i] = key
  		self.len++
 		return i

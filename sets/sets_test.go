@@ -55,7 +55,7 @@ func BenchmarkSortBasics(b *testing.B) {
 	runBasicTests(b, new(Sort).Resize(nreps), randits(nreps))
 }
 
-var hashslots = 100000
+var hashslots = 400000
 var hashits = randits(200000)
 
 func BenchmarkSortHashBasics(b *testing.B) {
