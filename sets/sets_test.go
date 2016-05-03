@@ -68,3 +68,22 @@ func BenchmarkMapHashBasics(b *testing.B) {
 		func(_ godbase.Key) godbase.Set { return new(Sort) })
 	runBasicTests(b, &s, randits(100000))
 }
+
+func BenchmarkMapBasics(b *testing.B) {
+	its := randits(100000)
+	m := make(map[int64]bool)
+
+	for _, it := range its {
+		m[it] = true
+	}
+
+	for _, it := range its {
+		if _, ok := m[it]; !ok {
+			b.Errorf("not found: %v", it)
+		}
+	}
+
+	for _, it := range its {
+		delete(m, it)
+	}
+}
