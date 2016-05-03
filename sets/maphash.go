@@ -27,10 +27,10 @@ func (self *MapHash) Clone() godbase.Set {
 	return res
 }
 
-func (self *MapHash) Delete(offs int, key godbase.Key) int {
+func (self *MapHash) Delete(start int, key godbase.Key) int {
 	si := self.fn(key)
 
-	if i := self.slot(key, si).Delete(offs, key); i != -1 {
+	if i := self.slot(key, si).Delete(start, key); i != -1 {
 		self.len--
 		return i
 	}
@@ -38,8 +38,19 @@ func (self *MapHash) Delete(offs int, key godbase.Key) int {
 	return -1
 }
 
-func (self *MapHash) Index(offs int, key godbase.Key) int {
-	return self.slot(key, self.fn(key)).Index(offs, key)	
+func (self *MapHash) DeleteAll(start, end int, key godbase.Key) (int, int64) {
+	si := self.fn(key)
+	i, ok := self.slot(key, si).DeleteAll(start, end, key)
+	self.len -= ok
+	return i, ok
+}
+
+func (self *MapHash) First(start int, key godbase.Key) int {
+	return self.slot(key, self.fn(key)).First(start, key)	
+}
+
+func (self *MapHash) Last(start, end int, key godbase.Key) int {
+	return self.slot(key, self.fn(key)).Last(start, end, key)	
 }
 
 func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
@@ -49,8 +60,8 @@ func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
 	return self
 }
 
-func (self *MapHash) Insert(offs int, key godbase.Key, multi bool) (int, bool) {
-	i, ok := self.slot(key, self.fn(key)).Insert(offs, key, multi)
+func (self *MapHash) Insert(start int, key godbase.Key, multi bool) (int, bool) {
+	i, ok := self.slot(key, self.fn(key)).Insert(start, key, multi)
 
 	if ok {
 		self.len++

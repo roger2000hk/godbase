@@ -23,12 +23,20 @@ func (self Map) Delete(_ int, k godbase.Key) int {
 	return -1
 }
 
-func (self Map) Index(_ int, k godbase.Key) int {
+func (self Map) DeleteAll(start, end int, key godbase.Key) (int, int64) {
+	panic("DeleteAll() not supported")
+}
+
+func (self Map) First(_ int, k godbase.Key) int {
 	if _, ok := self[k]; ok {
 		return 1
 	}
 
 	return -1
+}
+
+func (self Map) Last(_, _ int, k godbase.Key) int {
+	panic("Last() not supported")
 }
 
 func (self Map) Insert(_ int, k godbase.Key, multi bool) (int, bool) {

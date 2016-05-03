@@ -25,10 +25,10 @@ func (self *SortHash) Clone() godbase.Set {
 	return res
 }
 
-func (self *SortHash) Delete(offs int, key godbase.Key) int {
+func (self *SortHash) Delete(start int, key godbase.Key) int {
 	si := self.fn(key) % uint64(len(self.slots))
 
-	if i := self.slots[si].Delete(offs, key); i != -1 {
+	if i := self.slots[si].Delete(start, key); i != -1 {
 		self.len--
 		return i
 	}
@@ -36,9 +36,16 @@ func (self *SortHash) Delete(offs int, key godbase.Key) int {
 	return -1
 }
 
-func (self *SortHash) Index(offs int, key godbase.Key) int {
+func (self *SortHash) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	si := self.fn(key) % uint64(len(self.slots))
-	return self.slots[si].Index(offs, key)	
+	i, ok := self.slots[si].DeleteAll(start, end, key)
+	self.len -= ok
+	return i, ok
+}
+
+func (self *SortHash) First(start int, key godbase.Key) int {
+	si := self.fn(key) % uint64(len(self.slots))
+	return self.slots[si].First(start, key)	
 }
 
 func (self *SortHash) Init(sc int, fn godbase.HashFn) *SortHash {
@@ -47,9 +54,14 @@ func (self *SortHash) Init(sc int, fn godbase.HashFn) *SortHash {
 	return self
 }
 
-func (self *SortHash) Insert(offs int, key godbase.Key, multi bool) (int, bool) {
+func (self *SortHash) Last(start, end int, key godbase.Key) int {
 	si := self.fn(key) % uint64(len(self.slots))
-	i, ok := self.slots[si].Insert(offs, key, multi)
+	return self.slots[si].Last(start, end, key)	
+}
+
+func (self *SortHash) Insert(start int, key godbase.Key, multi bool) (int, bool) {
+	si := self.fn(key) % uint64(len(self.slots))
+	i, ok := self.slots[si].Insert(start, key, multi)
 	
 	if ok {
 		self.len++

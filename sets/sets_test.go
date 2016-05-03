@@ -36,7 +36,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	}
 
 	for _, it := range its {
-		if i := s.Index(0, godbase.Int64Key(it)); i == -1 {
+		if i := s.First(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("not found: %v", it)
 		}
 	}
@@ -71,4 +71,42 @@ func BenchmarkMapHashBasics(b *testing.B) {
 
 func BenchmarkMapBasics(b *testing.B) {
 	runBasicTests(b, NewMap(0), hashits)
+}
+
+func TestMulti(t *testing.T) {
+	var s Sort
+
+	s.Insert(0, godbase.Int64Key(1), false)
+	s.Insert(0, godbase.Int64Key(2), false)
+	s.Insert(0, godbase.Int64Key(3), false)
+	s.Insert(0, godbase.Int64Key(3), true)
+	s.Insert(0, godbase.Int64Key(3), true)
+	s.Insert(0, godbase.Int64Key(4), false)
+	s.Insert(0, godbase.Int64Key(5), false)
+
+	if l := s.Len(); l != 7 {
+		t.Errorf("wrong len after multi insert: %v", l)
+	}
+
+	if i := s.First(0, godbase.Int64Key(3)); i != 2 {
+		t.Errorf("wrong first res for multi: %v", i)
+	}
+
+	if i := s.Last(0, -1, godbase.Int64Key(3)); i != 4 {
+		t.Errorf("wrong last res for multi: %v", i)
+	}
+
+	i, ok := s.DeleteAll(0, 4, godbase.Int64Key(3))
+
+	if i != 2 {
+		t.Errorf("wrong res from multi delete: %v", ok)
+	}
+
+	if ok != 2 {
+		t.Errorf("wrong res from multi delete: %v", ok)
+	}
+
+	if l := s.Len(); l != 5 {
+		t.Errorf("wrong len after multi delete: %v", l)
+	}
 }
