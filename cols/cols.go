@@ -55,11 +55,11 @@ type RefType struct {
 	tbl godbase.Tbl
 }
 
-type StringCol struct {
+type StrCol struct {
 	Basic
 }
 
-type StringType struct {
+type StrType struct {
 	BasicType
 }
 
@@ -97,7 +97,7 @@ var (
 	boolType BoolType
 	fixType FixType
 	int64Type Int64Type
-	stringType StringType
+	stringType StrType
 	timeType TimeType
 	uidType UIdType
 	
@@ -110,7 +110,7 @@ func init() {
 
 	boolType.Init("Bool")
 	int64Type.Init("Int64")
-	stringType.Init("String")
+	stringType.Init("Str")
 	timeType.Init("Time")
 	uidType.Init("UId")
 
@@ -150,7 +150,7 @@ func Ref(tbl godbase.Tbl) godbase.ColType {
 	return new(RefType).Init(tbl)
 }
 
-func String() godbase.ColType {
+func Str() godbase.ColType {
 	return &stringType
 }
 
@@ -182,8 +182,8 @@ func NewRef(n string, t godbase.Tbl) *RefCol {
 	return new(RefCol).Init(n, t)
 }
 
-func NewString(n string) *StringCol {
-	return new(StringCol).Init(n)
+func NewStr(n string) *StrCol {
+	return new(StrCol).Init(n)
 }
 
 func NewTime(n string) *TimeCol {
@@ -210,7 +210,7 @@ func (c *Int64Col) AddToTbl(t godbase.Tbl) {
 	t.AddCol(c)
 }
 
-func (c *StringCol) AddToTbl(t godbase.Tbl) {
+func (c *StrCol) AddToTbl(t godbase.Tbl) {
 	t.AddCol(c)
 }
 
@@ -252,8 +252,8 @@ func (_ *Int64Type) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.Int64Key(v.(int64))
 }
 
-func (_ *StringType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
-	return godbase.StringKey(v.(string))
+func (_ *StrType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
+	return godbase.StrKey(v.(string))
 }
 
 func (_ *TimeType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
@@ -351,8 +351,8 @@ func (_ *Int64Type) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 	godbase.Write(&v, h)
 }
 
-func (_ *StringType) Hash(_ godbase.Rec, v interface{}, h hash.Hash64) {
-	h.Write([]byte(v.(godbase.StringKey)))
+func (_ *StrType) Hash(_ godbase.Rec, v interface{}, h hash.Hash64) {
+	h.Write([]byte(v.(godbase.StrKey)))
 }
 
 func (_ *TimeType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
@@ -426,12 +426,12 @@ func (t *RefType) Init(tbl godbase.Tbl) *RefType {
 	return t
 }
 
-func (c *StringCol) Init(n string) *StringCol {
-	c.Basic.Init(n, String())
+func (c *StrCol) Init(n string) *StrCol {
+	c.Basic.Init(n, Str())
 	return c
 }
 
-func (t *StringType) Init(n string) *StringType {
+func (t *StrType) Init(n string) *StrType {
 	t.BasicType.Init(n)
 	typeRegistry[n] = t
 	return t
@@ -511,7 +511,7 @@ func (_ *Int64Type) Read(_ godbase.Rec, _ godbase.ValSize, r io.Reader) (interfa
 	return v, nil
 }
 
-func (_ *StringType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
+func (_ *StrType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
 	v := make([]byte, s)
 
 	if _, err := io.ReadFull(r, v); err != nil {
@@ -576,7 +576,7 @@ func (_ *Int64Type) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	return WriteBinVal(8, &v, w)
 }
 
-func (_ *StringType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
+func (_ *StrType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 	return WriteBytes([]byte(_v.(string)), w)
 }
 

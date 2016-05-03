@@ -18,6 +18,8 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
+* convert hash sets to ptr receivers?
+
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
@@ -46,6 +48,8 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** copy maps
 
 * add sets.Wrap
+
+* --- post sets
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional

@@ -60,12 +60,12 @@ func TestKeyEq(t *testing.T) {
 
 func TestUniqueInsertDelete(t *testing.T) {
 	foo := cols.NewInt64("foo")
-	bar := cols.NewString("bar")
+	bar := cols.NewStr("bar")
 	foobarIdx := NewHash("idx", []godbase.Col{foo, bar}, true, 100, nil, 1)
 
-	r := recs.New(nil)
-	recs.SetInt64(r, foo, 1)
-	recs.SetString(r, bar, "abc")
+	r := recs.New(godbase.NewUId())
+	r.SetInt64(foo, 1)
+	r.SetStr(bar, "abc")
 
 	if _, err := foobarIdx.Insert(nil, r); err != nil {
 		t.Errorf("insert failed: %v", err)
@@ -75,9 +75,9 @@ func TestUniqueInsertDelete(t *testing.T) {
 		t.Errorf("dup insert of same rec not allowed")
 	}
 
-	rr := recs.New(nil)
-	recs.SetInt64(rr, foo, 1)
-	recs.SetString(rr, bar, "abc")
+	rr := recs.New(godbase.NewUId())
+	rr.SetInt64(foo, 1)
+	rr.SetStr(bar, "abc")
 
 	if _, err := foobarIdx.Insert(nil, rr); err == nil {
 		t.Errorf("dup insert allowed")
@@ -98,22 +98,22 @@ func TestMultiSort(t *testing.T) {
 	orderIdx := NewSort("idx", []godbase.Col{date, amount}, false, nil, 1)
 	d := time.Now().Truncate(time.Hour * 24)
 
-	o1 := recs.New(nil)
-	recs.SetTime(o1, date, d)
-	recs.SetFix(o1, amount, *fix.New(200, 1))
+	o1 := recs.New(godbase.NewUId())
+	o1.SetTime(date, d)
+	o1.SetFix(amount, *fix.New(200, 1))
 	orderIdx.Insert(nil, o1)
 
-	o2 := recs.New(nil)
-	recs.SetTime(o2, date, d)
-	recs.SetFix(o2, amount, *fix.New(300, 1))
+	o2 := recs.New(godbase.NewUId())
+	o2.SetTime(date, d)
+	o2.SetFix(amount, *fix.New(300, 1))
 	orderIdx.Insert(nil, o2)
 
-	o3 := recs.New(nil)
-	recs.SetTime(o3, date, d.AddDate(0, 0, 1))
-	recs.SetFix(o3, amount, *fix.New(100, 1))
+	o3 := recs.New(godbase.NewUId())
+	o3.SetTime(date, d.AddDate(0, 0, 1))
+	o3.SetFix(amount, *fix.New(100, 1))
 	orderIdx.Insert(nil, o3)
 
-	i, _ := orderIdx.Find(nil, orderIdx.Key(recs.Time(o3, date)), nil)
+	i, _ := orderIdx.Find(nil, orderIdx.Key(o3.Time(date)), nil)
 	i = i.Next()
 	if i.Val() != o3.Id() {
 		t.Errorf("invalid find res: %v", i.Key())

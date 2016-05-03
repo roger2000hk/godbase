@@ -1,5 +1,7 @@
 package godbase
 
+type ColValTestFn func(Col, interface{}) bool
+
 type Rec interface {
 	Clear()
 	Clone() Rec
@@ -8,8 +10,7 @@ type Rec interface {
 	Find(Col) (interface{}, bool)
 	Get(Col) interface{}
 	Id() UId
-	Iter() Iter
 	Len() int
-	New() Rec
 	Set(Col, interface{}) interface{}
+	While(ColValTestFn) bool
 }

@@ -9,8 +9,6 @@ import (
 )
 
 type Cx interface {
-	InitRec(Rec) Rec
-	InitRecId(Rec, UId) Rec
 }
 
 type Def interface {

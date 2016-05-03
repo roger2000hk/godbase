@@ -9,12 +9,12 @@ import (
 
 type Suffix struct {
 	Basic
-	cols []*cols.StringCol
+	cols []*cols.StrCol
 	recs maps.Suffix
 	unique bool
 }
 
-func NewSuffix(n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
+func NewSuffix(n string, cs []*cols.StrCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
 	return new(Suffix).Init(n, cs, u, a, ls)
 }
 
@@ -31,7 +31,7 @@ func (i *Suffix) Drop(start godbase.Iter, r godbase.Rec) error {
 
 	for _, col := range i.cols {
 		if v, ok := r.Find(col); ok {
-			if _, ok := i.recs.Delete(start, nil, godbase.StringKey(v.(string)), id); 
+			if _, ok := i.recs.Delete(start, nil, godbase.StrKey(v.(string)), id); 
 			ok != 1 {
 				return recs.NotFound(id)
 			}
@@ -51,7 +51,7 @@ func (self *Suffix) Find(start godbase.Iter, _key godbase.Key, val interface{}) 
 		}
 
 		var ok bool
-		if res, ok = self.recs.Find(start, godbase.StringKey(key[i]), val); ok {
+		if res, ok = self.recs.Find(start, godbase.StrKey(key[i]), val); ok {
 			return res, true
 		}
 	}
@@ -59,7 +59,7 @@ func (self *Suffix) Find(start godbase.Iter, _key godbase.Key, val interface{}) 
 	return res, false
 }
 
-func (i *Suffix) Init(n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
+func (i *Suffix) Init(n string, cs []*cols.StrCol, u bool, a *maps.SlabAlloc, ls int) *Suffix {
 	i.Basic.Init(n)
 	i.recs.Init(a, ls)
 	i.cols = cs
@@ -73,7 +73,7 @@ func (i *Suffix) Insert(start godbase.Iter, r godbase.Rec) (godbase.Iter, error)
 
 	for _, col := range i.cols {
 		if v, ok := r.Find(col); ok {
-			k := godbase.StringKey(v.(string))
+			k := godbase.StrKey(v.(string))
 			var ok bool
 			res, ok = i.recs.Insert(start, k, id, !i.unique)
 			
@@ -99,7 +99,7 @@ func (i *Suffix) Key(vs...interface{}) godbase.Key {
 func (i *Suffix) Load(rec godbase.Rec) (godbase.Rec, error) {
 	for _, col := range i.cols {
 		if v, ok := rec.Find(col); ok {
-			i.recs.Set(godbase.StringKey(v.(string)), rec.Id())
+			i.recs.Set(godbase.StrKey(v.(string)), rec.Id())
 		}
 	}
 

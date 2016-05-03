@@ -4,10 +4,25 @@ import (
 	"github.com/fncodr/godbase"
 )
 
+type SortSlots []Sort
+
 type SortHash struct {
 	fn godbase.HashFn
 	len int64
-	slots []Sort
+	slots SortSlots
+}
+
+func (self SortHash) Clone() godbase.Set {
+	res := SortHash{
+		fn: self.fn,
+		len: self.len,
+		slots: make(SortSlots, len(self.slots)) }
+	
+	for i, s := range self.slots {
+		res.slots[i] = s.Clone().(Sort)
+	}
+
+	return res
 }
 
 func (self SortHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {

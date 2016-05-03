@@ -1,6 +1,9 @@
 package godbase
 
 type Set interface {
+	// returns clone of set
+	Clone() Set
+
 	// deletes key from set, starting at offs
 	// returns updated set and idx, or org set and -1 if not found
 

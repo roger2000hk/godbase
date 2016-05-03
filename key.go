@@ -14,7 +14,7 @@ type Key interface {
 type BoolKey bool
 type FixKey fix.Val
 type Int64Key int64
-type StringKey string
+type StrKey string
 type StringsKey []string
 type TimeKey time.Time
 type UIdKey UId
@@ -32,8 +32,8 @@ func (k Int64Key) Less(other Key) bool {
 	return k < other.(Int64Key)
 }
 
-func (k StringKey) Less(other Key) bool {
-	return strings.Compare(string(k), string(other.(StringKey))) < 0
+func (k StrKey) Less(other Key) bool {
+	return strings.Compare(string(k), string(other.(StrKey))) < 0
 }
 
 func (k StringsKey) Less(_other Key) bool {

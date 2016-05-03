@@ -4,11 +4,27 @@ import (
 	"github.com/fncodr/godbase"
 )
 
+type MapSlots map[interface{}]godbase.Set
+
 type MapHash struct {
 	fn godbase.MapHashFn
 	len int64
 	slotAlloc SlotAlloc
-	slots map[interface{}]godbase.Set
+	slots MapSlots
+}
+
+func (self MapHash) Clone() godbase.Set {
+	res := MapHash{
+		fn: self.fn,
+		len: self.len,
+		slotAlloc: self.slotAlloc,
+		slots: make(MapSlots, len(self.slots)) }
+	
+	for i, s := range self.slots {
+		res.slots[i] = s.Clone()
+	}
+
+	return res
 }
 
 func (self MapHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {

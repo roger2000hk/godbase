@@ -53,7 +53,6 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 
 func BenchmarkSortBasics(b *testing.B) {
  	var s Sort
-
 	runBasicTests(b, godbase.Set(s), randits(10000))
 }
 

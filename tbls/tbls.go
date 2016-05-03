@@ -59,11 +59,11 @@ func AddSortIdx(t godbase.Tbl, n string, cs []godbase.Col, u bool, a *maps.SlabA
 	return i
 }
 
-func AddString(t godbase.Tbl, n string) *cols.StringCol {
-	return t.AddCol(cols.NewString(n)).(*cols.StringCol)
+func AddStr(t godbase.Tbl, n string) *cols.StrCol {
+	return t.AddCol(cols.NewStr(n)).(*cols.StrCol)
 }
 
-func AddSuffixIdx(t godbase.Tbl, n string, cs []*cols.StringCol, u bool, a *maps.SlabAlloc, 
+func AddSuffixIdx(t godbase.Tbl, n string, cs []*cols.StrCol, u bool, a *maps.SlabAlloc, 
 	ls int) godbase.Idx {
 	i := idxs.NewSuffix(n, cs, u, a, ls)
 	t.AddIdx(i)
@@ -120,8 +120,7 @@ func (t *Basic) AddIdx(i godbase.Idx) godbase.Idx {
 	})
 
 	OnUpsert(t, i, func (cx godbase.Cx, rec godbase.Rec) error {
-		var _prev recs.Basic
-		if prev, err := t.Reset(cx.InitRecId(&_prev, rec.Id())); err != nil {
+		if prev, err := t.Reset(recs.New(rec.Id())); err != nil {
 			if _, ok := err.(recs.NotFound); !ok {
 				return err
 			}
@@ -137,7 +136,7 @@ func (t *Basic) AddIdx(i godbase.Idx) godbase.Idx {
 }
 
 func (t *Basic) Col(n string) godbase.Col {
-	if c, ok := t.cols.Get(godbase.StringKey(n)); ok {
+	if c, ok := t.cols.Get(godbase.StrKey(n)); ok {
 		return c.(godbase.Col)
 	}
 	
@@ -149,7 +148,7 @@ func (t *Basic) Cols() godbase.Iter {
 }
 
 func (t *Basic) AddCol(c godbase.Col) godbase.Col {
-	if _, ok := t.cols.Insert(nil, godbase.StringKey(c.Name()), c, false); ok {
+	if _, ok := t.cols.Insert(nil, godbase.StrKey(c.Name()), c, false); ok {
 		return c
 	}
 
@@ -287,7 +286,7 @@ func (t *Basic) Read(rec godbase.Rec, r io.Reader) (godbase.Rec, error) {
 			return nil, err
 		}
 
-		if i, ok := t.cols.Find(nil, godbase.StringKey(n), nil); ok {
+		if i, ok := t.cols.Find(nil, godbase.StrKey(n), nil); ok {
 			c := i.Val().(godbase.Col)
 			var v interface{}
 			
@@ -322,10 +321,10 @@ func (t *Basic) Reset(rec godbase.Rec) (godbase.Rec, error) {
 		return nil, recs.NotFound(id)
 	}
 	
-	for i := rr.(godbase.Rec).Iter(); i.Valid(); i = i.Next() {
-		c := i.Key().(godbase.Col)
-		rec.Set(c, c.CloneVal(i.Val()))
-	}
+	rr.(godbase.Rec).While(func(c godbase.Col, v interface{}) bool {
+		rec.Set(c, c.CloneVal(v))
+		return true
+	})
 	
 	return rec, nil
 }
@@ -349,7 +348,7 @@ func (t *Basic) Load(cx godbase.Cx, rec godbase.Rec) (godbase.Rec, error) {
 
 func (t *Basic) Slurp(cx godbase.Cx, r io.Reader) error {
 	for true {
-		rec, err := t.Read(recs.New(nil), r)
+		rec, err := t.Read(new(recs.Basic), r)
 
 		if err != nil {
 			if err == io.EOF {
@@ -375,7 +374,7 @@ func (t *Basic) Upsert(cx godbase.Cx, rec godbase.Rec) (godbase.Rec, error) {
 	}
 
 	rec.Set(&t.upsertedAt, time.Now())
-	rr := recs.New(t.mapAlloc)
+	rr := new(recs.Basic)
 	
 	for i := t.cols.First(); i.Valid(); i = i.Next() {
 		c := i.Val().(godbase.Col)
@@ -417,11 +416,15 @@ func (t *Basic) Write(rec godbase.Rec, w io.Writer) error {
 		return err
 	}
 
-	for i := rec.Iter(); i.Valid(); i=i.Next() {
-		if err := cols.Write(rec, i.Key().(godbase.Col), i.Val(), w); err != nil {
-			return err
-		}
-	}
+	var err error
 
-	return nil
+	rec.While(func(c godbase.Col, v interface{}) bool {
+		if err = cols.Write(rec, c, v, w); err != nil {
+			return false
+		}
+		
+		return true
+	})
+
+	return err
 }

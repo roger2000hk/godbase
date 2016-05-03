@@ -2,6 +2,7 @@ package tbls
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cxs"
 	"github.com/fncodr/godbase/fix"
@@ -16,7 +17,7 @@ func TestCreate(t *testing.T) {
 	AddBool(foos, "bool")
 	AddFix(foos, "fix", 10)
 	AddInt64(foos, "int64")
-	AddString(foos, "string")
+	AddStr(foos, "string")
 	AddUId(foos, "uid")
 
 	if c := foos.Col("string"); c.Name() != "string" {
@@ -46,24 +47,24 @@ func TestReadWriteRec(t *testing.T) {
 	boolCol := AddBool(foos, "bool")
 	fixCol := AddFix(foos, "fix", 10)
 	int64Col := AddInt64(foos, "int64")
-	stringCol := AddString(foos, "string")
+	strCol := AddStr(foos, "string")
 	timeCol := AddTime(foos, "time")
 	uidCol := AddUId(foos, "uid")
 	
-	r := recs.New(nil)
-	recs.SetFix(r, fixCol, *fix.New(123, 10))
-	recs.SetBool(r, boolCol, true)
-	recs.SetInt64(r, int64Col, 1)
-	recs.SetString(r, stringCol, "abc")
-	recs.SetTime(r, timeCol, time.Now())
-	recs.SetUId(r, uidCol, godbase.NewUId())
+	r := recs.New(godbase.NewUId())
+	r.SetFix(fixCol, *fix.New(123, 10))
+	r.SetBool(boolCol, true)
+	r.SetInt64(int64Col, 1)
+	r.SetStr(strCol, "abc")
+	r.SetTime(timeCol, time.Now())
+	r.SetUId(uidCol, godbase.NewUId())
 
 	var buf bytes.Buffer
 	if err := foos.Write(r, &buf); err != nil {
 		panic(err)
 	}
 
-	rr, err := foos.Read(recs.New(nil), &buf);
+	rr, err := foos.Read(new(recs.Basic), &buf);
 	if err != nil {
 		panic(err)
 	}
@@ -78,7 +79,7 @@ func TestUpsert(t *testing.T) {
 
 	foos := New("foos", nil, 100, nil, 1)
 
-	r := recs.New(nil)
+	r := recs.New(godbase.NewUId())
 
 	if v := foos.Revision(r); v != -1 {
 		t.Errorf("invalid revision before upsert: %v", v)	
@@ -103,7 +104,7 @@ func TestUpsert(t *testing.T) {
 		t.Errorf("invalid upsert time after upsert: %v", v)	
 	}
 
-	if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
+	if rr, err := foos.Reset(recs.New(r.Id())); err != nil {
 		panic(err)
 	} else if !rr.Eq(r) {
 		t.Errorf("invalid rec found: %v/%v", rr, r)
@@ -121,7 +122,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	for i, _ := range rs {
 		var err error
 
-		if rs[i], err = foos.Upsert(cx, recs.New(nil)); err != nil {
+		if rs[i], err = foos.Upsert(cx, recs.New(godbase.NewUId())); err != nil {
 			panic(err)
 		}
 	}
@@ -146,7 +147,7 @@ func TestDumpClearSlurp(t *testing.T) {
 	}
 
 	for _, r := range rs {
-		if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
+		if rr, err := foos.Reset(recs.New(r.Id())); err != nil {
 			panic(err)
 		} else if !r.Eq(rr) {
 			t.Errorf("invalid rec found: %v/%v", rr, r)

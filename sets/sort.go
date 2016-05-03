@@ -8,6 +8,12 @@ import (
 
 type Sort []godbase.Key
 
+func (self Sort) Clone() godbase.Set {
+	res := make(Sort, len(self))
+	copy(res, self)
+	return res
+}
+
 func (self Sort) Delete(offs int, key godbase.Key) (godbase.Set, int) {
 	if i := self.Index(offs, key); i != -1 {
 		if self[i] == key {
@@ -33,7 +39,7 @@ func (self Sort) Index(offs int, key godbase.Key) int {
 func (self Sort) Insert(offs int, key godbase.Key) (godbase.Set, int) {
 	if i := self.Index(offs, key); i != -1 {
 		if self[i] == key {
-			return self, -1
+			return self, i
 		}
 		
 		self = append(self, nil)

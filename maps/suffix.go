@@ -17,11 +17,11 @@ func NewSuffix(a *SlabAlloc, ls int) *Suffix {
 
 // override to delete all suffixes
 func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
-	sk := key.(godbase.StringKey)
+	sk := key.(godbase.StrKey)
 	cnt := 0
 
 	for i := 1; i < len(sk) - 1; i++ {
-		_, sc := m.Sort.Delete(start, end, godbase.StringKey(sk[i:]), val)
+		_, sc := m.Sort.Delete(start, end, godbase.StrKey(sk[i:]), val)
 		cnt += sc
 	}
 
@@ -32,10 +32,10 @@ func (m *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{
 
 // override to insert all suffixes
 func (m *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, multi bool) (godbase.Iter, bool) {
-	sk := key.(godbase.StringKey)
+	sk := key.(godbase.StrKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		m.Sort.Insert(start, godbase.StringKey(sk[i:]), val, multi)
+		m.Sort.Insert(start, godbase.StrKey(sk[i:]), val, multi)
 	}
 
 	return m.Sort.Insert(start, key, val, multi)
