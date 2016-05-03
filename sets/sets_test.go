@@ -32,10 +32,9 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	var i int
 
 	for _, it := range its {
-		if s, i = s.Insert(0, godbase.Int64Key(it)); i == -1 {
+		if i = s.Insert(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("insert failed: %v", it)
 		}
-		//fmt.Printf("%v\n", s)
 	}
 
 	for _, it := range its {
@@ -45,7 +44,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	}
 
 	for _, it := range its {
-		if s, i = s.Delete(0, godbase.Int64Key(it)); i == -1 {
+		if i = s.Delete(0, godbase.Int64Key(it)); i == -1 {
 			b.Errorf("delete failed: %v", it)
 		}
 	}
@@ -53,24 +52,24 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 
 func BenchmarkSortBasics(b *testing.B) {
  	var s Sort
-	runBasicTests(b, godbase.Set(s), randits(10000))
+	runBasicTests(b, &s, randits(10000))
 }
 
 func BenchmarkSortHashBasics(b *testing.B) {
 	var s SortHash
-	s.Init(100000, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
-	runBasicTests(b, &s, randits(100000))
+	s.Init(10000, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
+	runBasicTests(b, &s, randits(200000))
 }
 
 func BenchmarkMapHashBasics(b *testing.B) {
 	var s MapHash
-	s.Init(20000, func(k godbase.Key) interface{} { return k.(godbase.Int64Key) % 200000 }, 
+	s.Init(10000, func(k godbase.Key) interface{} { return k.(godbase.Int64Key) % 10000 }, 
 		func(_ godbase.Key) godbase.Set { return new(Sort) })
-	runBasicTests(b, &s, randits(100000))
+	runBasicTests(b, &s, randits(300000))
 }
 
 func BenchmarkMapBasics(b *testing.B) {
-	its := randits(100000)
+	its := randits(300000)
 	m := make(map[int64]bool)
 
 	for _, it := range its {
@@ -87,3 +86,4 @@ func BenchmarkMapBasics(b *testing.B) {
 		delete(m, it)
 	}
 }
+

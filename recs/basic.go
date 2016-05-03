@@ -36,13 +36,12 @@ func (self *Basic) Clear() {
 
 func (self *Basic) Clone() godbase.Rec {
 	return &Basic {
-		cols: self.cols.Clone().(sets.Sort),
+		cols: *self.cols.Clone().(*sets.Sort),
 		vals: cloneVals(self.vals) }
 }
 
 func (self *Basic) Delete(col godbase.Col) bool {
-	if cs, i := self.cols.Delete(0, col); i != -1 {
-		self.cols = cs.(sets.Sort)
+	if i := self.cols.Delete(0, col); i != -1 {
 		self.vals = delVal(self.vals, i)
 		return true
 	}
@@ -53,7 +52,7 @@ func (self *Basic) Delete(col godbase.Col) bool {
 func (self *Basic) Eq(_other godbase.Rec) bool {
 	other := _other.(*Basic)
 
-	for i, _c := range self.cols {
+	for i, _c := range self.cols.Items() {
 		c := _c.(godbase.Col)
 
 		if v, ok := other.Find(c); !ok || !c.Eq(c.Encode(v), self.vals[i]) {
@@ -66,7 +65,7 @@ func (self *Basic) Eq(_other godbase.Rec) bool {
 
 
 func (self *Basic) Find(col godbase.Col) (interface{}, bool) {
-	if i := self.cols.Index(0, col); i != -1 && self.cols[i] == col {
+	if i := self.cols.Index(0, col); i != -1 && self.cols.Items()[i] == col {
 		return col.Decode(self.vals[i]), true
 	}
 
@@ -109,8 +108,7 @@ func (self *Basic) Ref(col *cols.RefCol, res godbase.Rec) (godbase.Rec, error) {
 }
 
 func (self *Basic) Set(col godbase.Col, val interface{}) interface{} {
-	cs, i := self.cols.Insert(0, col)
-	self.cols = cs.(sets.Sort)
+	i := self.cols.Insert(0, col)
 	self.vals = insertVal(self.vals, i, col.Encode(val))
 	return val
 }
@@ -151,7 +149,7 @@ func (self *Basic) String() string {
 	var buf bytes.Buffer
 	sep := ""
 
-	for i, col := range self.cols {
+	for i, col := range self.cols.Items() {
 		fmt.Fprintf(&buf, "%v%v: %v", sep, col.(godbase.Col).Name(), self.vals[i])
 		sep = ", "
 	}
@@ -168,7 +166,7 @@ func (self *Basic) UId(c *cols.UIdCol) godbase.UId {
 }
 
 func (self *Basic) While(fn godbase.ColValTestFn) bool {
-	for i, col := range self.cols {
+	for i, col := range self.cols.Items() {
 		if !fn(col.(godbase.Col), self.vals[i]) {
 			return false
 		}

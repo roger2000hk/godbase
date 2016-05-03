@@ -7,7 +7,7 @@ type Set interface {
 	// deletes key from set, starting at offs
 	// returns updated set and idx, or org set and -1 if not found
 
-	Delete(int, Key) (Set, int)
+	Delete(int, Key) int
 
 	// returns index of key, starting at offs; or -1 if not found
 	Index(int, Key) int
@@ -15,7 +15,7 @@ type Set interface {
 	// inserts key into set, starting at offs
 	// returns updated set and final index; or org set and -1 if not found
 
-	Insert(int, Key) (Set, int)
+	Insert(int, Key) int
 
 	// returns number of elems in set
 	Len() int64

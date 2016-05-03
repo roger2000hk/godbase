@@ -27,6 +27,8 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** commit
 
 
+* add Set.Shrink to remove end nils
+
 * add Set.Range(start, end Key) Sort
 ** slice set
 

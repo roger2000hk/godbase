@@ -2,7 +2,7 @@ package tbls
 
 import (
 	"bytes"
-	"fmt"
+	//"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cxs"
 	"github.com/fncodr/godbase/fix"

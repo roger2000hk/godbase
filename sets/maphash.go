@@ -27,16 +27,15 @@ func (self *MapHash) Clone() godbase.Set {
 	return res
 }
 
-func (self *MapHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {
+func (self *MapHash) Delete(offs int, key godbase.Key) int {
 	si := self.fn(key)
 
-	if s, i := self.slot(key, si).Delete(offs, key); i != -1 {
-		self.slots[si] = s.(Sort)
+	if i := self.slot(key, si).Delete(offs, key); i != -1 {
 		self.len--
-		return self, i
+		return i
 	}
 
-	return self, -1
+	return -1
 }
 
 func (self *MapHash) Index(offs int, key godbase.Key) int {
@@ -50,16 +49,15 @@ func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
 	return self
 }
 
-func (self *MapHash) Insert(offs int, key godbase.Key) (godbase.Set, int) {
+func (self *MapHash) Insert(offs int, key godbase.Key) int {
 	si := self.fn(key)
 
-	if s, i := self.slot(key, si).Insert(offs, key); i != -1 {
-		self.slots[si] = s
+	if i := self.slot(key, si).Insert(offs, key); i != -1 {
 		self.len++
-		return self, i
+		return i
 	}
 	
-	return self, -1
+	return -1
 }
 
 func (self *MapHash) Len() int64 {
