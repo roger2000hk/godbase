@@ -18,6 +18,11 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
+* add RecCol + test
+** read/write literal recs
+** cols/rec.go
+*** move all cols to separate files
+
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
