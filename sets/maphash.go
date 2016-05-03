@@ -13,8 +13,8 @@ type MapHash struct {
 	slots MapSlots
 }
 
-func (self MapHash) Clone() godbase.Set {
-	res := MapHash{
+func (self *MapHash) Clone() godbase.Set {
+	res := &MapHash{
 		fn: self.fn,
 		len: self.len,
 		slotAlloc: self.slotAlloc,
@@ -27,7 +27,7 @@ func (self MapHash) Clone() godbase.Set {
 	return res
 }
 
-func (self MapHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {
+func (self *MapHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {
 	si := self.fn(key)
 
 	if s, i := self.slot(key, si).Delete(offs, key); i != -1 {
@@ -39,7 +39,7 @@ func (self MapHash) Delete(offs int, key godbase.Key) (godbase.Set, int) {
 	return self, -1
 }
 
-func (self MapHash) Index(offs int, key godbase.Key) int {
+func (self *MapHash) Index(offs int, key godbase.Key) int {
 	return self.slot(key, self.fn(key)).Index(offs, key)	
 }
 
@@ -50,7 +50,7 @@ func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
 	return self
 }
 
-func (self MapHash) Insert(offs int, key godbase.Key) (godbase.Set, int) {
+func (self *MapHash) Insert(offs int, key godbase.Key) (godbase.Set, int) {
 	si := self.fn(key)
 
 	if s, i := self.slot(key, si).Insert(offs, key); i != -1 {
@@ -62,11 +62,11 @@ func (self MapHash) Insert(offs int, key godbase.Key) (godbase.Set, int) {
 	return self, -1
 }
 
-func (self MapHash) Len() int64 {
+func (self *MapHash) Len() int64 {
 	return self.len
 }
 
-func (self MapHash) slot(key godbase.Key, i interface{}) godbase.Set {
+func (self *MapHash) slot(key godbase.Key, i interface{}) godbase.Set {
 	s, ok := self.slots[i]
 
 	if !ok {
