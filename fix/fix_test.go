@@ -9,12 +9,8 @@ func TestAdd(t *testing.T) {
 	var res Val
 	res.AddInt64(*New(1234, 100), 1234, 10)
 
-	if tv := res.Trunc(); tv != 135 {
-		t.Errorf("invalid trunc: %v", tv)
-	}
-
-	if fv := res.Frac(); fv != 74 {
-		t.Errorf("invalid frac: %v", fv)
+	if tr, fr := res.Frac(); tr != 135 || fr != 74 {
+		t.Errorf("invalid frac: %v/%v", tr, fr)
 	}
 
 	if s := res.String(); s != "135.74" {
@@ -36,7 +32,7 @@ func TestFloat64(t *testing.T) {
 	var v Val
 	v.AddFloat64(*New(1234, 100), 12.34)
 
-	if res := v.Float64(); res != 24.67 {
+	if res := v.Float64(); res != 24.68 {
 		t.Errorf("invalid float64 res: %v", res)
 	}
 }
@@ -57,12 +53,8 @@ func TestSub(t *testing.T) {
 	var res Val
 	res.SubInt64(*New(1234, 10), 1234, 100)
 
-	if tv := res.Trunc(); tv != 111 {
-		t.Errorf("invalid trunc: %v", tv)
-	}
-
-	if fv := res.Frac(); fv != 0 {
-		t.Errorf("invalid frac: %v", fv)
+	if tr, fr := res.Frac(); tr != 111 || fr != 0 {
+		t.Errorf("invalid trunc: %v/%v", tr, fr)
 	}
 
 	if s := res.String(); s != "111.0" {

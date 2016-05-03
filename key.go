@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/fncodr/godbase/fix"
 	"strings"
-	"time"
 )
 
 type Key interface {
@@ -19,7 +18,9 @@ type KVMapFn func (Key, interface{}) (Key, interface{})
 type KVTestFn func (Key, interface{}) bool
 type StrKey string
 type StringsKey []string
-type TimeKey time.Time
+type TimeKey struct {
+	Secs, NSecs int64
+}
 type UIdKey UId
 
 func (k BoolKey) Less(other Key) bool {
@@ -51,8 +52,9 @@ func (k StringsKey) Less(_other Key) bool {
 	return false
 }
 
-func (k TimeKey) Less(other Key) bool {
-	return time.Time(k).Before(time.Time(other.(TimeKey)))
+func (k TimeKey) Less(_other Key) bool {
+	other := _other.(TimeKey)
+	return k.Secs < other.Secs || (k.Secs == other.Secs && k.NSecs < other.NSecs)
 }
 
 func (k UIdKey) Less(_other Key) bool {

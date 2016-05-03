@@ -1,6 +1,7 @@
 package idxs
 
 import (
+	//"fmt"
 	"github.com/fncodr/godbase"
 	"github.com/fncodr/godbase/cols"
 	"github.com/fncodr/godbase/fix"

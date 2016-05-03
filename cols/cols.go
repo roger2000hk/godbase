@@ -8,7 +8,6 @@ import (
 	"github.com/fncodr/godbase/defs"
 	"hash"
 	"io"
-	"math/big"
 	"time"
 )
 
@@ -35,7 +34,7 @@ type FixCol struct {
 
 type FixType struct {
 	BasicType
-	denom big.Int
+	denom int64
 }
 
 type Int64Col struct {
@@ -240,12 +239,11 @@ func (_ *BoolType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 
 func (t *FixType) AsKey(_ godbase.Rec, _v interface{}) godbase.Key {
 	if v, ok := _v.(fix.Val); ok {
+		v.Scale(t.denom)
 		return godbase.FixKey(v)
 	}
 
-	var kv fix.Val
-	kv.Init(_v.(big.Int), t.denom)
-	return godbase.FixKey(kv)
+	return godbase.Int64Key(_v.(int64))
 }
 
 func (_ *Int64Type) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
@@ -256,8 +254,9 @@ func (_ *StrType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.StrKey(v.(string))
 }
 
-func (_ *TimeType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
-	return godbase.TimeKey(v.(time.Time))
+func (_ *TimeType) AsKey(_ godbase.Rec, _v interface{}) godbase.Key {
+	v := _v.(time.Time)
+	return godbase.TimeKey{Secs: v.Unix(), NSecs: v.UnixNano()}
 }
 
 func (_ *UIdType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
@@ -276,7 +275,7 @@ func (_ *BasicType) CloneVal(v interface{}) interface{} {
 	return v
 }
 
-func (c *FixCol) Denom() big.Int {
+func (c *FixCol) Denom() int64 {
 	return c.colType.(*FixType).denom
 }
 
@@ -294,7 +293,7 @@ func (_ *BasicType) Decode(v interface{}) interface{} {
 
 func (t *FixType) Decode(v interface{}) interface{} {
 	var res fix.Val
-	res.Init(v.(big.Int), t.denom)
+	res.Init(v.(int64), t.denom)
 	return res
 }
 
@@ -304,7 +303,7 @@ func (_ *BasicType) Encode(v interface{}) interface{} {
 
 func (t *FixType) Encode(_v interface{}) interface{} {
 	if v, ok := _v.(fix.Val); ok {
-		return v.Scale(t.denom.Int64()).Num()
+		return v.Scale(t.denom).Num()
 	}
 
 	return _v
@@ -323,8 +322,7 @@ func (_ *BasicType) Eq(l, r interface{}) bool {
 }
 
 func (_ *FixType) Eq(_l, _r interface{}) bool {
-	l, r := _l.(big.Int), _r.(big.Int)
-	return l.Cmp(&r) == 0
+	return _l.(int64) == _r.(int64)
 }
 
 func (c *Basic) Eq(l, r interface{}) bool {
@@ -341,9 +339,8 @@ func (_ *BoolType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
 }
 
 func (_ *FixType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
-	v := fix.Val(_v.(godbase.FixKey))
-	d := v.Num()
-	h.Write(d.Bytes())
+	v := _v.(godbase.Int64Key)
+	godbase.Write(&v, h)
 }
 
 func (_ *Int64Type) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
@@ -356,8 +353,10 @@ func (_ *StrType) Hash(_ godbase.Rec, v interface{}, h hash.Hash64) {
 }
 
 func (_ *TimeType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
-	v := time.Time(_v.(godbase.TimeKey)).Unix()
-	godbase.Write(&v, h)
+	v := _v.(godbase.TimeKey)
+
+	godbase.Write(&v.Secs, h)
+	godbase.Write(&v.NSecs, h)
 }
 
 func (_ *UIdType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
@@ -398,7 +397,7 @@ func (c *FixCol) Init(n string, d int64) *FixCol {
 
 func (t *FixType) Init(d int64) *FixType {
 	t.BasicType.Init(fmt.Sprintf("Fix(%v)", d))
-	t.denom.SetInt64(d)
+	t.denom = d
 	typeRegistry[t.Name()] = t
 	return t
 }
@@ -490,14 +489,12 @@ func (_ *BoolType) Read(_ godbase.Rec, _ godbase.ValSize, r io.Reader) (interfac
 }
 
 func (_ *FixType) Read(_ godbase.Rec, s godbase.ValSize, r io.Reader) (interface{}, error) {
-	bs := make([]byte, s)
+	var v int64
 
-	if _, err := io.ReadFull(r, bs); err != nil {
+	if err := godbase.Read(&v, r); err != nil {
 		return nil, err
 	}
-	
-	var v big.Int
-	v.SetBytes(bs)
+
 	return v, nil
 }
 
@@ -567,8 +564,8 @@ func (_ *BoolType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
 }
 
 func (_ *FixType) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
-	v := _v.(big.Int)
-	return WriteBytes(v.Bytes(), w)
+	v := _v.(int64)
+	return WriteBinVal(8, &v, w)
 }
 
 func (_ *Int64Type) Write(_ godbase.Rec, _v interface{}, w io.Writer) error {
