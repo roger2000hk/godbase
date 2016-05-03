@@ -25,8 +25,8 @@ func TestDumpClearSlurp(t *testing.T) {
 	rs := make([]godbase.Rec, nrecs)
 
 	for i, _ := range rs {
-		r := recs.New(nil)
-		recs.SetInt64(r, bar, int64(i))
+		r := recs.New(godbase.NewUId())
+		r.SetInt64(bar, int64(i))
 		
 		var err error
 		if rs[i], err = foos.Upsert(cx, r); err != nil {
@@ -65,7 +65,7 @@ func TestDumpClearSlurp(t *testing.T) {
 		// Get() returns rec for id or err
 		// Eq() compares vals for all cols in receiver with param
 
-		if rr, err := foos.Reset(cx.InitRecId(new(recs.Basic), r.Id())); err != nil {
+		if rr, err := foos.Reset(recs.New(r.Id())); err != nil {
 			panic(err)
 		} else if !r.Eq(rr) {
 			t.Errorf("invalid loaded rec: %v/%v", rr, r)
