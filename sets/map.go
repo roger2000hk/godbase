@@ -4,14 +4,20 @@ import (
 	"github.com/fncodr/godbase"
 )
 
-type Map map[interface{}]bool
+type Map map[godbase.Key]bool
 
 func NewMap(s int) Map {
 	return make(Map, s)
 }
 
 func (self Map) Clone() godbase.Set {
-	panic("Clone() not supported")
+	res := make(Map, len(self))
+
+	for k, _ := range self {
+		res[k] = true
+	}
+
+	return res
 }
 
 func (self Map) Delete(_ int, k godbase.Key) int {
@@ -35,6 +41,10 @@ func (self Map) First(_ int, k godbase.Key) int {
 	return -1
 }
 
+func (self Map) Get(k godbase.Key, i int) godbase.Key {
+	panic("Get() not supported")
+}
+
 func (self Map) Last(_, _ int, k godbase.Key) int {
 	panic("Last() not supported")
 }
@@ -56,4 +66,14 @@ func (self Map) Insert(_ int, k godbase.Key, multi bool) (int, bool) {
 
 func (self Map) Len() int64 {
 	return int64(len(self))
+}
+
+func (self Map) While(fn godbase.SetTestFn) bool {
+	for k, _ := range self {
+		if !fn(-1, k) {
+			return false
+		}
+	}
+	
+	return true
 }

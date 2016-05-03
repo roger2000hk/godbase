@@ -48,6 +48,11 @@ func (self *SortHash) First(start int, key godbase.Key) int {
 	return self.slots[si].First(start, key)	
 }
 
+func (self *SortHash) Get(key godbase.Key, i int) godbase.Key {
+	si := self.fn(key) % uint64(len(self.slots))
+	return self.slots[si].Get(key, i)
+}
+
 func (self *SortHash) Init(sc int, fn godbase.HashFn) *SortHash {
 	self.fn = fn
 	self.slots = make([]Sort, sc)
@@ -72,4 +77,14 @@ func (self *SortHash) Insert(start int, key godbase.Key, multi bool) (int, bool)
 
 func (self *SortHash) Len() int64 {
 	return self.len
+}
+
+func (self *SortHash) While(fn godbase.SetTestFn) bool {
+	for _, s := range self.slots {
+		if !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
 }

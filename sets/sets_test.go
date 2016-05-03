@@ -70,7 +70,29 @@ func BenchmarkMapHashBasics(b *testing.B) {
 }
 
 func BenchmarkMapBasics(b *testing.B) {
-	runBasicTests(b, NewMap(0), hashits)
+	runBasicTests(b, NewMap(len(hashits)), hashits)
+}
+
+func runCloneTests(b *testing.B, s godbase.Set, its []int64) {
+	for _, it := range its {
+		if _, ok := s.Insert(0, godbase.Int64Key(it), false); !ok {
+			b.Errorf("insert failed: %v", it)
+		}
+	}
+	
+	for i := 0; i < 5000; i++ {
+		s = s.Clone()
+	}
+}
+
+var cloneits = sortits(1000)
+
+func BenchmarkSortClone(b *testing.B) {
+	runCloneTests(b, new(Sort).Resize(len(cloneits)), cloneits)
+}
+
+func BenchmarkMapClone(b *testing.B) {
+	runCloneTests(b, NewMap(len(cloneits)), cloneits)
 }
 
 func TestMulti(t *testing.T) {

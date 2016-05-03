@@ -13,7 +13,10 @@ type Key interface {
 
 type BoolKey bool
 type FixKey fix.Val
+type SetTestFn func (int, Key) bool
 type Int64Key int64
+type KVMapFn func (Key, interface{}) (Key, interface{})
+type KVTestFn func (Key, interface{}) bool
 type StrKey string
 type StringsKey []string
 type TimeKey time.Time

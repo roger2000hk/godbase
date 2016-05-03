@@ -52,20 +52,20 @@ func (self *Basic) Delete(col godbase.Col) bool {
 func (self *Basic) Eq(_other godbase.Rec) bool {
 	other := _other.(*Basic)
 
-	for i, _c := range self.cols.Items() {
+	return self.cols.While(func (i int, _c godbase.Key) bool {
 		c := _c.(godbase.Col)
 
 		if v, ok := other.Find(c); !ok || !c.Eq(c.Encode(v), self.vals[i]) {
 			return false
 		}
-	}
-
-	return true
+		
+		return true
+	})
 }
 
 
 func (self *Basic) Find(col godbase.Col) (interface{}, bool) {
-	if i := self.cols.First(0, col); i != -1 && self.cols.Items()[i] == col {
+	if i := self.cols.First(0, col); i != -1 {
 		return col.Decode(self.vals[i]), true
 	}
 
@@ -154,10 +154,11 @@ func (self *Basic) String() string {
 	var buf bytes.Buffer
 	sep := ""
 
-	for i, col := range self.cols.Items() {
-		fmt.Fprintf(&buf, "%v%v: %v", sep, col.(godbase.Col).Name(), self.vals[i])
+	self.cols.While(func (i int, c godbase.Key) bool {
+		fmt.Fprintf(&buf, "%v%v: %v", sep, c.(godbase.Col).Name(), self.vals[i])
 		sep = ", "
-	}
+		return true
+	})
 
 	return buf.String()
 }
@@ -171,13 +172,13 @@ func (self *Basic) UId(c *cols.UIdCol) godbase.UId {
 }
 
 func (self *Basic) While(fn godbase.ColValTestFn) bool {
-	for i, col := range self.cols.Items() {
-		if !fn(col.(godbase.Col), self.vals[i]) {
+	return self.cols.While(func (i int, c godbase.Key) bool {
+		if !fn(c.(godbase.Col), self.vals[i]) {
 			return false
 		}
-	}
 
-	return true
+		return true
+	})
 }
 
 func cloneVals(in Vals) Vals {

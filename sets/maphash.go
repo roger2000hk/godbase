@@ -49,8 +49,8 @@ func (self *MapHash) First(start int, key godbase.Key) int {
 	return self.slot(key, self.fn(key)).First(start, key)	
 }
 
-func (self *MapHash) Last(start, end int, key godbase.Key) int {
-	return self.slot(key, self.fn(key)).Last(start, end, key)	
+func (self *MapHash) Get(key godbase.Key, i int) godbase.Key {
+	return self.slot(key, self.fn(key)).Get(key, i)
 }
 
 func (self *MapHash) Init(sc int, fn godbase.MapHashFn, sa SlotAlloc) *MapHash {
@@ -70,8 +70,22 @@ func (self *MapHash) Insert(start int, key godbase.Key, multi bool) (int, bool) 
 	return i, ok
 }
 
+func (self *MapHash) Last(start, end int, key godbase.Key) int {
+	return self.slot(key, self.fn(key)).Last(start, end, key)	
+}
+
 func (self *MapHash) Len() int64 {
 	return self.len
+}
+
+func (self *MapHash) While(fn godbase.SetTestFn) bool {
+	for _, s := range self.slots {
+		if !s.While(fn) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func (self *MapHash) slot(key godbase.Key, i interface{}) godbase.Set {

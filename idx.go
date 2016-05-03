@@ -10,6 +10,3 @@ type Idx interface {
 	Key(...interface{}) Key
 	RecKey(r Rec) Key
 }
-
-type KVMapFn func (Key, interface{}) (Key, interface{})
-type KVTestFn func (Key, interface{}) bool

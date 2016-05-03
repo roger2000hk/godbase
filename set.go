@@ -17,6 +17,9 @@ type Set interface {
 	// returns first index of key, starting at start; or -1 if not found
 	First(start int, key Key) int
 
+	// returns elem at index i, within slot for hash sets; key is ignored for sorted sets
+	Get(key Key, i int) Key
+
 	// returns last index of key, between start and end (exclusive); or -1 if not found
 	Last(start, end int, key Key) int
 
@@ -28,4 +31,7 @@ type Set interface {
 
 	// returns number of elems in set
 	Len() int64
+
+	// calls fn with successive elems until it returns false; returns false on early exit
+	While(SetTestFn) bool
 }
