@@ -18,6 +18,8 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
+* rename all db defs in remento to lowercase
+
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
