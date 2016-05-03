@@ -52,9 +52,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 
 func BenchmarkSortBasics(b *testing.B) {
 	const nreps = 20000
- 	var s Sort
-	s.Resize(nreps)
-	runBasicTests(b, &s, randits(nreps))
+	runBasicTests(b, new(Sort).Resize(nreps), randits(nreps))
 }
 
 var hashslots = 100000
@@ -76,4 +74,3 @@ func BenchmarkMapHashBasics(b *testing.B) {
 func BenchmarkMapBasics(b *testing.B) {
 	runBasicTests(b, NewMap(0), hashits)
 }
-

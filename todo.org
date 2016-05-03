@@ -18,6 +18,13 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
+* add multi support to sets.Sort
+** multi param to insert
+*** don't bail out if found when true
+** FirstIndex(start, key) to Set
+** Add DeleteAll(start, end, key)
+*** use FirstIndex()
+
 * change Key interface from Less to Cmp
 ** use Cmp instead of == for comparing keys in map/set imps
 ** compare perf
