@@ -17,7 +17,7 @@ func TestSuffix(t *testing.T) {
 	s.Insert(0, godbase.StrKey("abcdefghi"), false)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i  := s.First(0, godbase.StrKey("def"))
+	i  := s.First(0, godbase.StrKey("de"))
 	
 	// then we get all matching suffixes in order
 	if k := s.Get(nil, i).(godbase.StrKey); k != "def" {
@@ -31,7 +31,7 @@ func TestSuffix(t *testing.T) {
 
 	// check that Delete removes all suffixes
 
-	if _, cnt := s.DeleteAll(0, -1, godbase.StrKey("abcdefghi")); cnt != 8 {
+	if _, cnt := s.DeleteAll(0, 0, godbase.StrKey("abcdefghi")); cnt != 8 {
 		t.Errorf("invalid delete res: %v", cnt)
 	}
 }

@@ -107,7 +107,7 @@ func TestMulti(t *testing.T) {
 		t.Errorf("wrong first res for multi: %v", i)
 	}
 
-	if i := s.Last(0, -1, godbase.Int64Key(3)); i != 4 {
+	if i := s.Last(0, 0, godbase.Int64Key(3)); i != 4 {
 		t.Errorf("wrong last res for multi: %v", i)
 	}
 
