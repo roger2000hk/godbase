@@ -87,27 +87,12 @@ func BenchmarkFullSlabHash(t *testing.B) {
 		fullIts1, fullIts2, fullIts3)
 }
 
-func BenchmarkFullESortHash(t *testing.B) {
-	runFullTests(t, "ESortHash", NewHash(NewESortSlots(testESlots, genHash)), 
+func BenchmarkFullSortHash(t *testing.B) {
+	runFullTests(t, "SortHash", NewSortHash(testESlots, genHash, testHashLevels), 
 		fullIts1, fullIts2, fullIts3)
 }
 
-func BenchmarkFullSortBasicHash(t *testing.B) {
-	runFullTests(t, "SortBasicHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
-		fullIts1, fullIts2, fullIts3) 
-}
-
-func BenchmarkFullESortBasicHash(t *testing.B) {
-	runFullTests(t, "ESortBasicHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
-		fullIts1, fullIts2, fullIts3) 
-}
-
-func BenchmarkFullSortMapHash(t *testing.B) {
-	runFullTests(t, "SortMapHash", NewHash(NewMapSlots(testSlots, genMapHash, allocSlab)), 
-		fullIts1, fullIts2, fullIts3) 
-}
-
-func BenchmarkFullESortMapHash(t *testing.B) {
-	runFullTests(t, "ESortMapHash", NewHash(NewMapSlots(testESlots, genMapHash, allocESort)), 
+func BenchmarkFullESortHash(t *testing.B) {
+	runFullTests(t, "ESortHash", NewESortHash(testESlots, genHash), 
 		fullIts1, fullIts2, fullIts3)
 }

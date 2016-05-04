@@ -18,8 +18,13 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
-* replace maps.hash slot mess with one file per imp
-** Hash, ESortHash, SortHash, MapHash, HashHash
+* add sets.Suffix
+** copy maps
+
+* add sets.Wrap
+
+* document maps/sets
+** base on map docs
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
@@ -38,18 +43,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** read/write literal recs
 ** cols/rec.go
 
-* add sets.Hash
-** use array of godbase.Set & Alloc
-
-* add sets.HashHash
-** use array of Hash
-
-* add sets.Suffix
-** copy maps
-
-* add sets.Wrap
-
-* --- post sets
 
 * add Idx.FindRange(start, end key, out *sets.Hash) *sets.Hash
 ** start/end optional

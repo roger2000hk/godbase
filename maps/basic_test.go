@@ -83,40 +83,14 @@ func TestConstructors(t *testing.T) {
 	// sorted map with embedded nodes
 	NewESort()
 
-	// 1000 slots backed by a native array and generic slot allocator
-	// could be used in any of the following examples,
-	// but specializing the slot type allows allocating all slots at once and
-	// accessing by value which makes a difference in some scenarios.
-	// the allocator receives the key as param which enables choosing
-	// differend kinds of slot chains for different keys.
-
-	sortAlloc := func (_ godbase.Key) godbase.Map { return NewSort(2) }
-	as := NewSlots(1000, genHash, sortAlloc)
-	NewHash(as)
-
-	// 1000 slots backed by a native map and generic slot allocator
-	// could also be used in any of the following examples, since it too
-	// uses a generic allocator to allocate slots on demand.
-	// what map slots bring to the table, is the ability to use any kind of
-	// value except slices as hash keys; which is useful when
-	// mapping your keys to an integer is problematic.
-
-	ms := NewMapSlots(1000, genMapHash, sortAlloc)
-	NewHash(ms)
-
-	// 1000 slots backed by 2 level maps with slab allocated nodes
+	// 1000 hash slots backed by 2 level maps with slab allocated nodes
 	NewSlabHash(1000, genHash, a, 2)
 
+	// 1000 hash slots backed by 2 level maps with separately allocated nodes
+	NewSortHash(1000, genHash, 2)
+
 	// 1000 hash slots backed by maps with embedded nodes
-	ess := NewESortSlots(1000, genHash)
-	NewHash(ess)
-
-	// 1000 hash slots backed by hash maps with 100 embedded node slots
-	hs := NewHashSlots(1000, genHash, func (_ godbase.Key) Slots { 
-		return NewESortSlots(100, genHash) 
-	})
-
-	NewHash(hs)
+	NewESortHash(1000, genHash)
 }
 
 var basicIts = randItems(testReps)
@@ -198,26 +172,10 @@ func BenchmarkBasicSlabHash(t *testing.B) {
 		basicIts) 
 }
 
+func BenchmarkBasicSortHash(t *testing.B) {
+	runBasicTests(t, "SortHash", NewSortHash(testSlots, genHash, testHashLevels), basicIts) 
+}
+
 func BenchmarkBasicESortHash(t *testing.B) {
-	runBasicTests(t, "ESortHash", NewHash(NewESortSlots(testESlots, genHash)), basicIts) 
-}
-
-func BenchmarkBasicSortBasicHash(t *testing.B) {
-	runBasicTests(t, "SortBasicHash", NewHash(NewSlots(testSlots, genHash, allocSlab)), 
-		basicIts) 
-}
-
-func BenchmarkBasicESortBasicHash(t *testing.B) {
-	runBasicTests(t, "ESortBasicHash", NewHash(NewSlots(testESlots, genHash, allocESort)), 
-		basicIts) 
-}
-
-func BenchmarkBasicSortMapHash(t *testing.B) {
-	runBasicTests(t, "SortMapHash", NewHash(NewMapSlots(testSlots, genMapHash, allocSlab)), 
-		basicIts) 
-}
-
-func BenchmarkBasicESortMapHash(t *testing.B) {
-	runBasicTests(t, "ESortMapHash", NewHash(NewMapSlots(testESlots, genMapHash, allocESort)), 
-		basicIts) 
+	runBasicTests(t, "ESortHash", NewESortHash(testESlots, genHash), basicIts) 
 }

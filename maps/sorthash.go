@@ -22,14 +22,6 @@ func NewSortHash(sc int, fn godbase.HashFn, ls int) *SortHash {
 	return NewSlabHash(sc, fn, nil, ls)
 }
 
-func (self *SortHash) Init(sc int, fn godbase.HashFn, a *SlabAlloc, ls int) *SortHash {
-	self.alloc = a
-	self.fn = fn
-	self.levels = ls
-	self.slots = make([]Sort, sc)
-	return self
-}
-
 func (self *SortHash) Clear() {
 	for i := range self.slots {
 		self.slots[i].Clear()
@@ -74,6 +66,15 @@ func (self *SortHash) GetSlot(key godbase.Key, create bool) godbase.Map {
 	}
 
 	return nil
+}
+
+func (self *SortHash) Init(sc int, fn godbase.HashFn, a *SlabAlloc, ls int) *SortHash {
+	self.alloc = a
+	self.fn = fn
+	self.levels = ls
+	self.slots = make([]Sort, sc)
+	self.isInit = true
+	return self
 }
 
 func (self *SortHash) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
