@@ -21,11 +21,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * replace maps.hash slot mess with one file per imp
 ** Hash, ESortHash, SortHash, MapHash, HashHash
 
-* add RecCol + test
-** read/write literal recs
-** cols/rec.go
-*** move all cols to separate files
-
 * add Set.Shrink to remove end nils
 
 * add sets.Hash
@@ -33,11 +28,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
 * add sets.HashHash
 ** use array of Hash
-
-* add Set.Clone() Set
-** alloc new and copy for Sort
-** delegate for Hash
-*** only call slot.Clone() if len > 0
 
 * add sets.Suffix
 ** copy maps
@@ -64,13 +54,17 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 *** add test** add Rc.SumPrices(cx, start, end) []Price
 
 
+* add RecCol + test
+** read/write literal recs
+** cols/rec.go
+*** move all cols to separate files
+
+
 * add godbase.dbs package
 ** add godbase.Db with MapAlloc
 ** add dbs.Basic
 ** replaces global MapAlloc in remento
 
-* add sets.MapHash/HashSlots like map
- 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
 
@@ -87,13 +81,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** call in remento_test.init()
 
 * add ref test
-
-* rename fix.New to fix.NewInt64
-* add fix.NewFloat64
-* rename fix.Init to fix.SetBig
-* add SetFloat64 / SetInt64
-* add fix benchmark based on big.Rat
-
 * add SliceCol
 ** take col type as param to cols.Slice()
 
