@@ -1,4 +1,4 @@
-* fix Rc.Avail tests
+* debug Rc.Avail and make tests pass
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
