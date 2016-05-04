@@ -7,8 +7,8 @@ This package contains two implementations of sorted maps based on deterministic 
 ### status
 Basic functionality and testing in place, and evolving on a daily basis. The rest of godbase is currently being built on top, there are plenty of examples in the other packages.
 
-### benchmarks
-Several parameters are available for tuning the tests, they are defined in test.go
+### performance
+The short story is that sorted implementations are around 3-5 times slower than native maps for 100k elems; a properly tuned hashed one is comparable to a native map. Several parameters are available for tuning the benchmarks, they are defined in test.go
 
 ```
 	go test -bench=.*
@@ -128,11 +128,11 @@ type KVTestFn func (Key, interface{}) bool
 
 type testKey int
 
-func (k testKey) Less(other Key) bool {
+func (k testKey) Less(other godbase.Key) bool {
 	return k < other.(testKey)
 }
 
-func genHash(k Key) uint64 { return uint64(k.(testKey)) }
+func genHash(k godbase.Key) uint64 { return uint64(k.(testKey)) }
 
 func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,

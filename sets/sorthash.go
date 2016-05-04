@@ -12,6 +12,10 @@ type SortHash struct {
 	slots SortSlots
 }
 
+func NewSortHash(sc int, fn godbase.HashFn) *SortHash {
+	return new(SortHash).Init(sc, fn)
+}
+
 func (self *SortHash) Clone() godbase.Set {
 	res := &SortHash{
 		fn: self.fn,
@@ -79,7 +83,7 @@ func (self *SortHash) Len() int64 {
 	return self.len
 }
 
-func (self *SortHash) While(fn godbase.SetTestFn) bool {
+func (self *SortHash) While(fn godbase.IKTestFn) bool {
 	for _, s := range self.slots {
 		if !s.While(fn) {
 			return false

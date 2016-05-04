@@ -1,7 +1,6 @@
 package maps
 
-// package godbase/maps implements hashed and sorted maps based on skip lists with optionally 
-// slab allocated or embedded nodes
+// package maps implements sorted & hashed maps based on deterministic skip lists
 
 import (
 	"github.com/fncodr/godbase"

@@ -14,6 +14,10 @@ type Sort struct {
 	len int
 }
 
+func NewSort() *Sort {
+	return new(Sort)
+}
+
 func (self *Sort) Capac() int {
 	return len(self.elems)
 }
@@ -134,7 +138,7 @@ func (self *Sort) Resize(s int) *Sort {
 	return self
 }
 
-func (self *Sort) While(fn godbase.SetTestFn) bool {
+func (self *Sort) While(fn godbase.IKTestFn) bool {
 	for i, k := range self.elems {
 		if !fn(i, k) {
 			return false

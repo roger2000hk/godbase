@@ -68,7 +68,7 @@ func (self Map) Len() int64 {
 	return int64(len(self))
 }
 
-func (self Map) While(fn godbase.SetTestFn) bool {
+func (self Map) While(fn godbase.IKTestFn) bool {
 	for k, _ := range self {
 		if !fn(-1, k) {
 			return false

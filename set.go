@@ -32,5 +32,5 @@ type Set interface {
 	Len() int64
 
 	// calls fn with successive elems until it returns false; returns false on early exit
-	While(SetTestFn) bool
+	While(IKTestFn) bool
 }
