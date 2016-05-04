@@ -18,8 +18,22 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
+* attempt to remove time key struct again
+** run idxs tests
+
 * replace maps.hash slot mess with one file per imp
 ** Hash, ESortHash, SortHash, MapHash, HashHash
+
+* add *Rc.NewResv(start, end, capac) *Resv
+** add test
+
+* add *Rc.Update(start, end, total, avail) (big.Rat, error)
+** return min of avail / total if total != 0
+* add resv test
+
+* add resv loop perf test with unlimited resources
+
+
 
 * add Set.Shrink to remove end nils
 
@@ -64,15 +78,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 ** add godbase.Db with MapAlloc
 ** add dbs.Basic
 ** replaces global MapAlloc in remento
-
-* add *Rc.NewResv(start, end, capac) *Resv
-** add test
-
-* add *Rc.Update(start, end, total, avail) (big.Rat, error)
-** return min of avail / total if total != 0
-* add resv test
-
-* add resv loop perf test with unlimited resources
 
 * load settings table to decide amount scale in remento
 ** create path if it doesn't exist in db.init
