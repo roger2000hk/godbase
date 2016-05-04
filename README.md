@@ -1,6 +1,9 @@
 # godbase
 #### a hacker friendly Golang DB
 
+### license
+NOP
+
 Still cooking, but here's a tiny teaser:
 
 ```go

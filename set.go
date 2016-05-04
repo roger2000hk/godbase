@@ -14,18 +14,17 @@ type Set interface {
 
 	DeleteAll(start, end int, key Key) (int, int64)
 
-	// returns first index of key, starting at start; or -1 if not found
+	// returns first index of key, from start; or -1 if not found
 	First(start int, key Key) int
 
 	// returns elem at index i, within slot for hash sets; key is ignored for sorted sets
 	Get(key Key, i int) Key
 
-	// returns last index of key, between start and end (exclusive); or -1 if not found
+	// returns last index of key, from start to end (exclusive); or -1 if not found
 	Last(start, end int, key Key) int
 
-	// inserts key into set, starting at start
-	// rejects duplicate keys if multi=false and returns updated set and final index; 
-	// or org set and -1 if not found
+	// inserts key into set, from start; rejects dup keys if multi=false
+	// returns updated set and final index, or org set and -1 if dup
 
 	Insert(start int, key Key, multi bool) (int, bool)
 

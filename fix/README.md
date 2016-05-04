@@ -1,11 +1,11 @@
 # fix
-#### a speedy, comparable fixed-point for Go
+#### a snappy, comparable fixed-point with int64 num/denom
 
 ### why?
 I needed a fixed-point type, but couldn't find one that felt just right.
 
 ### what?
-I ended up implementing a value struct using int64 numerator and denominators. This means that the upper representable limit is max(int64)/denominator. The api resembles the big apis, with pointer receivers for results. 
+I ended up implementing a value struct with int64 numerator and denominator. This means that the upper representable limit is max(int64)/denominator. The api resembles the big apis, with pointer receivers for results. 
 
 ### performance
 I implemented a basic benchmark loop that adds, subs, muls & divs random numbers; for fix, github.com/oguzbilgic/fpd and github.com/shopspring/decimal. The Scale flavor rescales each value. I would like to increase the number of iterations further to get a valid comparison, but both fpd and decimal start running into weird edge cases and timeouts.

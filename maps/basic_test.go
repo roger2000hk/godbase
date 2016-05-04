@@ -66,8 +66,7 @@ func TestEmbedded(t *testing.T) {
 
 func TestConstructors(t *testing.T) {
 	// Map is mostly meant as a reference for performance comparisons,
-	// it only supports enough of the api to run basic tests on top of 
-	// a native map.
+	// it only supports enough of the api to run basic tests on top of a native map
 	
 	NewMap()
 	

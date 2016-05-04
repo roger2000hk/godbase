@@ -213,10 +213,10 @@ func (m *ESort) Init() *ESort {
 }
 
 func (m *ESort) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
-	allowMulti bool) (godbase.Iter, bool) {
+	multi bool) (godbase.Iter, bool) {
 	n, ok := m.FindNode(start, key)
 	
-	if ok && !allowMulti {
+	if ok && !multi {
 		return n, false
 	}
 	n.InsertAfter(val.(*ENode).Init(key), ELevels-1)
@@ -292,6 +292,10 @@ func (n *ENode) Key() godbase.Key {
 
 func (n *ENode) Next() godbase.Iter {
 	return n.next[ELevels-1]
+}
+
+func (n *ENode) Prev() godbase.Iter {
+	return n.prev[ELevels-1]
 }
 
 func (n *ENode) Val() interface{} {

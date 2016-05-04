@@ -1,18 +1,21 @@
 package godbase
 
-// Iters are cheap, since they are nothing but a common 
-// interface on top of actual nodes. 
+// iters are circular and cheap, 
+// since they are nothing but a common interface on top of actual nodes
 
 type Iter interface {
-	// Returns key for elem or nil if root
+	// returns key for elem or nil if root
 	Key() Key
 
-	// Returns iter to next elem
+	// returns iter to next elem
 	Next() Iter
 
-	// Returns val for elem
+	// returns iter to next elem
+	Prev() Iter
+
+	// returns val for elem
 	Val() interface{}
 
-	// Returns true if not root
+	// returns true if not root
 	Valid() bool
 }

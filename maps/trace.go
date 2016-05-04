@@ -23,14 +23,14 @@ func NewTrace(m godbase.Map, id string) *Trace {
 
 // override to log actions before updating wrapped map
 
-func (m *Trace) Delete(start, end godbase.Iter, key godbase.Key, 
+func (self *Trace) Delete(start, end godbase.Iter, key godbase.Key, 
 	val interface{}) (godbase.Iter, int) {
-	log.Printf("%v.delete '%v': '%v'", m.id, key, val)
-	return m.wrapped.Delete(start, end, key, val)
+	log.Printf("%v.delete '%v': '%v'", self.id, key, val)
+	return self.wrapped.Delete(start, end, key, val)
 }
 
-func (m *Trace) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
+func (self *Trace) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
 	multi bool) (godbase.Iter, bool) {
-	log.Printf("%v.insert/%v '%v': '%v'", m.id, multi, key, val)
-	return m.wrapped.Insert(start, key, val, multi)
+	log.Printf("%v.insert/%v '%v': '%v'", self.id, multi, key, val)
+	return self.wrapped.Insert(start, key, val, multi)
 }
