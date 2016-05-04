@@ -30,3 +30,11 @@ This means that maps.Any is named godbase.Map, same goes for cols.Any, recs.Any,
 Also moved Key & Iter to godbase.
 
 ### 2016-05-01 Converted Suffix to proper implementation and added Trace wrap
+
+### 2016-05-02 Added sets package
+
+### 2016-05-03 Switched recs.Basic to custom type with sets.Sort for keys
+
+### 2016-05-04 Changed fix to use int64 instead of big.Int
+
+### 2016-05-04 Changed TimeKey to store custom struct with unix vals
