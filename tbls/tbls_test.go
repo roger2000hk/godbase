@@ -75,7 +75,7 @@ func TestReadWriteRec(t *testing.T) {
 }
 
 func TestUpsert(t *testing.T) {
-	cx := cxs.New(100)
+	cx := cxs.New()
 
 	foos := New("foos", nil, 100, nil, 1)
 
@@ -114,7 +114,7 @@ func TestUpsert(t *testing.T) {
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
-	cx := cxs.New(100)
+	cx := cxs.New()
 	foos := New("foos", nil, 100, nil, 1)
 
 	rs := make([]godbase.Rec, nrecs)

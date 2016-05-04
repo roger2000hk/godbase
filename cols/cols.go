@@ -254,9 +254,8 @@ func (_ *StrType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
 	return godbase.StrKey(v.(string))
 }
 
-func (_ *TimeType) AsKey(_ godbase.Rec, _v interface{}) godbase.Key {
-	v := _v.(time.Time)
-	return godbase.TimeKey{Secs: v.Unix(), NSecs: v.UnixNano()}
+func (_ *TimeType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
+	return godbase.TimeKey(v.(time.Time))
 }
 
 func (_ *UIdType) AsKey(_ godbase.Rec, v interface{}) godbase.Key {
@@ -353,10 +352,10 @@ func (_ *StrType) Hash(_ godbase.Rec, v interface{}, h hash.Hash64) {
 }
 
 func (_ *TimeType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {
-	v := _v.(godbase.TimeKey)
-
-	godbase.Write(&v.Secs, h)
-	godbase.Write(&v.NSecs, h)
+	v := time.Time(_v.(godbase.TimeKey))
+	s, ns := v.Unix(), v.UnixNano()
+	godbase.Write(&s, h)
+	godbase.Write(&ns, h)
 }
 
 func (_ *UIdType) Hash(_ godbase.Rec, _v interface{}, h hash.Hash64) {

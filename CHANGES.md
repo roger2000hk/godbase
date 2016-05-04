@@ -36,5 +36,3 @@ Also moved Key & Iter to godbase.
 ### 2016-05-03 Switched recs.Basic to custom type with sets.Sort for keys
 
 ### 2016-05-04 Changed fix to use int64 instead of big.Int
-
-### 2016-05-04 Changed TimeKey to custom struct with unix vals
