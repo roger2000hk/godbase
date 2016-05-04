@@ -29,7 +29,7 @@ func (self *Sort) Clone() godbase.Set {
 }
 
 func (self *Sort) Delete(start int, key godbase.Key) int {
-	if i := self.First(start, key); i != self.len {
+	if i := self.index(start, key); i != self.len {
 		if self.elems[i] == key {
 			copy(self.elems[i:], self.elems[i+1:])
 			self.len--
@@ -48,7 +48,7 @@ func (self *Sort) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	}
 
 	if key != nil {
-		i = self.First(start, key)
+		i = self.index(start, key)
 	}
 
 	var j int
@@ -67,10 +67,13 @@ func (self *Sort) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 }
 
 func (self *Sort) First(start int, key godbase.Key) int {
-	return sort.Search(self.len-start, func(i int) bool {
-		v := self.elems[i+start]
-		return key == v || key.Less(v)
-	})
+	i := self.index(start, key)
+
+	if i > 0 && i < self.len && self.elems[i] != key {
+		i--
+	}
+
+	return i
 }
 
 func (self *Sort) Get(_ godbase.Key, i int) godbase.Key {
@@ -97,7 +100,7 @@ func (self *Sort) Last(start, end int, key godbase.Key) int {
 }
 
 func (self *Sort) Insert(start int, key godbase.Key, multi bool) (int, bool) {
-	if i := self.First(start, key); i < self.len {
+	if i := self.index(start, key); i < self.len {
 		if self.elems[i] == key && !multi {
 			return i, false
 		}
@@ -145,4 +148,11 @@ func (self *Sort) While(fn godbase.IKTestFn) bool {
 	}
 	
 	return true
+}
+
+func (self *Sort) index(start int, key godbase.Key) int {
+	return sort.Search(self.len-start, func(i int) bool {
+		v := self.elems[i+start]
+		return key == v || key.Less(v)
+	})
 }

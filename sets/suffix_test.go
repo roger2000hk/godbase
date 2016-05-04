@@ -20,12 +20,13 @@ func TestSuffix(t *testing.T) {
 	i  := s.First(0, godbase.StrKey("de"))
 	
 	// then we get all matching suffixes in order
-	if k := s.Get(nil, i).(godbase.StrKey); k != "def" {
+	// i+1 since we matched on a prefix instead of full key
+	if k := s.Get(nil, i+1).(godbase.StrKey); k != "def" {
 		t.Errorf("invalid find res: %v", k)
 	}
 
 	// then we get all matching suffixes in order
-	if k := s.Get(nil, i+1).(godbase.StrKey); k != "defghi" {
+	if k := s.Get(nil, i+2).(godbase.StrKey); k != "defghi" {
 		t.Errorf("invalid find res: %v", k)
 	}
 
