@@ -36,3 +36,11 @@ Also moved Key & Iter to godbase.
 ### 2016-05-03 Switched recs.Basic to custom type with sets.Sort for keys
 
 ### 2016-05-04 Changed fix to use int64 instead of big.Int
+
+### 2016-05-04 Simplified hash map implementations
+Cut versions using interface references for slots.
+
+### 2016-05-04 Added ok result to Set.First/Last()
+Added result to signal if key was found in Set.First/Last().
+
+
