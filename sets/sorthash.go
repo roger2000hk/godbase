@@ -68,6 +68,11 @@ func (self *SortHash) Last(start, end int, key godbase.Key) (int, bool) {
 	return self.slots[si].Last(start, end, key)	
 }
 
+func (self *SortHash) Load(start int, keys...godbase.Key) {
+	si := self.fn(keys[0]) % uint64(len(self.slots))
+	self.slots[si].Load(start, keys...)
+}
+
 func (self *SortHash) Insert(start int, key godbase.Key, multi bool) (int, bool) {
 	si := self.fn(key) % uint64(len(self.slots))
 	i, ok := self.slots[si].Insert(start, key, multi)

@@ -107,6 +107,16 @@ func (self *Sort) Last(start, end int, key godbase.Key) (int, bool) {
 	return j-1, res
 }
 
+func (self *Sort) Load(start int, keys...godbase.Key) {
+	i := self.index(start, keys[0])
+	ksl := len(keys)
+	nvs := make(SortElems, self.len + ksl)
+	copy(nvs, self.elems[:i])
+	copy(nvs[:i], keys)
+	copy(nvs[:i+ksl], self.elems[i:])
+	self.len += ksl
+}
+
 func (self *Sort) Insert(start int, key godbase.Key, multi bool) (int, bool) {
 	if i := self.index(start, key); i < self.len {
 		if self.elems[i] == key && !multi {

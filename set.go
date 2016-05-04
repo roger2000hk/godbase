@@ -29,6 +29,12 @@ type Set interface {
 
 	Last(start, end int, key Key) (int, bool)
 
+
+	// loads keys into set, from start
+	// keys are assumed to be in order and no dup checks are performed
+	// for hashed sets; first key decides slot
+	Load(start int, keys...Key)
+
 	// inserts key into set, from start; rejects dup keys if multi=false
 	// returns updated set and final index, or org set and -1 if dup
 

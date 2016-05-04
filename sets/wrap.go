@@ -32,6 +32,10 @@ func (self *Wrap) Last(start, end int, key godbase.Key) (int, bool) {
 	return self.wrapped.Last(start, end, key)
 }
 
+func (self *Wrap) Load(start int, keys...godbase.Key) {
+	self.wrapped.Load(start, keys...)
+}
+
 func (self *Wrap) Init(s godbase.Set) *Wrap {
 	self.wrapped = s
 	return self

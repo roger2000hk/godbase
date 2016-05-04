@@ -49,6 +49,12 @@ func (self Map) Last(start, _ int, k godbase.Key) (int, bool) {
 	return self.First(start, k)
 }
 
+func (self Map) Load(_ int, keys...godbase.Key) {
+	for _, k := range keys {
+		self[k] = true
+	}
+}
+
 func (self Map) Insert(_ int, k godbase.Key, multi bool) (int, bool) {
 	if multi {
 		panic("multi not supported")
