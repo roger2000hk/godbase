@@ -25,12 +25,12 @@ func NewTrace(m godbase.Map, id string) *Trace {
 
 func (self *Trace) Delete(start, end godbase.Iter, key godbase.Key, 
 	val interface{}) (godbase.Iter, int) {
-	log.Printf("%v.delete '%v': '%v'", self.id, key, val)
+	log.Printf("%v.Delete '%v': '%v'", self.id, key, val)
 	return self.wrapped.Delete(start, end, key, val)
 }
 
 func (self *Trace) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
 	multi bool) (godbase.Iter, bool) {
-	log.Printf("%v.insert/%v '%v': '%v'", self.id, multi, key, val)
+	log.Printf("%v.Insert/%v '%v': '%v'", self.id, multi, key, val)
 	return self.wrapped.Insert(start, key, val, multi)
 }

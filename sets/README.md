@@ -5,7 +5,7 @@
 This package contains a sorted set implementation based on sorted slices, a corresponding hashed implmentation is also provided. They are very close to godbase's maps in spirit, not so much in body. Where the maps are optimized for huge datasets and frequent modifications, the sets are lightweight and snappy as long as they don't get to big and are read more than written. Even though a lot of care has been taken to minimize the number of separate memory allocations in the maps package, nothing beats allocating your entire dataset as a single slab of memory and accessing by index.
 
 ### status
-Basic functionality and testing in place, and evolving on a daily basis. The rest of godbase is currently being built on top, there are plenty of examples in the other packages.
+Basic functionality and testing in place, and evolving on a daily basis. The rest of godbase is currently being built on top, see recs/basic.go for a real world example.
 
 ### performance
 The short story is that the sorted implementation is around 50 times slower than a native hashed map for 10k elems; a properly tuned hashed set is comparable to a native map, while still providing the same features as the sorted implementation. One spot where sorted sets blow native maps out of the water is cloning. Basic performance tests are in sets_test.go
@@ -101,7 +101,7 @@ func TestConstructors(t *testing.T) {
 ```
 
 ### extending
-Extending the map api is as simple as embedding one of the implementations in your struct and optionally overriding parts of the api. maps.Suffix implements a suffix map on top of maps.Sorted:
+Extending the sets api is as simple as embedding one of the implementations in your struct and optionally overriding parts of the api. sets.Suffix implements a suffix set on top of sets.Sort:
 
 ```
 
@@ -109,80 +109,80 @@ type Suffix struct {
 	Sort
 }
 
-func NewSuffix(a *SlabAlloc, ls int) *Suffix {
-	res := new(Suffix)
-	res.Sort.Init(a, ls)
-	return res
+// override to delete all suffixes
+func (self *Suffix) Delete(start int, key godbase.Key) int {
+	sk := key.(godbase.StrKey)
+
+	for i := 1; i < len(sk) - 1; i++ {
+		self.Sort.Delete(start, godbase.StrKey(sk[i:]))
+	}
+
+	return self.Sort.Delete(start, sk)
 }
 
 // override to delete all suffixes
-func (self *Suffix) Delete(start, end godbase.Iter, key godbase.Key, val interface{}) (godbase.Iter, int) {
+func (self *Suffix) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	sk := key.(godbase.StrKey)
-	cnt := 0
+	res := int64(0)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		_, sc := self.Sort.Delete(start, end, godbase.StrKey(sk[i:]), val)
-		cnt += sc
+		_, cnt := self.Sort.DeleteAll(start, end, godbase.StrKey(sk[i:]))
+		res += cnt
 	}
 
-	res, sc := self.Sort.Delete(start, end, sk, val)
-	cnt += sc
-	return res, cnt
+	i, cnt := self.Sort.DeleteAll(start, end, sk)
+	return i, res + cnt 
 }
 
 // override to insert all suffixes
-func (self *Suffix) Insert(start godbase.Iter, key godbase.Key, val interface{}, multi bool) (godbase.Iter, bool) {
+func (self *Suffix) Insert(start int, key godbase.Key, multi bool) (int, bool) {
 	sk := key.(godbase.StrKey)
 
 	for i := 1; i < len(sk) - 1; i++ {
-		self.Sort.Insert(start, godbase.StrKey(sk[i:]), val, multi)
+		self.Sort.Insert(start, godbase.StrKey(sk[i:]), multi)
 	}
 
-	return self.Sort.Insert(start, key, val, multi)
+	return self.Sort.Insert(start, key, multi)
 }
 
 func TestSuffix(t *testing.T) {
-	m := NewSuffix(nil, 3)
+	var s Suffix
 
-	// keys must be of type godbase.StringKey
-	// per key dup check control is inherited from the map api
+	// keys must be of type godbase.StrKey
+	// per key dup check control is inherited from the set api
 
-	m.Insert(nil, godbase.StringKey("abc"), "abc", true)
-	m.Insert(nil, godbase.StringKey("abcdef"), "abcdef", true)
-	m.Insert(nil, godbase.StringKey("abcdefghi"), "abcdefghi", true)
+	s.Insert(0, godbase.StrKey("abc"), true)
+	s.Insert(0, godbase.StrKey("abcdef"), true)
+	s.Insert(0, godbase.StrKey("abcdefghi"), true)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i, _ := m.Find(nil, godbase.StringKey("de"), nil)
+	i  := s.First(0, godbase.StrKey("def"))
 	
-	// since we're prefix searching, iter needs to be stepped once
-	i = i.Next()
+	// then we get all matching suffixes in order
+	if k := s.Get(nil, i).(godbase.StrKey); k != "def" {
+		t.Errorf("invalid find res: %v", k)
+	}
 
 	// then we get all matching suffixes in order
-	if i.Key().(godbase.StringKey) != "def" || i.Val().(string) != "abcdef" {
-		t.Errorf("invalid find res: %v", i.Key())
+	if k := s.Get(nil, i+1).(godbase.StrKey); k != "defghi" {
+		t.Errorf("invalid find res: %v", k)
 	}
 
-	i = i.Next()
+	// check that Delete removes all suffixes
 
-	if i.Key().(godbase.StringKey) != "defghi" || i.Val().(string) != "abcdefghi" {
-		t.Errorf("invalid find res: %v", i.Key())
-	}
-
-	// check that Delete removes all suffixes for specified val
-	if res, cnt := m.Delete(nil, nil, godbase.StringKey("bcdef"), "abcdef"); 
-	cnt != 4 || res.Next().Key().(godbase.StringKey) != "cdefghi" {
-		t.Errorf("invalid delete res: %v", res.Next().Key())	
+	if _, cnt := s.DeleteAll(0, -1, godbase.StrKey("abcdefghi")); cnt != 8 {
+		t.Errorf("invalid delete res: %v", cnt)
 	}
 }
 
 ```
 
 ### wrapping it up
-godbase provides scaffolding for trivial ad-hoc extension of the maps api in form of a Wrap struct. maps.Trace serves well as an introduction:
+godbase provides scaffolding for trivial ad-hoc extension of the sets api in form of a Wrap struct. sets.Trace serves well as an introduction:
 
 ```go
 
-// embedding Wrap gives you default delegation to wrapped map
+// embedding Wrap gives you default delegation to wrapped set
 
 type Trace struct {
 	Wrap
@@ -191,25 +191,28 @@ type Trace struct {
 	id string
 }
 
-func NewTrace(m godbase.Map, id string) *Trace {
+func NewTrace(s godbase.Set, id string) *Trace {
 	res := new(Trace)
-	res.Init(m)
+	res.Init(s)
 	res.id = id
 	return res
 }
 
 // override to log actions before updating wrapped map
 
-func (self *Trace) Delete(start, end godbase.Iter, key godbase.Key, 
-	val interface{}) (godbase.Iter, int) {
-	log.Printf("%v.delete '%v': '%v'", self.id, key, val)
-	return self.wrapped.Delete(start, end, key, val)
+func (self *Trace) Delete(start int, key godbase.Key) int {
+	log.Printf("%v.Delete %v: '%v'", self.id, start, key)
+	return self.wrapped.Delete(start, key)
 }
 
-func (self *Trace) Insert(start godbase.Iter, key godbase.Key, val interface{}, 
-	multi bool) (godbase.Iter, bool) {
-	log.Printf("%v.insert/%v '%v': '%v'", self.id, multi, key, val)
-	return self.wrapped.Insert(start, key, val, multi)
+func (self *Trace) DeleteAll(start, end int, key godbase.Key) (int, int64) {
+	log.Printf("%v.DeleteAll %v/%v: '%v'", self.id, start, end, key)
+	return self.wrapped.DeleteAll(start, end, key)
+}
+
+func (self *Trace) Insert(start int, key godbase.Key, multi bool) (int, bool) {
+	log.Printf("%v.Insert/%v %v: '%v'", self.id, multi, start, key)
+	return self.wrapped.Insert(start, key, multi)
 }
 
 ```
