@@ -18,11 +18,13 @@ BenchmarkFullESortBasicHash-4           1000000000               0.03 ns/op
 BenchmarkFullSortMapHash-4              2000000000               0.02 ns/op
 BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
-* attempt to remove time key struct again
-** run idxs tests
-
 * replace maps.hash slot mess with one file per imp
 ** Hash, ESortHash, SortHash, MapHash, HashHash
+
+* add RecCol + test
+** read/write literal recs
+** cols/rec.go
+*** move all cols to separate files
 
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
@@ -66,12 +68,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 *** break if gap between start/end
 *** allow overlapping prices
 *** add test** add Rc.SumPrices(cx, start, end) []Price
-
-
-* add RecCol + test
-** read/write literal recs
-** cols/rec.go
-*** move all cols to separate files
 
 
 * add godbase.dbs package
