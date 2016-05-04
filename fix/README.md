@@ -2,7 +2,7 @@
 #### a speedy, comparable fixed-point for Go
 
 ### why?
-I needed a fixed-point type, but couldn't find one that felt just right. Further investigation showed that big.Ints are not comparable which means using them this deep down the stack is an extra responsibility and limitation that I'm not really comfortable with.
+I needed a fixed-point type, but couldn't find one that felt just right.
 
 ### what?
 I ended up implementing a value struct using int64 numerator and denominators. This means that the upper representable limit is max(int64)/denominator. The api resembles the big apis, with pointer receivers for results. 
