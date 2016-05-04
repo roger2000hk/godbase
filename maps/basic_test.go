@@ -105,8 +105,7 @@ func TestConstructors(t *testing.T) {
 	NewHash(ms)
 
 	// 1000 slots backed by 2 level maps with slab allocated nodes
-	ss := NewSlabSlots(1000, genHash, a, 2)
-	NewHash(ss)
+	NewSlabHash(1000, genHash, a, 2)
 
 	// 1000 hash slots backed by maps with embedded nodes
 	ess := NewESortSlots(1000, genHash)
@@ -195,7 +194,7 @@ func BenchmarkBasicESort(t *testing.B) {
 
 func BenchmarkBasicSlabHash(t *testing.B) {
 	runBasicTests(t, "SlabHash", 
-		NewHash(NewSlabSlots(testSlots, genHash, testAlloc, testHashLevels)), 
+		NewSlabHash(testSlots, genHash, testAlloc, testHashLevels), 
 		basicIts) 
 }
 

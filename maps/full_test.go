@@ -83,7 +83,7 @@ func BenchmarkFullESort(t *testing.B) {
 
 func BenchmarkFullSlabHash(t *testing.B) {
 	runFullTests(t, "SlabHash", 
-		NewHash(NewSlabSlots(testSlots, genHash, testAlloc, testHashLevels)),
+		NewSlabHash(testSlots, genHash, testAlloc, testHashLevels),
 		fullIts1, fullIts2, fullIts3)
 }
 

@@ -41,13 +41,6 @@ type HashSlots struct {
 	slots []Hash
 }
 
-type SortSlots struct {
-	alloc *SlabAlloc
-	fn godbase.HashFn
-	levels int
-	slots []Sort
-}
-
 type SlotAlloc func (key godbase.Key) godbase.Map
 type SlotsAlloc func (key godbase.Key) Slots
 
@@ -76,19 +69,6 @@ func NewMapSlots(sc int, fn godbase.MapHashFn, a SlotAlloc) *MapSlots {
 	ss.alloc = a
 	ss.slots = make(map[interface{}]godbase.Map, sc)
 	return ss
-}
-
-func NewSlabSlots(sc int, fn godbase.HashFn, a *SlabAlloc, ls int) *SortSlots {
-	ss := new(SortSlots)
-	ss.alloc = a
-	ss.fn = fn
-	ss.levels = ls
-	ss.slots = make([]Sort, sc)
-	return ss
-}
-
-func NewSortSlots(sc int, fn godbase.HashFn, ls int) *SortSlots {
-	return NewSlabSlots(sc, fn, nil, ls)
 }
 
 func NewSlots(sc int, fn godbase.HashFn, a SlotAlloc) *BasicSlots {
@@ -125,12 +105,6 @@ func (ss *HashSlots) Clear() {
 func (ss *MapSlots) Clear() {
 	for i := range ss.slots {
 		ss.slots[i] = nil
-	}
-}
-
-func (ss *SortSlots) Clear() {
-	for i := range ss.slots {
-		ss.slots[i].Clear()
 	}
 }
 
@@ -220,21 +194,6 @@ func (ss *MapSlots) Get(key godbase.Key, create bool) godbase.Map {
 	return nil
 }
 
-func (ss *SortSlots) Get(key godbase.Key, create bool) godbase.Map {
-	i := ss.fn(key) % uint64(len(ss.slots))
-	s := &ss.slots[i]
-
-	if s.isInit {
-		return s
-	}
-
-	if create {
-		return s.Init(ss.alloc, ss.levels)
-	}
-
-	return nil
-}
-
 func (m *Hash) Init(slots Slots) *Hash {
 	m.isInit = true
 	m.slots = slots
@@ -274,10 +233,6 @@ func (ss *HashSlots) New() Slots {
 
 func (ss *MapSlots) New() Slots {
 	return NewMapSlots(len(ss.slots), ss.fn, ss.alloc)
-}
-
-func (ss *SortSlots) New() Slots {
-	return NewSlabSlots(len(ss.slots), ss.fn, ss.alloc, ss.levels)
 }
 
 func (m *Hash) Set(key godbase.Key, val interface{}) bool {
@@ -330,16 +285,6 @@ func (ss *HashSlots) While(fn godbase.KVTestFn) bool {
 func (ss *MapSlots) While(fn godbase.KVTestFn) bool {
 	for _, s := range ss.slots {
 		if !s.While(fn) {
-			return false
-		}
-	}
-
-	return true
-}
-
-func (ss *SortSlots) While(fn godbase.KVTestFn) bool {
-	for _, s := range ss.slots {
-		if s.isInit && !s.While(fn) {
 			return false
 		}
 	}

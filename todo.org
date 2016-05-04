@@ -21,11 +21,6 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 * replace maps.hash slot mess with one file per imp
 ** Hash, ESortHash, SortHash, MapHash, HashHash
 
-* add RecCol + test
-** read/write literal recs
-** cols/rec.go
-*** move all cols to separate files
-
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
 
@@ -38,6 +33,10 @@ BenchmarkFullESortMapHash-4             2000000000               0.02 ns/op
 
 
 * add Set.Shrink to remove end nils
+
+* add RecCol + test
+** read/write literal recs
+** cols/rec.go
 
 * add sets.Hash
 ** use array of godbase.Set & Alloc
