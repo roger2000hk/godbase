@@ -11,7 +11,7 @@ type Set interface {
 
 	// deletes keys from start to end (exclusive),
 	// specify end=0 for rest of set
-	// returns next idx, or -1 if not found; and nr of deleted elems
+	// returns next idx and nr of deleted elems
 
 	DeleteAll(start, end int, key Key) (int, int64)
 

@@ -38,17 +38,20 @@ type Set interface {
 	Delete(start int, key Key) int
 
 	// deletes keys from start to end (exclusive),
-	// returns next idx, or -1 if not found; and nr of deleted elems
+	// specify end=0 for rest of set
+	// returns next idx and nr of deleted elems
 
 	DeleteAll(start, end int, key Key) (int, int64)
 
-	// returns first index of key, from start; or -1 if not found
+	// returns first index of key, from start; or len if not found
 	First(start int, key Key) int
 
 	// returns elem at index i, within slot for hash sets; key is ignored for sorted sets
 	Get(key Key, i int) Key
 
 	// returns last index of key, from start to end (exclusive); or -1 if not found
+	// specify end=0 for rest of set
+
 	Last(start, end int, key Key) int
 
 	// inserts key into set, from start; rejects dup keys if multi=false
