@@ -66,21 +66,27 @@ func (self *Sort) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	return i, int64(cnt)
 }
 
-func (self *Sort) First(start int, key godbase.Key) int {
+func (self *Sort) First(start int, key godbase.Key) (int, bool) {
 	i := self.index(start, key)
 
-	if i > 0 && i < self.len && self.elems[i] != key {
-		i--
+	if i < self.len {
+		if self.elems[i] == key {
+			return i, true
+		}
+		
+		if i > 0 {
+			return i-1, false
+		}
 	}
 
-	return i
+	return i, false
 }
 
 func (self *Sort) Get(_ godbase.Key, i int) godbase.Key {
 	return self.elems[i]
 }
 
-func (self *Sort) Last(start, end int, key godbase.Key) int {
+func (self *Sort) Last(start, end int, key godbase.Key) (int, bool) {
 	i := start
 
 	if end == 0 {
@@ -88,15 +94,17 @@ func (self *Sort) Last(start, end int, key godbase.Key) int {
 	}
 
 	if key != nil {
-		i = self.First(start, key)
+		i = self.index(start, key)
 	}
 
 	var j int
+	res := false
 
 	for j = i; j < end && self.elems[j] == key; j++ {
+		res = true
 	}
 		
-	return j-1
+	return j-1, res
 }
 
 func (self *Sort) Insert(start int, key godbase.Key, multi bool) (int, bool) {

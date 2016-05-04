@@ -20,7 +20,7 @@ func (self *Wrap) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	return self.wrapped.DeleteAll(start, end, key)
 }
 
-func (self *Wrap) First(start int, key godbase.Key) int {
+func (self *Wrap) First(start int, key godbase.Key) (int, bool) {
 	return self.wrapped.First(start, key)
 }
 
@@ -28,7 +28,7 @@ func (self *Wrap) Get(key godbase.Key, i int) godbase.Key {
 	return self.wrapped.Get(key, i)
 }
 
-func (self *Wrap) Last(start, end int, key godbase.Key) int {
+func (self *Wrap) Last(start, end int, key godbase.Key) (int, bool) {
 	return self.wrapped.Last(start, end, key)
 }
 

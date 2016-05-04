@@ -17,8 +17,13 @@ func TestSuffix(t *testing.T) {
 	m.Insert(nil, godbase.StrKey("abcdefghi"), "abcdefghi", true)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i, _ := m.Find(nil, godbase.StrKey("de"), nil)
+	i, ok := m.Find(nil, godbase.StrKey("de"), nil)
 	
+	// we shouldn't get a clean find on "de"
+	if ok {
+		t.Errorf("found: %v", i)		
+	}
+
 	// since we're prefix searching, iter needs to be stepped once
 	i = i.Next()
 

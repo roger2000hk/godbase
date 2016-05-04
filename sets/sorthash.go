@@ -47,7 +47,7 @@ func (self *SortHash) DeleteAll(start, end int, key godbase.Key) (int, int64) {
 	return i, ok
 }
 
-func (self *SortHash) First(start int, key godbase.Key) int {
+func (self *SortHash) First(start int, key godbase.Key) (int, bool) {
 	si := self.fn(key) % uint64(len(self.slots))
 	return self.slots[si].First(start, key)	
 }
@@ -63,7 +63,7 @@ func (self *SortHash) Init(sc int, fn godbase.HashFn) *SortHash {
 	return self
 }
 
-func (self *SortHash) Last(start, end int, key godbase.Key) int {
+func (self *SortHash) Last(start, end int, key godbase.Key) (int, bool) {
 	si := self.fn(key) % uint64(len(self.slots))
 	return self.slots[si].Last(start, end, key)	
 }

@@ -16,21 +16,24 @@ import (
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
-	// create tmp tbl named "foos" backed by a hashed 1-level skip map without allocator 
+	// create new context
+	cx := godbase.NewCx()
 
-	foos := tbls.New("foos", 100, nil, 1)
+	// create tmp tbl named "foos" backed by a 100 slot hashed 1-level map without allocator 
+
+	foos := tbls.New("foos", nil, 100, nil, 1)
 	bar := tbls.AddInt64(foos, "bar")
 
 	// fill table with recs
 
-	rs := make([]Rec, nrecs)
+	rs := make([]godbase.Rec, nrecs)
 
 	for i, _ := range rs {
-		r := recs.New(nil)
-		recs.SetInt64(r, bar, int64(i))
+		r := recs.New(godbase.NewUId())
+		r.SetInt64(bar, int64(i))
 		
 		var err error
-		if rs[i], err = foos.Upsert(r); err != nil {
+		if rs[i], err = foos.Upsert(cx, r); err != nil {
 			panic(err)
 		}
 	}
@@ -52,7 +55,7 @@ func TestDumpClearSlurp(t *testing.T) {
 
 	// slurp recs from buffer
 
-	if err := foos.Slurp(&buf); err != nil {
+	if err := foos.Slurp(cx, &buf); err != nil {
 		panic(err)
 	}
 
@@ -66,7 +69,7 @@ func TestDumpClearSlurp(t *testing.T) {
 		// Get() returns rec for id or err
 		// Eq() compares vals for all cols in receiver with param
 
-		if rr, err := foos.Get(r.Id()); err != nil {
+		if rr, err := foos.Reset(recs.New(r.Id())); err != nil {
 			panic(err)
 		} else if !r.Eq(rr) {
 			t.Errorf("invalid loaded rec: %v/%v", rr, r)

@@ -43,16 +43,19 @@ type Set interface {
 
 	DeleteAll(start, end int, key Key) (int, int64)
 
-	// returns first index of key, from start; or len if not found
-	First(start int, key Key) int
+	// returns first index of key, from start; regardless of actually finding key
+	// second result is true if key was found
+	First(start int, key Key) (int, bool)
 
 	// returns elem at index i, within slot for hash sets; key is ignored for sorted sets
 	Get(key Key, i int) Key
 
-	// returns last index of key, from start to end (exclusive); or -1 if not found
+	// returns last index of key, from start to end (exclusive); 
+	// regardless of actually finding key
 	// specify end=0 for rest of set
+	// second result is true if key was found
 
-	Last(start, end int, key Key) int
+	Last(start, end int, key Key) (int, bool)
 
 	// inserts key into set, from start; rejects dup keys if multi=false
 	// returns updated set and final index, or org set and -1 if dup
@@ -159,21 +162,27 @@ func TestSuffix(t *testing.T) {
 	s.Insert(0, godbase.StrKey("abcdefghi"), false)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i  := s.First(0, godbase.StrKey("def"))
-	
+	i, ok := s.First(0, godbase.StrKey("de"))
+
+	// we shouldn't get a clean find on "de"
+	if ok {
+		t.Errorf("found: %v", i)		
+	}
+
 	// then we get all matching suffixes in order
-	if k := s.Get(nil, i).(godbase.StrKey); k != "def" {
+	// i+1 since we matched on a prefix instead of full key
+	if k := s.Get(nil, i+1).(godbase.StrKey); k != "def" {
 		t.Errorf("invalid find res: %v", k)
 	}
 
 	// then we get all matching suffixes in order
-	if k := s.Get(nil, i+1).(godbase.StrKey); k != "defghi" {
+	if k := s.Get(nil, i+2).(godbase.StrKey); k != "defghi" {
 		t.Errorf("invalid find res: %v", k)
 	}
 
 	// check that Delete removes all suffixes
 
-	if _, cnt := s.DeleteAll(0, -1, godbase.StrKey("abcdefghi")); cnt != 8 {
+	if _, cnt := s.DeleteAll(0, 0, godbase.StrKey("abcdefghi")); cnt != 8 {
 		t.Errorf("invalid delete res: %v", cnt)
 	}
 }

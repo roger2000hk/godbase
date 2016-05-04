@@ -17,8 +17,13 @@ func TestSuffix(t *testing.T) {
 	s.Insert(0, godbase.StrKey("abcdefghi"), false)
 
 	// find first suffix starting with "de" using wrapped Find()
-	i  := s.First(0, godbase.StrKey("de"))
-	
+	i, ok := s.First(0, godbase.StrKey("de"))
+
+	// we shouldn't get a clean find on "de"
+	if ok {
+		t.Errorf("found: %v", i)		
+	}
+
 	// then we get all matching suffixes in order
 	// i+1 since we matched on a prefix instead of full key
 	if k := s.Get(nil, i+1).(godbase.StrKey); k != "def" {

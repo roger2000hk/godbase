@@ -36,7 +36,7 @@ func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
 	}
 
 	for _, it := range its {
-		if i := s.First(0, godbase.Int64Key(it)); i == -1 {
+		if _, ok := s.First(0, godbase.Int64Key(it)); !ok {
 			b.Errorf("not found: %v", it)
 		}
 	}
@@ -103,11 +103,11 @@ func TestMulti(t *testing.T) {
 		t.Errorf("wrong len after multi insert: %v", l)
 	}
 
-	if i := s.First(0, godbase.Int64Key(3)); i != 2 {
+	if i, ok := s.First(0, godbase.Int64Key(3)); !ok || i != 2 {
 		t.Errorf("wrong first res for multi: %v", i)
 	}
 
-	if i := s.Last(0, 0, godbase.Int64Key(3)); i != 4 {
+	if i, ok := s.Last(0, 0, godbase.Int64Key(3)); !ok || i != 4 {
 		t.Errorf("wrong last res for multi: %v", i)
 	}
 

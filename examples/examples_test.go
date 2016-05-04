@@ -3,7 +3,6 @@ package examples
 import (
 	"bytes"
 	"github.com/fncodr/godbase"
-	"github.com/fncodr/godbase/cxs"
 	"github.com/fncodr/godbase/recs"
 	"github.com/fncodr/godbase/tbls"
 	"testing"
@@ -12,8 +11,8 @@ import (
 func TestDumpClearSlurp(t *testing.T) {
 	const nrecs = 1000
 
-	// create new context with rec slab size 100
-	cx := cxs.New(100)
+	// create new context
+	cx := godbase.NewCx()
 
 	// create tmp tbl named "foos" backed by a 100 slot hashed 1-level map without allocator 
 
