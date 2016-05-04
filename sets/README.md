@@ -103,7 +103,7 @@ func TestConstructors(t *testing.T) {
 ### extending
 Extending the sets api is as simple as embedding one of the implementations in your struct and optionally overriding parts of the api. sets.Suffix implements a suffix set on top of sets.Sort:
 
-```
+```go
 
 type Suffix struct {
 	Sort

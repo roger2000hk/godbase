@@ -213,7 +213,7 @@ func TestEmbedded(t *testing.T) {
 ### extending
 Extending the map api is as simple as embedding one of the implementations in your struct and optionally overriding parts of the api. maps.Suffix implements a suffix map on top of maps.Sort:
 
-```
+```go
 
 type Suffix struct {
 	Sort
