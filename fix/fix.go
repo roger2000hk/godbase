@@ -1,6 +1,6 @@
 package fix
 
-// package godbase/fix implements speedy, comparable fixed-points with int64 nums/denoms 
+// package godbase/fix implements a speedy, comparable fixed-point with int64 nums/denoms 
 
 import (
 	"fmt"

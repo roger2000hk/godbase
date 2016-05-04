@@ -1,5 +1,5 @@
 # fix
-#### speedy, comparable fixed-point for Go
+#### a speedy, comparable fixed-point for Go
 
 ### why?
 I needed a fixed-point type, but couldn't find one that felt just right. Further investigation showed that big.Ints are not comparable which means using them this deep down the stack is an extra responsibility and limitation that I'm not really comfortable with.
