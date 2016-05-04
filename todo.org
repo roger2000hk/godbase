@@ -1,3 +1,6 @@
+* add ok result to Set.First/Last
+** replaces separate checks in calling code
+
 * add *Rc.NewResv(start, end, capac) *Resv
 ** add test
 
