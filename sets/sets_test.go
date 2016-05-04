@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-func sortits(n int) []int64 {
+func sortelems(n int) []int64 {
 	res := make([]int64, n)
 
 	for i := 0; i < n; i++ {
@@ -17,59 +17,69 @@ func sortits(n int) []int64 {
 	return res
 }
 
-func randits(n int) []int64 {
-	its := sortits(n)
+func sortkeys(n int) []godbase.Key {
+	res := make([]godbase.Key, n)
+
+	for i := 0; i < n; i++ {
+		res[i] = godbase.Int64Key(i)
+	}
+
+	return res
+}
+
+func randelems(n int) []int64 {
+	elems := sortelems(n)
 
 	for i := 0; i < n; i++ {
 		j := rand.Intn(n)
-		its[i], its[j] = its[j], its[i]
+		elems[i], elems[j] = elems[j], elems[i]
 	}
 
-	return its
+	return elems
 }
 
-func runBasicTests(b *testing.B, s godbase.Set, its []int64) {
-	for _, it := range its {
-		if _, ok := s.Insert(0, godbase.Int64Key(it), false); !ok {
-			b.Errorf("insert failed: %v", it)
+func runBasicTests(b *testing.B, s godbase.Set, elems []int64) {
+	for _, e := range elems {
+		if _, ok := s.Insert(0, godbase.Int64Key(e), false); !ok {
+			b.Errorf("insert failed: %v", e)
 		}
 	}
 
-	for _, it := range its {
-		if _, ok := s.First(0, godbase.Int64Key(it)); !ok {
-			b.Errorf("not found: %v", it)
+	for _, e := range elems {
+		if _, ok := s.First(0, godbase.Int64Key(e)); !ok {
+			b.Errorf("not found: %v", e)
 		}
 	}
 
-	for _, it := range its {
-		if i := s.Delete(0, godbase.Int64Key(it)); i == -1 {
-			b.Errorf("delete failed: %v", it)
+	for _, e := range elems {
+		if i := s.Delete(0, godbase.Int64Key(e)); i == -1 {
+			b.Errorf("delete failed: %v", e)
 		}
 	}
 }
 
 func BenchmarkSortBasics(b *testing.B) {
 	const nreps = 20000
-	runBasicTests(b, new(Sort).Resize(nreps), randits(nreps))
+	runBasicTests(b, new(Sort).Resize(nreps), randelems(nreps))
 }
 
 var hashslots = 400000
-var hashits = randits(200000)
+var hashelems = randelems(200000)
 
 func BenchmarkSortHashBasics(b *testing.B) {
 	var s SortHash
 	s.Init(hashslots, func(k godbase.Key) uint64 { return uint64(k.(godbase.Int64Key)) })
-	runBasicTests(b, &s, hashits)
+	runBasicTests(b, &s, hashelems)
 }
 
 func BenchmarkMapBasics(b *testing.B) {
-	runBasicTests(b, NewMap(len(hashits)), hashits)
+	runBasicTests(b, NewMap(len(hashelems)), hashelems)
 }
 
-func runCloneTests(b *testing.B, s godbase.Set, its []int64) {
-	for _, it := range its {
-		if _, ok := s.Insert(0, godbase.Int64Key(it), false); !ok {
-			b.Errorf("insert failed: %v", it)
+func runCloneTests(b *testing.B, s godbase.Set, elems []int64) {
+	for _, e := range elems {
+		if _, ok := s.Insert(0, godbase.Int64Key(e), false); !ok {
+			b.Errorf("insert failed: %v", e)
 		}
 	}
 	
@@ -78,14 +88,28 @@ func runCloneTests(b *testing.B, s godbase.Set, its []int64) {
 	}
 }
 
-var cloneits = sortits(1000)
+var cloneelems = sortelems(1000)
 
 func BenchmarkSortClone(b *testing.B) {
-	runCloneTests(b, new(Sort).Resize(len(cloneits)), cloneits)
+	runCloneTests(b, new(Sort).Resize(len(cloneelems)), cloneelems)
 }
 
 func BenchmarkMapClone(b *testing.B) {
-	runCloneTests(b, NewMap(len(cloneits)), cloneits)
+	runCloneTests(b, NewMap(len(cloneelems)), cloneelems)
+}
+
+func runLoadTests(b *testing.B, s godbase.Set, elems []godbase.Key) {
+	s.Load(0, elems...)
+}
+
+var loadelems = sortkeys(1000000)
+
+func BenchmarkSortLoad(b *testing.B) {
+	runLoadTests(b, new(Sort), loadelems)
+}
+
+func BenchmarkMapLoad(b *testing.B) {
+	runLoadTests(b, NewMap(len(loadelems)), loadelems)
 }
 
 func TestMulti(t *testing.T) {

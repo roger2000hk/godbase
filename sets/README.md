@@ -8,7 +8,7 @@ This package contains a sorted set implementation based on sorted slices, a corr
 Basic functionality and testing in place, and evolving on a daily basis. The rest of godbase is currently being built on top, see recs/basic.go for a real world example.
 
 ### performance
-The short story is that the sorted implementation is around 50 times slower than a native hashed map for 10k elems; a properly tuned hashed set is comparable to a native map, while still providing the same features as the sorted implementation. One spot where sorted sets blow native maps out of the water is cloning. Basic performance tests are in sets_test.go
+The short story is that the sorted implementation is around 50 times slower than a native hashed map for 10k elems; a properly tuned hashed set is comparable to a native map, while still providing the same features as the sorted implementation. Two tasks where sorted sets blow native maps out of the water is ordered loading and cloning. Basic performance tests are in sets_test.go
 
 ```
 	go test -bench=.*
@@ -56,6 +56,11 @@ type Set interface {
 	// second result is true if key was found
 
 	Last(start, end int, key Key) (int, bool)
+
+	// loads keys into set, from start
+	// keys are assumed to be in order, no dup checks are performed
+	// for hashed sets; first key decides slot
+	Load(start int, keys...Key)
 
 	// inserts key into set, from start; rejects dup keys if multi=false
 	// returns updated set and final index, or org set and -1 if dup

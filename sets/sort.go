@@ -110,10 +110,11 @@ func (self *Sort) Last(start, end int, key godbase.Key) (int, bool) {
 func (self *Sort) Load(start int, keys...godbase.Key) {
 	i := self.index(start, keys[0])
 	ksl := len(keys)
-	nvs := make(SortElems, self.len + ksl)
-	copy(nvs, self.elems[:i])
-	copy(nvs[:i], keys)
-	copy(nvs[:i+ksl], self.elems[i:])
+	nels := make(SortElems, self.len + ksl)
+	copy(nels, self.elems[:i])
+	copy(nels[i:], keys)
+	copy(nels[i+ksl:], self.elems[i:])
+	self.elems = nels
 	self.len += ksl
 }
 

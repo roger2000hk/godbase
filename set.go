@@ -31,7 +31,7 @@ type Set interface {
 
 
 	// loads keys into set, from start
-	// keys are assumed to be in order and no dup checks are performed
+	// keys are assumed to be in order, no dup checks are performed
 	// for hashed sets; first key decides slot
 	Load(start int, keys...Key)
 
