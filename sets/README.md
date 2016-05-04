@@ -151,9 +151,9 @@ func TestSuffix(t *testing.T) {
 	// keys must be of type godbase.StrKey
 	// per key dup check control is inherited from the set api
 
-	s.Insert(0, godbase.StrKey("abc"), true)
-	s.Insert(0, godbase.StrKey("abcdef"), true)
-	s.Insert(0, godbase.StrKey("abcdefghi"), true)
+	s.Insert(0, godbase.StrKey("abc"), false)
+	s.Insert(0, godbase.StrKey("abcdef"), false)
+	s.Insert(0, godbase.StrKey("abcdefghi"), false)
 
 	// find first suffix starting with "de" using wrapped Find()
 	i  := s.First(0, godbase.StrKey("def"))
