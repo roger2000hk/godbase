@@ -43,11 +43,6 @@
 *** add test** add Rc.SumPrices(cx, start, end) []Price
 
 
-* add godbase.dbs package
-** add godbase.Db with MapAlloc
-** add dbs.Basic
-** replaces global MapAlloc in remento
-
 * load settings table to decide amount scale in remento
 ** create path if it doesn't exist in db.init
 ** slurp setting tbl if exists
@@ -57,31 +52,18 @@
 * add ref test
 * add SliceCol
 ** take col type as param to cols.Slice()
-
 * remento
 ** add offset idx
 ** add slice(Ref) col ResvItems
-
 * add MapCol
 ** take two col types as params to cols.Map()
-
 * implement Dump/Load for idxs.Reverse
 ** copy tbls
 
-* add Tbl.Delete()
-
-* add remento project
-** check old
-
 * add tbls.Wrap
 
-* add Cx
-** take cx param in tbl.Insert/Delete
-** take cx param in idx.Insert/Delete
-
 * add tbls.Log wrap
-* log delete/insert to disk
-
+** log delete/insert to disk
 * add testfn to Delete
 ** only delete if testfn nil / returns true
 ** add DeleteAll(key) int
@@ -91,10 +73,6 @@
 ** take col type as param
 
 * add find loop in both maps in runCutTests
-
-* copy maps to sets package
-** no multi capability
-** compare perf
 
 * add hash slot resizing
 
