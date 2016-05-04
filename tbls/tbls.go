@@ -19,7 +19,7 @@ type Basic struct {
 	mapAlloc *maps.SlabAlloc
 	onDelete, onDrop, onLoad, onUpsert godbase.Evt
 	recIdHash godbase.UIdHash
-	recs maps.Hash
+	recs maps.SortHash
 	revision cols.Int64Col
 	upsertedAt cols.TimeCol
 }
@@ -236,7 +236,7 @@ func (t *Basic) Init(n string, ds []godbase.TblDef, rsc int, ma *maps.SlabAlloc,
 		return t.recIdHash.Hash(id)
 	}
 
-	t.recs.Init(maps.NewSlabSlots(rsc, hashRecId, ma, rls))
+	t.recs.Init(rsc, hashRecId, ma, rls)
 	t.AddCol(cols.CreatedAt())
 	t.AddCol(cols.RecId())
 	t.AddCol(t.revision.Init(fmt.Sprintf("%v/revision", n)))

@@ -25,7 +25,7 @@ func NewReverse(n string, c godbase.Col, sc int, a *maps.SlabAlloc, ls int) *Rev
 		return i.recIdHash.Hash(godbase.UId(id.(godbase.UIdKey)))
 	}
 
-	return i.Init(n, c, maps.NewHash(maps.NewSlabSlots(sc, hashRecId, a, ls)))
+	return i.Init(n, c, maps.NewSlabHash(sc, hashRecId, a, ls))
 }
 
 func (self *Reverse) AddToTbl(tbl godbase.Tbl)  {

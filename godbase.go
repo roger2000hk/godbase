@@ -8,9 +8,6 @@ import (
 	"io"
 )
 
-type Cx interface {
-}
-
 type Def interface {
 	Key
 	Name() string

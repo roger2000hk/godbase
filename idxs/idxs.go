@@ -168,7 +168,7 @@ func New(n string, cs []godbase.Col, u bool, recs godbase.Map) *Map {
 
 func NewHash(n string, cs []godbase.Col, u bool, sc int, a *maps.SlabAlloc, ls int) *Map {
 	i := new(Map)
-	return i.Init(n, cs, u, maps.NewHash(maps.NewSlabSlots(sc, genHashFn(i), a, ls)))
+	return i.Init(n, cs, u, maps.NewSlabHash(sc, genHashFn(i), a, ls))
 }
 
 func NewSort(n string, cs []godbase.Col, u bool, a *maps.SlabAlloc, ls int) *Map {

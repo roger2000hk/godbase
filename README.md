@@ -1,9 +1,6 @@
 # godbase
 #### a hacker friendly Golang DB
 
-### license
-NOP
-
 Still cooking, but here's a tiny teaser:
 
 ```go
@@ -81,4 +78,5 @@ func TestDumpClearSlurp(t *testing.T) {
 
 Or, if you prefer your examples less toyish; have a look at the reservation system I'm building on top here: https://github.com/fncodr/remento.
 
-Peace
+### license
+NOP
